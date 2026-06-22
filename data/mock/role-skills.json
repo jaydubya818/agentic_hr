@@ -1,0 +1,26 @@
+[
+  {
+    "id": "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbb00",
+    "roleId": "44444444-4444-4444-8444-444444444442",
+    "skillId": "40000000-0000-4000-8000-000000000003",
+    "importance": "required",
+    "minProficiency": 4,
+    "createdAt": "2026-01-15T10:00:00.000Z"
+  },
+  {
+    "id": "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbb01",
+    "roleId": "44444444-4444-4444-8444-444444444442",
+    "skillId": "40000000-0000-4000-8000-000000000001",
+    "importance": "required",
+    "minProficiency": 4,
+    "createdAt": "2026-01-15T10:00:00.000Z"
+  },
+  {
+    "id": "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbb02",
+    "roleId": "44444444-4444-4444-8444-444444444442",
+    "skillId": "40000000-0000-4000-8000-000000000012",
+    "importance": "preferred",
+    "minProficiency": 3,
+    "createdAt": "2026-01-15T10:00:00.000Z"
+  }
+]

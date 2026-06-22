@@ -1,0 +1,202 @@
+[
+  {
+    "id": "40000000-0000-4000-8000-000000000001",
+    "organizationId": "11111111-1111-4111-8111-111111111111",
+    "name": "TypeScript",
+    "category": "technical",
+    "description": "TypeScript competency for engineering and product teams",
+    "isActive": true,
+    "createdAt": "2026-01-15T10:00:00.000Z",
+    "updatedAt": "2026-01-15T10:00:00.000Z"
+  },
+  {
+    "id": "40000000-0000-4000-8000-000000000002",
+    "organizationId": "11111111-1111-4111-8111-111111111111",
+    "name": "React",
+    "category": "technical",
+    "description": "React competency for engineering and product teams",
+    "isActive": true,
+    "createdAt": "2026-01-15T10:00:00.000Z",
+    "updatedAt": "2026-01-15T10:00:00.000Z"
+  },
+  {
+    "id": "40000000-0000-4000-8000-000000000003",
+    "organizationId": "11111111-1111-4111-8111-111111111111",
+    "name": "System Design",
+    "category": "technical",
+    "description": "System Design competency for engineering and product teams",
+    "isActive": true,
+    "createdAt": "2026-01-15T10:00:00.000Z",
+    "updatedAt": "2026-01-15T10:00:00.000Z"
+  },
+  {
+    "id": "40000000-0000-4000-8000-000000000004",
+    "organizationId": "11111111-1111-4111-8111-111111111111",
+    "name": "API Design",
+    "category": "technical",
+    "description": "API Design competency for engineering and product teams",
+    "isActive": true,
+    "createdAt": "2026-01-15T10:00:00.000Z",
+    "updatedAt": "2026-01-15T10:00:00.000Z"
+  },
+  {
+    "id": "40000000-0000-4000-8000-000000000005",
+    "organizationId": "11111111-1111-4111-8111-111111111111",
+    "name": "PostgreSQL",
+    "category": "technical",
+    "description": "PostgreSQL competency for engineering and product teams",
+    "isActive": true,
+    "createdAt": "2026-01-15T10:00:00.000Z",
+    "updatedAt": "2026-01-15T10:00:00.000Z"
+  },
+  {
+    "id": "40000000-0000-4000-8000-000000000006",
+    "organizationId": "11111111-1111-4111-8111-111111111111",
+    "name": "Team Leadership",
+    "category": "leadership",
+    "description": "Team Leadership competency for engineering and product teams",
+    "isActive": true,
+    "createdAt": "2026-01-15T10:00:00.000Z",
+    "updatedAt": "2026-01-15T10:00:00.000Z"
+  },
+  {
+    "id": "40000000-0000-4000-8000-000000000007",
+    "organizationId": "11111111-1111-4111-8111-111111111111",
+    "name": "Coaching",
+    "category": "leadership",
+    "description": "Coaching competency for engineering and product teams",
+    "isActive": true,
+    "createdAt": "2026-01-15T10:00:00.000Z",
+    "updatedAt": "2026-01-15T10:00:00.000Z"
+  },
+  {
+    "id": "40000000-0000-4000-8000-000000000008",
+    "organizationId": "11111111-1111-4111-8111-111111111111",
+    "name": "Product Strategy",
+    "category": "domain",
+    "description": "Product Strategy competency for engineering and product teams",
+    "isActive": true,
+    "createdAt": "2026-01-15T10:00:00.000Z",
+    "updatedAt": "2026-01-15T10:00:00.000Z"
+  },
+  {
+    "id": "40000000-0000-4000-8000-000000000009",
+    "organizationId": "11111111-1111-4111-8111-111111111111",
+    "name": "Data Analysis",
+    "category": "technical",
+    "description": "Data Analysis competency for engineering and product teams",
+    "isActive": true,
+    "createdAt": "2026-01-15T10:00:00.000Z",
+    "updatedAt": "2026-01-15T10:00:00.000Z"
+  },
+  {
+    "id": "40000000-0000-4000-8000-000000000010",
+    "organizationId": "11111111-1111-4111-8111-111111111111",
+    "name": "Communication",
+    "category": "leadership",
+    "description": "Communication competency for engineering and product teams",
+    "isActive": true,
+    "createdAt": "2026-01-15T10:00:00.000Z",
+    "updatedAt": "2026-01-15T10:00:00.000Z"
+  },
+  {
+    "id": "40000000-0000-4000-8000-000000000011",
+    "organizationId": "11111111-1111-4111-8111-111111111111",
+    "name": "Cloud Architecture",
+    "category": "technical",
+    "description": "Cloud Architecture competency for engineering and product teams",
+    "isActive": true,
+    "createdAt": "2026-01-15T10:00:00.000Z",
+    "updatedAt": "2026-01-15T10:00:00.000Z"
+  },
+  {
+    "id": "40000000-0000-4000-8000-000000000012",
+    "organizationId": "11111111-1111-4111-8111-111111111111",
+    "name": "Agile Delivery",
+    "category": "domain",
+    "description": "Agile Delivery competency for engineering and product teams",
+    "isActive": true,
+    "createdAt": "2026-01-15T10:00:00.000Z",
+    "updatedAt": "2026-01-15T10:00:00.000Z"
+  },
+  {
+    "id": "40000000-0000-4000-8000-000000000013",
+    "organizationId": "11111111-1111-4111-8111-111111111111",
+    "name": "UX Collaboration",
+    "category": "domain",
+    "description": "UX Collaboration competency for engineering and product teams",
+    "isActive": true,
+    "createdAt": "2026-01-15T10:00:00.000Z",
+    "updatedAt": "2026-01-15T10:00:00.000Z"
+  },
+  {
+    "id": "40000000-0000-4000-8000-000000000014",
+    "organizationId": "11111111-1111-4111-8111-111111111111",
+    "name": "Security Fundamentals",
+    "category": "technical",
+    "description": "Security Fundamentals competency for engineering and product teams",
+    "isActive": true,
+    "createdAt": "2026-01-15T10:00:00.000Z",
+    "updatedAt": "2026-01-15T10:00:00.000Z"
+  },
+  {
+    "id": "40000000-0000-4000-8000-000000000015",
+    "organizationId": "11111111-1111-4111-8111-111111111111",
+    "name": "Mentorship",
+    "category": "leadership",
+    "description": "Mentorship competency for engineering and product teams",
+    "isActive": true,
+    "createdAt": "2026-01-15T10:00:00.000Z",
+    "updatedAt": "2026-01-15T10:00:00.000Z"
+  },
+  {
+    "id": "40000000-0000-4000-8000-000000000016",
+    "organizationId": "11111111-1111-4111-8111-111111111111",
+    "name": "Stakeholder Management",
+    "category": "leadership",
+    "description": "Stakeholder Management competency for engineering and product teams",
+    "isActive": true,
+    "createdAt": "2026-01-15T10:00:00.000Z",
+    "updatedAt": "2026-01-15T10:00:00.000Z"
+  },
+  {
+    "id": "40000000-0000-4000-8000-000000000017",
+    "organizationId": "11111111-1111-4111-8111-111111111111",
+    "name": "Python",
+    "category": "technical",
+    "description": "Python competency for engineering and product teams",
+    "isActive": true,
+    "createdAt": "2026-01-15T10:00:00.000Z",
+    "updatedAt": "2026-01-15T10:00:00.000Z"
+  },
+  {
+    "id": "40000000-0000-4000-8000-000000000018",
+    "organizationId": "11111111-1111-4111-8111-111111111111",
+    "name": "CI/CD",
+    "category": "technical",
+    "description": "CI/CD competency for engineering and product teams",
+    "isActive": true,
+    "createdAt": "2026-01-15T10:00:00.000Z",
+    "updatedAt": "2026-01-15T10:00:00.000Z"
+  },
+  {
+    "id": "40000000-0000-4000-8000-000000000019",
+    "organizationId": "11111111-1111-4111-8111-111111111111",
+    "name": "Workforce Analytics",
+    "category": "domain",
+    "description": "Workforce Analytics competency for engineering and product teams",
+    "isActive": true,
+    "createdAt": "2026-01-15T10:00:00.000Z",
+    "updatedAt": "2026-01-15T10:00:00.000Z"
+  },
+  {
+    "id": "40000000-0000-4000-8000-000000000020",
+    "organizationId": "11111111-1111-4111-8111-111111111111",
+    "name": "Change Management",
+    "category": "domain",
+    "description": "Change Management competency for engineering and product teams",
+    "isActive": true,
+    "createdAt": "2026-01-15T10:00:00.000Z",
+    "updatedAt": "2026-01-15T10:00:00.000Z"
+  }
+]

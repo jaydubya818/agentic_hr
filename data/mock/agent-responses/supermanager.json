@@ -1,0 +1,17 @@
+{
+  "defaultResponse": "I reviewed your team's skills, growth plans, and development goals. Here are coaching-focused actions grounded in direct-report data.",
+  "scenarios": [
+    {
+      "keywords": ["coaching", "prompt", "conversation"],
+      "response": "Coaching prompts for your team emphasize growth conversations: celebrate skill progress, explore stretch interests, and co-create next development steps — without comparing employees negatively."
+    },
+    {
+      "keywords": ["stretch", "assignment"],
+      "response": "Stretch opportunities should align with documented skill gaps and career interests. Consider platform initiative ownership for engineers showing system design strength."
+    },
+    {
+      "keywords": ["capability", "team plan"],
+      "response": "Your team's capability plan highlights collective gaps in distributed systems depth and mentoring coverage. Recommended actions focus on learning cohorts and paired stretch work."
+    }
+  ]
+}

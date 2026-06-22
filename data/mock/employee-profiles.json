@@ -1,0 +1,137 @@
+[
+  {
+    "id": "99999999-9999-4999-8999-999999999900",
+    "employeeId": "33333333-3333-4333-8333-333333333331",
+    "bio": null,
+    "careerSummary": "Full-stack engineer focused on platform reliability and developer experience.",
+    "onboardingCompletedAt": "2026-01-15T10:00:00.000Z",
+    "inferredSkillsVisible": true,
+    "preferences": {
+      "growthFocus": "technical_leadership",
+      "mobilityInterest": "internal"
+    },
+    "createdAt": "2026-01-15T10:00:00.000Z",
+    "updatedAt": "2026-01-15T10:00:00.000Z"
+  },
+  {
+    "id": "99999999-9999-4999-8999-999999999901",
+    "employeeId": "33333333-3333-4333-8333-333333333332",
+    "bio": null,
+    "careerSummary": null,
+    "onboardingCompletedAt": "2026-01-15T10:00:00.000Z",
+    "inferredSkillsVisible": true,
+    "preferences": {},
+    "createdAt": "2026-01-15T10:00:00.000Z",
+    "updatedAt": "2026-01-15T10:00:00.000Z"
+  },
+  {
+    "id": "99999999-9999-4999-8999-999999999902",
+    "employeeId": "33333333-3333-4333-8333-333333333333",
+    "bio": null,
+    "careerSummary": null,
+    "onboardingCompletedAt": "2026-01-15T10:00:00.000Z",
+    "inferredSkillsVisible": true,
+    "preferences": {},
+    "createdAt": "2026-01-15T10:00:00.000Z",
+    "updatedAt": "2026-01-15T10:00:00.000Z"
+  },
+  {
+    "id": "99999999-9999-4999-8999-999999999903",
+    "employeeId": "33333333-3333-4333-8333-333333333334",
+    "bio": null,
+    "careerSummary": null,
+    "onboardingCompletedAt": "2026-01-15T10:00:00.000Z",
+    "inferredSkillsVisible": true,
+    "preferences": {},
+    "createdAt": "2026-01-15T10:00:00.000Z",
+    "updatedAt": "2026-01-15T10:00:00.000Z"
+  },
+  {
+    "id": "99999999-9999-4999-8999-999999999904",
+    "employeeId": "33333333-3333-4333-8333-000000000340",
+    "bio": null,
+    "careerSummary": null,
+    "onboardingCompletedAt": "2026-01-15T10:00:00.000Z",
+    "inferredSkillsVisible": true,
+    "preferences": {},
+    "createdAt": "2026-01-15T10:00:00.000Z",
+    "updatedAt": "2026-01-15T10:00:00.000Z"
+  },
+  {
+    "id": "99999999-9999-4999-8999-999999999905",
+    "employeeId": "33333333-3333-4333-8333-000000000341",
+    "bio": null,
+    "careerSummary": null,
+    "onboardingCompletedAt": "2026-01-15T10:00:00.000Z",
+    "inferredSkillsVisible": true,
+    "preferences": {},
+    "createdAt": "2026-01-15T10:00:00.000Z",
+    "updatedAt": "2026-01-15T10:00:00.000Z"
+  },
+  {
+    "id": "99999999-9999-4999-8999-999999999906",
+    "employeeId": "33333333-3333-4333-8333-000000000342",
+    "bio": null,
+    "careerSummary": null,
+    "onboardingCompletedAt": "2026-01-15T10:00:00.000Z",
+    "inferredSkillsVisible": true,
+    "preferences": {},
+    "createdAt": "2026-01-15T10:00:00.000Z",
+    "updatedAt": "2026-01-15T10:00:00.000Z"
+  },
+  {
+    "id": "99999999-9999-4999-8999-999999999907",
+    "employeeId": "33333333-3333-4333-8333-000000000343",
+    "bio": null,
+    "careerSummary": null,
+    "onboardingCompletedAt": "2026-01-15T10:00:00.000Z",
+    "inferredSkillsVisible": true,
+    "preferences": {},
+    "createdAt": "2026-01-15T10:00:00.000Z",
+    "updatedAt": "2026-01-15T10:00:00.000Z"
+  },
+  {
+    "id": "99999999-9999-4999-8999-999999999908",
+    "employeeId": "33333333-3333-4333-8333-000000000344",
+    "bio": null,
+    "careerSummary": null,
+    "onboardingCompletedAt": "2026-01-15T10:00:00.000Z",
+    "inferredSkillsVisible": true,
+    "preferences": {},
+    "createdAt": "2026-01-15T10:00:00.000Z",
+    "updatedAt": "2026-01-15T10:00:00.000Z"
+  },
+  {
+    "id": "99999999-9999-4999-8999-999999999909",
+    "employeeId": "33333333-3333-4333-8333-000000000345",
+    "bio": null,
+    "careerSummary": null,
+    "onboardingCompletedAt": "2026-01-15T10:00:00.000Z",
+    "inferredSkillsVisible": true,
+    "preferences": {},
+    "createdAt": "2026-01-15T10:00:00.000Z",
+    "updatedAt": "2026-01-15T10:00:00.000Z"
+  },
+  {
+    "id": "99999999-9999-4999-8999-999999999910",
+    "employeeId": "33333333-3333-4333-8333-000000000346",
+    "bio": null,
+    "careerSummary": null,
+    "onboardingCompletedAt": "2026-01-15T10:00:00.000Z",
+    "inferredSkillsVisible": true,
+    "preferences": {},
+    "createdAt": "2026-01-15T10:00:00.000Z",
+    "updatedAt": "2026-01-15T10:00:00.000Z"
+  },
+  {
+    "id": "99999999-9999-4999-8999-999999999911",
+    "employeeId": "33333333-3333-4333-8333-000000000347",
+    "bio": null,
+    "careerSummary": null,
+    "onboardingCompletedAt": "2026-01-15T10:00:00.000Z",
+    "inferredSkillsVisible": true,
+    "preferences": {},
+    "createdAt": "2026-01-15T10:00:00.000Z",
+    "updatedAt": "2026-01-15T10:00:00.000Z"
+  }
+]

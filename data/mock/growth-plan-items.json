@@ -1,0 +1,71 @@
+[
+  {
+    "id": "eeeeeeee-eeee-4eee-8eee-eeeeeeeeee00",
+    "growthPlanId": "55555555-5555-4555-8555-555555555551",
+    "description": "Complete system design learning path",
+    "dueDate": null,
+    "sortOrder": 0,
+    "createdAt": "2026-01-15T10:00:00.000Z",
+    "updatedAt": "2026-01-15T10:00:00.000Z",
+    "title": "Complete system design learning path",
+    "milestoneDay": 30,
+    "itemType": "learning",
+    "learningResourceId": "cccccccc-cccc-4ccc-8ccc-cccccccccc00",
+    "status": "in_progress"
+  },
+  {
+    "id": "eeeeeeee-eeee-4eee-8eee-eeeeeeeeee01",
+    "growthPlanId": "55555555-5555-4555-8555-555555555551",
+    "description": "Lead design review for payments service",
+    "dueDate": null,
+    "sortOrder": 1,
+    "createdAt": "2026-01-15T10:00:00.000Z",
+    "updatedAt": "2026-01-15T10:00:00.000Z",
+    "title": "Lead design review for payments service",
+    "milestoneDay": 30,
+    "itemType": "project",
+    "skillId": "40000000-0000-4000-8000-000000000003",
+    "status": "pending"
+  },
+  {
+    "id": "eeeeeeee-eeee-4eee-8eee-eeeeeeeeee02",
+    "growthPlanId": "55555555-5555-4555-8555-555555555551",
+    "description": "Mentor two junior engineers",
+    "dueDate": null,
+    "sortOrder": 2,
+    "createdAt": "2026-01-15T10:00:00.000Z",
+    "updatedAt": "2026-01-15T10:00:00.000Z",
+    "title": "Mentor two junior engineers",
+    "milestoneDay": 60,
+    "itemType": "conversation",
+    "status": "pending"
+  },
+  {
+    "id": "eeeeeeee-eeee-4eee-8eee-eeeeeeeeee03",
+    "growthPlanId": "55555555-5555-4555-8555-555555555551",
+    "description": "Present architecture proposal to platform guild",
+    "dueDate": null,
+    "sortOrder": 3,
+    "createdAt": "2026-01-15T10:00:00.000Z",
+    "updatedAt": "2026-01-15T10:00:00.000Z",
+    "title": "Present architecture proposal to platform guild",
+    "milestoneDay": 60,
+    "itemType": "project",
+    "skillId": "40000000-0000-4000-8000-000000000003",
+    "status": "pending"
+  },
+  {
+    "id": "eeeeeeee-eeee-4eee-8eee-eeeeeeeeee04",
+    "growthPlanId": "55555555-5555-4555-8555-555555555551",
+    "description": "Shadow staff engineer on cross-team initiative",
+    "dueDate": null,
+    "sortOrder": 4,
+    "createdAt": "2026-01-15T10:00:00.000Z",
+    "updatedAt": "2026-01-15T10:00:00.000Z",
+    "title": "Shadow staff engineer on cross-team initiative",
+    "milestoneDay": 90,
+    "itemType": "learning",
+    "learningResourceId": "cccccccc-cccc-4ccc-8ccc-cccccccccc01",
+    "status": "pending"
+  }
+]

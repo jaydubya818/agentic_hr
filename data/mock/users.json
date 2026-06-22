@@ -1,0 +1,172 @@
+[
+  {
+    "id": "22222222-2222-4222-8222-222222222221",
+    "email": "alex.chen@techforward.io",
+    "fullName": "Alex Chen",
+    "roles": [
+      "employee"
+    ],
+    "organizationId": "11111111-1111-4111-8111-111111111111",
+    "authUserId": null,
+    "avatarUrl": null,
+    "isActive": true,
+    "createdAt": "2026-01-15T10:00:00.000Z",
+    "updatedAt": "2026-01-15T10:00:00.000Z"
+  },
+  {
+    "id": "22222222-2222-4222-8222-222222222222",
+    "email": "jordan.lee@techforward.io",
+    "fullName": "Jordan Lee",
+    "roles": [
+      "employee",
+      "manager"
+    ],
+    "organizationId": "11111111-1111-4111-8111-111111111111",
+    "authUserId": null,
+    "avatarUrl": null,
+    "isActive": true,
+    "createdAt": "2026-01-15T10:00:00.000Z",
+    "updatedAt": "2026-01-15T10:00:00.000Z"
+  },
+  {
+    "id": "22222222-2222-4222-8222-222222222223",
+    "email": "sam.patel@techforward.io",
+    "fullName": "Sam Patel",
+    "roles": [
+      "hr_admin"
+    ],
+    "organizationId": "11111111-1111-4111-8111-111111111111",
+    "authUserId": null,
+    "avatarUrl": null,
+    "isActive": true,
+    "createdAt": "2026-01-15T10:00:00.000Z",
+    "updatedAt": "2026-01-15T10:00:00.000Z"
+  },
+  {
+    "id": "22222222-2222-4222-8222-222222222224",
+    "email": "morgan.kim@techforward.io",
+    "fullName": "Morgan Kim",
+    "roles": [
+      "employee",
+      "manager"
+    ],
+    "organizationId": "11111111-1111-4111-8111-111111111111",
+    "authUserId": null,
+    "avatarUrl": null,
+    "isActive": true,
+    "createdAt": "2026-01-15T10:00:00.000Z",
+    "updatedAt": "2026-01-15T10:00:00.000Z"
+  },
+  {
+    "id": "22222222-2222-4222-8222-222222222225",
+    "email": "riley.nguyen@techforward.io",
+    "fullName": "Riley Nguyen",
+    "roles": [
+      "org_admin"
+    ],
+    "organizationId": "11111111-1111-4111-8111-111111111111",
+    "authUserId": null,
+    "avatarUrl": null,
+    "isActive": true,
+    "createdAt": "2026-01-15T10:00:00.000Z",
+    "updatedAt": "2026-01-15T10:00:00.000Z"
+  },
+  {
+    "id": "22222222-2222-4222-8222-000000000230",
+    "email": "engineer1@techforward.io",
+    "fullName": "Engineer 1",
+    "roles": [
+      "employee"
+    ],
+    "organizationId": "11111111-1111-4111-8111-111111111111",
+    "authUserId": null,
+    "avatarUrl": null,
+    "isActive": true,
+    "createdAt": "2026-01-15T10:00:00.000Z",
+    "updatedAt": "2026-01-15T10:00:00.000Z"
+  },
+  {
+    "id": "22222222-2222-4222-8222-000000000231",
+    "email": "engineer2@techforward.io",
+    "fullName": "Engineer 2",
+    "roles": [
+      "employee"
+    ],
+    "organizationId": "11111111-1111-4111-8111-111111111111",
+    "authUserId": null,
+    "avatarUrl": null,
+    "isActive": true,
+    "createdAt": "2026-01-15T10:00:00.000Z",
+    "updatedAt": "2026-01-15T10:00:00.000Z"
+  },
+  {
+    "id": "22222222-2222-4222-8222-000000000232",
+    "email": "engineer3@techforward.io",
+    "fullName": "Engineer 3",
+    "roles": [
+      "employee"
+    ],
+    "organizationId": "11111111-1111-4111-8111-111111111111",
+    "authUserId": null,
+    "avatarUrl": null,
+    "isActive": true,
+    "createdAt": "2026-01-15T10:00:00.000Z",
+    "updatedAt": "2026-01-15T10:00:00.000Z"
+  },
+  {
+    "id": "22222222-2222-4222-8222-000000000233",
+    "email": "engineer4@techforward.io",
+    "fullName": "Engineer 4",
+    "roles": [
+      "employee"
+    ],
+    "organizationId": "11111111-1111-4111-8111-111111111111",
+    "authUserId": null,
+    "avatarUrl": null,
+    "isActive": true,
+    "createdAt": "2026-01-15T10:00:00.000Z",
+    "updatedAt": "2026-01-15T10:00:00.000Z"
+  },
+  {
+    "id": "22222222-2222-4222-8222-000000000234",
+    "email": "engineer5@techforward.io",
+    "fullName": "Engineer 5",
+    "roles": [
+      "employee"
+    ],
+    "organizationId": "11111111-1111-4111-8111-111111111111",
+    "authUserId": null,
+    "avatarUrl": null,
+    "isActive": true,
+    "createdAt": "2026-01-15T10:00:00.000Z",
+    "updatedAt": "2026-01-15T10:00:00.000Z"
+  },
+  {
+    "id": "22222222-2222-4222-8222-000000000235",
+    "email": "engineer6@techforward.io",
+    "fullName": "Engineer 6",
+    "roles": [
+      "employee"
+    ],
+    "organizationId": "11111111-1111-4111-8111-111111111111",
+    "authUserId": null,
+    "avatarUrl": null,
+    "isActive": true,
+    "createdAt": "2026-01-15T10:00:00.000Z",
+    "updatedAt": "2026-01-15T10:00:00.000Z"
+  },
+  {
+    "id": "22222222-2222-4222-8222-000000000236",
+    "email": "engineer7@techforward.io",
+    "fullName": "Engineer 7",
+    "roles": [
+      "employee"
+    ],
+    "organizationId": "11111111-1111-4111-8111-111111111111",
+    "authUserId": null,
+    "avatarUrl": null,
+    "isActive": true,
+    "createdAt": "2026-01-15T10:00:00.000Z",
+    "updatedAt": "2026-01-15T10:00:00.000Z"
+  }
+]

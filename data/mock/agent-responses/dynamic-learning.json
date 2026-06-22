@@ -1,0 +1,13 @@
+{
+  "defaultResponse": "I matched your skill gaps to learning resources in the TechForward catalog. Recommendations are optional development suggestions, not requirements.",
+  "scenarios": [
+    {
+      "keywords": ["learn", "course", "training", "resource"],
+      "response": "Learning recommendations prioritize catalog resources linked to your documented skill gaps. You may explore these at your own pace — they are growth suggestions, not mandates."
+    },
+    {
+      "keywords": ["typescript", "system design"],
+      "response": "For TypeScript and system design gaps, the catalog includes workshops and mentorship options aligned to your Staff Engineer development path."
+    }
+  ]
+}

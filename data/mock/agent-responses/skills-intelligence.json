@@ -1,0 +1,13 @@
+{
+  "defaultResponse": "I analyzed confirmed and inferred skills against role requirements. Skill gaps and readiness contributions are labeled by source.",
+  "scenarios": [
+    {
+      "keywords": ["gap", "skill"],
+      "response": "Skill gaps are ranked by severity against your target role. Confirmed skills are labeled separately from inferred skills, each with confidence where applicable."
+    },
+    {
+      "keywords": ["infer", "inferred"],
+      "response": "Inferred skills are included only with evidence summaries and confidence scores. Confirmed skills from your profile take precedence in readiness calculations."
+    }
+  ]
+}

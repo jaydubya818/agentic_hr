@@ -1,0 +1,17 @@
+{
+  "defaultResponse": "I reviewed your growth profile, skills, and career goals. Here are development-focused suggestions grounded in your current data.",
+  "scenarios": [
+    {
+      "keywords": ["career", "path", "role"],
+      "response": "Based on your confirmed TypeScript and API design skills plus your Staff Engineer goal, two strong development paths stand out: deepening technical leadership on Platform Engineering or expanding into a Tech Lead track with cross-team influence."
+    },
+    {
+      "keywords": ["30", "60", "90", "plan", "growth plan"],
+      "response": "Here is a development-oriented 30/60/90 outline aligned to your Staff Engineer target: strengthen system design evidence in 30 days, lead a cross-team initiative by day 60, and mentor a junior engineer by day 90."
+    },
+    {
+      "keywords": ["1:1", "manager", "conversation", "prep"],
+      "response": "For your next manager conversation, focus on growth evidence: share recent API design wins, ask about stretch opportunities on platform initiatives, and align on skill milestones for your Staff Engineer path."
+    }
+  ]
+}

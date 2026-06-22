@@ -1,0 +1,38 @@
+[
+  {
+    "id": "10101010-1010-4101-8101-101010101000",
+    "recommendationId": "ffffffff-ffff-4fff-8fff-fffffffffff1",
+    "evidenceType": "skill",
+    "referenceId": "40000000-0000-4000-8000-000000000001",
+    "label": "TypeScript (confirmed)",
+    "detail": "Proficiency level 4",
+    "createdAt": "2026-01-15T10:00:00.000Z"
+  },
+  {
+    "id": "10101010-1010-4101-8101-101010101001",
+    "recommendationId": "ffffffff-ffff-4fff-8fff-fffffffffff1",
+    "evidenceType": "role_requirement",
+    "referenceId": "44444444-4444-4444-8444-444444444442",
+    "label": "Staff Engineer role requirements",
+    "detail": "System design required at proficiency 4",
+    "createdAt": "2026-01-15T10:00:00.000Z"
+  },
+  {
+    "id": "10101010-1010-4101-8101-101010101002",
+    "recommendationId": "ffffffff-ffff-4fff-8fff-fffffffffff2",
+    "evidenceType": "learning_resource",
+    "referenceId": "cccccccc-cccc-4ccc-8ccc-cccccccccc00",
+    "label": "Advanced System Design Patterns",
+    "detail": "Recommended learning resource",
+    "createdAt": "2026-01-15T10:00:00.000Z"
+  },
+  {
+    "id": "10101010-1010-4101-8101-101010101003",
+    "recommendationId": "ffffffff-ffff-4fff-8fff-fffffffffff3",
+    "evidenceType": "opportunity",
+    "referenceId": "dddddddd-dddd-4ddd-8ddd-dddddddddd00",
+    "label": "Platform Reliability Lead",
+    "detail": "Open internal opportunity",
+    "createdAt": "2026-01-15T10:00:00.000Z"
+  }
+]

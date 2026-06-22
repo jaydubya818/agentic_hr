@@ -1,0 +1,28 @@
+[
+  {
+    "id": "12121212-1212-4121-8121-121212121201",
+    "organizationId": "11111111-1111-4111-8111-111111111111",
+    "scopeType": "organization",
+    "scopeId": null,
+    "overallScore": 74,
+    "confirmedSkillsPct": 58,
+    "profileCompletenessPct": 81,
+    "roleMappingPct": 72,
+    "activePlansPct": 42,
+    "calculatedAt": "2026-01-15T10:00:00.000Z",
+    "createdAt": "2026-01-15T10:00:00.000Z"
+  },
+  {
+    "id": "12121212-1212-4121-8121-121212121202",
+    "organizationId": "11111111-1111-4111-8111-111111111111",
+    "scopeType": "department",
+    "scopeId": "21111111-1111-4111-8111-111111111111",
+    "overallScore": 78,
+    "confirmedSkillsPct": 62,
+    "profileCompletenessPct": 85,
+    "roleMappingPct": 76,
+    "activePlansPct": 48,
+    "calculatedAt": "2026-01-15T10:00:00.000Z",
+    "createdAt": "2026-01-15T10:00:00.000Z"
+  }
+]

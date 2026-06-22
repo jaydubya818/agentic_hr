@@ -1,0 +1,67 @@
+[
+  {
+    "id": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaa00",
+    "employeeId": "33333333-3333-4333-8333-333333333331",
+    "skillId": "40000000-0000-4000-8000-000000000001",
+    "source": "confirmed",
+    "proficiencyLevel": 4,
+    "confidence": null,
+    "evidenceSummary": "Self-assessed and manager confirmed",
+    "confirmedAt": "2026-01-15T10:00:00.000Z",
+    "confirmedBy": "22222222-2222-4222-8222-222222222222",
+    "createdAt": "2026-01-15T10:00:00.000Z",
+    "updatedAt": "2026-01-15T10:00:00.000Z"
+  },
+  {
+    "id": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaa01",
+    "employeeId": "33333333-3333-4333-8333-333333333331",
+    "skillId": "40000000-0000-4000-8000-000000000002",
+    "source": "confirmed",
+    "proficiencyLevel": 4,
+    "confidence": null,
+    "evidenceSummary": "Self-assessed and manager confirmed",
+    "confirmedAt": "2026-01-15T10:00:00.000Z",
+    "confirmedBy": "22222222-2222-4222-8222-222222222222",
+    "createdAt": "2026-01-15T10:00:00.000Z",
+    "updatedAt": "2026-01-15T10:00:00.000Z"
+  },
+  {
+    "id": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaa02",
+    "employeeId": "33333333-3333-4333-8333-333333333331",
+    "skillId": "40000000-0000-4000-8000-000000000003",
+    "source": "inferred",
+    "proficiencyLevel": 3,
+    "confidence": 0.72,
+    "evidenceSummary": "Inferred from project contributions and peer feedback",
+    "confirmedAt": null,
+    "confirmedBy": null,
+    "createdAt": "2026-01-15T10:00:00.000Z",
+    "updatedAt": "2026-01-15T10:00:00.000Z"
+  },
+  {
+    "id": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaa03",
+    "employeeId": "33333333-3333-4333-8333-333333333331",
+    "skillId": "40000000-0000-4000-8000-000000000004",
+    "source": "confirmed",
+    "proficiencyLevel": 3,
+    "confidence": null,
+    "evidenceSummary": "Self-assessed and manager confirmed",
+    "confirmedAt": "2026-01-15T10:00:00.000Z",
+    "confirmedBy": "22222222-2222-4222-8222-222222222222",
+    "createdAt": "2026-01-15T10:00:00.000Z",
+    "updatedAt": "2026-01-15T10:00:00.000Z"
+  },
+  {
+    "id": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaa04",
+    "employeeId": "33333333-3333-4333-8333-333333333331",
+    "skillId": "40000000-0000-4000-8000-000000000005",
+    "source": "inferred",
+    "proficiencyLevel": 3,
+    "confidence": 0.68,
+    "evidenceSummary": "Inferred from project contributions and peer feedback",
+    "confirmedAt": null,
+    "confirmedBy": null,
+    "createdAt": "2026-01-15T10:00:00.000Z",
+    "updatedAt": "2026-01-15T10:00:00.000Z"
+  }
+]

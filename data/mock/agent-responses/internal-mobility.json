@@ -1,0 +1,13 @@
+{
+  "defaultResponse": "I compared your skills and career interests to open internal opportunities. Matches include fit explanations and gaps to close — not hiring decisions.",
+  "scenarios": [
+    {
+      "keywords": ["mobility", "opportunity", "internal", "role"],
+      "response": "Open internal opportunities are ranked by skill overlap and career goal alignment. Each match explains fit and development gaps — applying remains your choice with manager support."
+    },
+    {
+      "keywords": ["transfer", "move"],
+      "response": "Internal mobility matches consider your confirmed skills first. Opportunities with partial overlap include suggested learning to strengthen your candidacy over time."
+    }
+  ]
+}

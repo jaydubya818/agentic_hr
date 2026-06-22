@@ -1,0 +1,47 @@
+[
+  {
+    "id": "ffffffff-ffff-4fff-8fff-fffffffffff1",
+    "employeeId": "33333333-3333-4333-8333-333333333331",
+    "agentId": "employee-growth",
+    "type": "career_path",
+    "title": "Staff Engineer is a strong near-term path",
+    "explanation": "Your confirmed TypeScript and API design skills, plus growing system design capability, align with the Staff Engineer role requirements at TechForward.",
+    "confidence": 0.82,
+    "confidenceLevel": "high",
+    "status": "pending",
+    "organizationId": "11111111-1111-4111-8111-111111111111",
+    "metadata": {},
+    "createdAt": "2026-01-15T10:00:00.000Z",
+    "updatedAt": "2026-01-15T10:00:00.000Z"
+  },
+  {
+    "id": "ffffffff-ffff-4fff-8fff-fffffffffff2",
+    "employeeId": "33333333-3333-4333-8333-333333333331",
+    "agentId": "dynamic-learning",
+    "type": "learning",
+    "title": "Prioritize system design coursework",
+    "explanation": "Closing the system design gap will strengthen your Staff Engineer candidacy. This is based on role requirements, not performance judgment.",
+    "confidence": 0.78,
+    "confidenceLevel": "medium",
+    "status": "pending",
+    "organizationId": "11111111-1111-4111-8111-111111111111",
+    "metadata": {},
+    "createdAt": "2026-01-15T10:00:00.000Z",
+    "updatedAt": "2026-01-15T10:00:00.000Z"
+  },
+  {
+    "id": "ffffffff-ffff-4fff-8fff-fffffffffff3",
+    "employeeId": "33333333-3333-4333-8333-333333333331",
+    "agentId": "internal-mobility",
+    "type": "mobility",
+    "title": "Platform Reliability Lead stretch assignment",
+    "explanation": "This open internal opportunity matches your platform experience and offers visibility for technical leadership growth.",
+    "confidence": 0.71,
+    "confidenceLevel": "medium",
+    "status": "pending",
+    "organizationId": "11111111-1111-4111-8111-111111111111",
+    "metadata": {},
+    "createdAt": "2026-01-15T10:00:00.000Z",
+    "updatedAt": "2026-01-15T10:00:00.000Z"
+  }
+]
