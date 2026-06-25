@@ -27,6 +27,8 @@ const ROUTES_BY_ROLE = {
     '/manager/team-skills',
     '/manager/coaching',
     '/manager/team-capability-plan',
+    '/manager/decisions',
+    '/manager/team-scenarios',
     '/manager/employee/33333333-3333-4333-8333-333333333331',
     '/settings',
   ],
@@ -37,6 +39,9 @@ const ROUTES_BY_ROLE = {
     '/hr/talent-density',
     '/hr/workforce-readiness',
     '/hr/audit',
+    '/hr/decisions',
+    '/hr/work-design',
+    '/hr/organizational-learning',
     '/settings',
   ],
 };
