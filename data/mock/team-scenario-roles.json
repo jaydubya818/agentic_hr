@@ -1,0 +1,38 @@
+[
+  {
+    "id": "13131313-1313-4131-8131-131313131301",
+    "organizationId": "11111111-1111-4111-8111-111111111111",
+    "scenarioId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa1",
+    "roleId": "44444444-4444-4444-8444-444444444444",
+    "headcount": 3,
+    "notes": "Product engineers with QA automation responsibilities",
+    "createdAt": "2026-02-01T10:00:00.000Z"
+  },
+  {
+    "id": "13131313-1313-4131-8131-131313131302",
+    "organizationId": "11111111-1111-4111-8111-111111111111",
+    "scenarioId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa1",
+    "roleId": "44444444-4444-4444-8444-444444444445",
+    "headcount": 1,
+    "notes": "Tech lead overseeing quality practices",
+    "createdAt": "2026-02-01T10:00:00.000Z"
+  },
+  {
+    "id": "13131313-1313-4131-8131-131313131303",
+    "organizationId": "11111111-1111-4111-8111-111111111111",
+    "scenarioId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa2",
+    "roleId": "44444444-4444-4444-8444-444444444444",
+    "headcount": 2,
+    "notes": "Reduced manual QA; increased automation focus",
+    "createdAt": "2026-03-01T10:00:00.000Z"
+  },
+  {
+    "id": "13131313-1313-4131-8131-131313131304",
+    "organizationId": "11111111-1111-4111-8111-111111111111",
+    "scenarioId": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa2",
+    "roleId": "44444444-4444-4444-8444-444444444445",
+    "headcount": 1,
+    "notes": "AI Product Quality Lead (evolved role)",
+    "createdAt": "2026-03-01T10:00:00.000Z"
+  }
+]

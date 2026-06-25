@@ -19,6 +19,7 @@ import {
   users,
 } from '@/lib/db/schema';
 import type { MockDataStore } from './types';
+import { loadWorkforceIntelligenceFixtures } from './workforce-intelligence-fixtures';
 import {
   mapCareerGoal,
   mapDataReadinessScore,
@@ -111,6 +112,7 @@ export async function loadSupabaseStore(): Promise<MockDataStore | null> {
       recommendations: recommendationRows.map(mapRecommendation),
       recommendationEvidence: evidenceRows.map(mapRecommendationEvidence),
       dataReadinessScores: readinessRows.map(mapDataReadinessScore),
+      ...loadWorkforceIntelligenceFixtures(),
     };
   } catch (error) {
     console.warn('[data-provider] Supabase store load failed; falling back to mock data.', error);

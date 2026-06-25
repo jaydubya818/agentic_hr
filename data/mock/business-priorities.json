@@ -1,0 +1,50 @@
+[
+  {
+    "id": "77777777-7777-4777-8777-777777777771",
+    "organizationId": "11111111-1111-4111-8111-111111111111",
+    "title": "Product Quality Excellence",
+    "description": "Reduce production defects and improve release confidence through automation and AI-assisted quality practices.",
+    "quarter": "2026-Q2",
+    "status": "active",
+    "ownerEmployeeId": "33333333-3333-4333-8333-333333333334",
+    "metadata": { "theme": "quality" },
+    "createdAt": "2026-01-15T10:00:00.000Z",
+    "updatedAt": "2026-01-15T10:00:00.000Z"
+  },
+  {
+    "id": "77777777-7777-4777-8777-777777777772",
+    "organizationId": "11111111-1111-4111-8111-111111111111",
+    "title": "Platform Reliability",
+    "description": "Achieve 99.9% uptime and reduce incident mean time to recovery across core services.",
+    "quarter": "2026-Q2",
+    "status": "active",
+    "ownerEmployeeId": "33333333-3333-4333-8333-333333333332",
+    "metadata": { "theme": "reliability" },
+    "createdAt": "2026-01-15T10:00:00.000Z",
+    "updatedAt": "2026-01-15T10:00:00.000Z"
+  },
+  {
+    "id": "77777777-7777-4777-8777-777777777773",
+    "organizationId": "11111111-1111-4111-8111-111111111111",
+    "title": "AI Enablement",
+    "description": "Embed governed AI capabilities into employee growth, manager coaching, and quality workflows.",
+    "quarter": "2026-Q3",
+    "status": "planned",
+    "ownerEmployeeId": "33333333-3333-4333-8333-333333333333",
+    "metadata": { "theme": "ai" },
+    "createdAt": "2026-01-15T10:00:00.000Z",
+    "updatedAt": "2026-01-15T10:00:00.000Z"
+  },
+  {
+    "id": "77777777-7777-4777-8777-777777777774",
+    "organizationId": "11111111-1111-4111-8111-111111111111",
+    "title": "Customer Retention",
+    "description": "Improve onboarding completion and reduce churn through product quality and support readiness.",
+    "quarter": "2026-Q2",
+    "status": "active",
+    "ownerEmployeeId": "33333333-3333-4333-8333-333333333334",
+    "metadata": { "theme": "retention" },
+    "createdAt": "2026-01-15T10:00:00.000Z",
+    "updatedAt": "2026-01-15T10:00:00.000Z"
+  }
+]

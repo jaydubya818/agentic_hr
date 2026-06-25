@@ -18,6 +18,23 @@ import {
   teamSchema,
   userSchema,
 } from '@/schemas';
+import type {
+  AgentActionPlan,
+  AgentProposedAction,
+  BusinessPriority,
+  DecisionEvidence,
+  DecisionOutcome,
+  DecisionParticipant,
+  Project,
+  ProjectMembership,
+  RoleEvolutionScenario,
+  RoleTaskChange,
+  TeamScenario,
+  TeamScenarioRole,
+  TeamScenarioSkill,
+  WorkforceContextEdge,
+  WorkforceDecision,
+} from '@/schemas/workforce-intelligence';
 
 export type Organization = z.infer<typeof organizationSchema>;
 export type User = z.infer<typeof userSchema>;
@@ -36,6 +53,24 @@ export type GrowthPlanItem = z.infer<typeof growthPlanItemSchema>;
 export type Recommendation = z.infer<typeof recommendationSchema>;
 export type RecommendationEvidence = z.infer<typeof recommendationEvidenceSchema>;
 export type DataReadinessScore = z.infer<typeof dataReadinessScoreSchema>;
+
+export type {
+  AgentActionPlan,
+  AgentProposedAction,
+  BusinessPriority,
+  DecisionEvidence,
+  DecisionOutcome,
+  DecisionParticipant,
+  Project,
+  ProjectMembership,
+  RoleEvolutionScenario,
+  RoleTaskChange,
+  TeamScenario,
+  TeamScenarioRole,
+  TeamScenarioSkill,
+  WorkforceContextEdge,
+  WorkforceDecision,
+};
 
 export interface CareerPathMatch {
   role: Role;
@@ -185,6 +220,21 @@ export interface MockDataStore {
   recommendations: Recommendation[];
   recommendationEvidence: RecommendationEvidence[];
   dataReadinessScores: DataReadinessScore[];
+  businessPriorities: BusinessPriority[];
+  projects: Project[];
+  projectMemberships: ProjectMembership[];
+  workforceContextEdges: WorkforceContextEdge[];
+  workforceDecisions: WorkforceDecision[];
+  decisionEvidence: DecisionEvidence[];
+  decisionOutcomes: DecisionOutcome[];
+  decisionParticipants: DecisionParticipant[];
+  teamScenarios: TeamScenario[];
+  teamScenarioRoles: TeamScenarioRole[];
+  teamScenarioSkills: TeamScenarioSkill[];
+  roleEvolutionScenarios: RoleEvolutionScenario[];
+  roleTaskChanges: RoleTaskChange[];
+  agentActionPlans: AgentActionPlan[];
+  agentProposedActions: AgentProposedAction[];
 }
 
 export interface HrInsightRecommendation {

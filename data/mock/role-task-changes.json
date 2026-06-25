@@ -1,0 +1,42 @@
+[
+  {
+    "id": "15151515-1515-4151-8151-151515151501",
+    "organizationId": "11111111-1111-4111-8111-111111111111",
+    "roleEvolutionScenarioId": "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbb1",
+    "taskDescription": "Manual regression test execution",
+    "changeType": "automate",
+    "impactLevel": "high",
+    "notes": "Shift to AI-assisted regression triage",
+    "createdAt": "2026-03-05T10:00:00.000Z"
+  },
+  {
+    "id": "15151515-1515-4151-8151-151515151502",
+    "organizationId": "11111111-1111-4111-8111-111111111111",
+    "roleEvolutionScenarioId": "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbb1",
+    "taskDescription": "Quality metrics dashboard ownership",
+    "changeType": "increase",
+    "impactLevel": "medium",
+    "notes": "Expanded analytics partnership with product",
+    "createdAt": "2026-03-05T10:00:00.000Z"
+  },
+  {
+    "id": "15151515-1515-4151-8151-151515151503",
+    "organizationId": "11111111-1111-4111-8111-111111111111",
+    "roleEvolutionScenarioId": "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbb1",
+    "taskDescription": "Release go/no-go decision",
+    "changeType": "delegate",
+    "impactLevel": "low",
+    "notes": "Human product and engineering leaders retain decision authority",
+    "createdAt": "2026-03-05T10:00:00.000Z"
+  },
+  {
+    "id": "15151515-1515-4151-8151-151515151504",
+    "organizationId": "11111111-1111-4111-8111-111111111111",
+    "roleEvolutionScenarioId": "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbb1",
+    "taskDescription": "AI prompt design for test case generation",
+    "changeType": "add",
+    "impactLevel": "high",
+    "notes": "New capability requiring reskilling investment",
+    "createdAt": "2026-03-05T10:00:00.000Z"
+  }
+]

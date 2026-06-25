@@ -15,6 +15,7 @@ import growthPlanItemsData from '../../../data/mock/growth-plan-items.json';
 import recommendationsData from '../../../data/mock/recommendations.json';
 import recommendationEvidenceData from '../../../data/mock/recommendation-evidence.json';
 import dataReadinessData from '../../../data/mock/data-readiness.json';
+import { loadWorkforceIntelligenceFixtures } from './workforce-intelligence-fixtures';
 import { z } from 'zod';
 import {
   careerGoalSchema,
@@ -110,6 +111,7 @@ function loadStore(): MockDataStore {
       dataReadinessData,
       'dataReadinessScores',
     ),
+    ...loadWorkforceIntelligenceFixtures(),
   };
 }
 

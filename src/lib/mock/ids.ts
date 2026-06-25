@@ -32,6 +32,35 @@ export const MOCK_IDS = {
   careerGoals: {
     alex: '66666666-6666-4666-8666-666666666661',
   },
+  businessPriorities: {
+    productQuality: '77777777-7777-4777-8777-777777777771',
+    platformReliability: '77777777-7777-4777-8777-777777777772',
+    aiEnablement: '77777777-7777-4777-8777-777777777773',
+    customerRetention: '77777777-7777-4777-8777-777777777774',
+  },
+  projects: {
+    qualityAutomation: '88888888-8888-4888-8888-888888888881',
+    platformModernization: '88888888-8888-4888-8888-888888888882',
+    aiCopilotPilot: '88888888-8888-4888-8888-888888888883',
+    onboardingRevamp: '88888888-8888-4888-8888-888888888884',
+  },
+  decisions: {
+    qaReskilling: '99999999-9999-4999-8999-999999999991',
+    platformStaffing: '99999999-9999-4999-8999-999999999992',
+    aiQualityLead: '99999999-9999-4999-8999-999999999993',
+    learningInvestment: '99999999-9999-4999-8999-999999999994',
+  },
+  teamScenarios: {
+    productQualityCurrent: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa1',
+    productQualityFuture: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa2',
+  },
+  roleEvolution: {
+    qaToAiQuality: 'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbb1',
+  },
+  actionPlans: {
+    employeeGrowth: 'cccccccc-cccc-4ccc-8ccc-ccccccccccc1',
+    supermanager: 'cccccccc-cccc-4ccc-8ccc-ccccccccccc2',
+  },
 } as const;
 
 export const DEMO_USER_ID = MOCK_IDS.users.alex;
