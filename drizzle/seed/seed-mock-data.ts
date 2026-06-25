@@ -422,8 +422,291 @@ async function main() {
     )
     .onConflictDoNothing();
 
+  const wiTimestamp = (value: string) => new Date(value);
+
+  await db
+    .insert(schema.businessPriorities)
+    .values(
+      readJson<Array<Record<string, unknown>>>('business-priorities.json').map((row) => ({
+        id: String(row.id),
+        organizationId: String(row.organizationId),
+        title: String(row.title),
+        description: (row.description as string | null) ?? null,
+        quarter: (row.quarter as string | null) ?? null,
+        status: String(row.status),
+        ownerEmployeeId: (row.ownerEmployeeId as string | null) ?? null,
+        metadata: (row.metadata as Record<string, unknown>) ?? {},
+        createdAt: wiTimestamp(String(row.createdAt)),
+        updatedAt: wiTimestamp(String(row.updatedAt ?? row.createdAt)),
+      })),
+    )
+    .onConflictDoNothing();
+
+  await db
+    .insert(schema.projects)
+    .values(
+      readJson<Array<Record<string, unknown>>>('projects.json').map((row) => ({
+        id: String(row.id),
+        organizationId: String(row.organizationId),
+        name: String(row.name),
+        description: (row.description as string | null) ?? null,
+        businessPriorityId: (row.businessPriorityId as string | null) ?? null,
+        status: String(row.status),
+        startDate: row.startDate ? wiTimestamp(String(row.startDate)) : null,
+        endDate: row.endDate ? wiTimestamp(String(row.endDate)) : null,
+        metadata: (row.metadata as Record<string, unknown>) ?? {},
+        createdAt: wiTimestamp(String(row.createdAt)),
+        updatedAt: wiTimestamp(String(row.updatedAt ?? row.createdAt)),
+      })),
+    )
+    .onConflictDoNothing();
+
+  await db
+    .insert(schema.projectMemberships)
+    .values(
+      readJson<Array<Record<string, unknown>>>('project-memberships.json').map((row) => ({
+        id: String(row.id),
+        organizationId: String(row.organizationId),
+        projectId: String(row.projectId),
+        employeeId: String(row.employeeId),
+        role: (row.role as string | null) ?? null,
+        allocationPct: typeof row.allocationPct === 'number' ? row.allocationPct : null,
+        joinedAt: row.joinedAt ? wiTimestamp(String(row.joinedAt)) : null,
+        createdAt: wiTimestamp(String(row.createdAt)),
+        updatedAt: wiTimestamp(String(row.updatedAt ?? row.createdAt)),
+      })),
+    )
+    .onConflictDoNothing();
+
+  await db
+    .insert(schema.workforceContextEdges)
+    .values(
+      readJson<Array<Record<string, unknown>>>('workforce-context-edges.json').map((row) => ({
+        id: String(row.id),
+        organizationId: String(row.organizationId),
+        sourceEntityType: row.sourceEntityType as schema.workforceContextEdges.$inferInsert['sourceEntityType'],
+        sourceEntityId: String(row.sourceEntityId),
+        targetEntityType: row.targetEntityType as schema.workforceContextEdges.$inferInsert['targetEntityType'],
+        targetEntityId: String(row.targetEntityId),
+        relationshipType: row.relationshipType as schema.workforceContextEdges.$inferInsert['relationshipType'],
+        strength: typeof row.strength === 'number' ? row.strength : null,
+        label: (row.label as string | null) ?? null,
+        explanation: (row.explanation as string | null) ?? null,
+        metadata: (row.metadata as Record<string, unknown>) ?? {},
+        createdAt: wiTimestamp(String(row.createdAt)),
+        updatedAt: wiTimestamp(String(row.updatedAt ?? row.createdAt)),
+      })),
+    )
+    .onConflictDoNothing();
+
+  await db
+    .insert(schema.workforceDecisions)
+    .values(
+      readJson<Array<Record<string, unknown>>>('workforce-decisions.json').map((row) => ({
+        id: String(row.id),
+        organizationId: String(row.organizationId),
+        title: String(row.title),
+        description: (row.description as string | null) ?? null,
+        decisionType: row.decisionType as schema.workforceDecisions.$inferInsert['decisionType'],
+        status: row.status as schema.workforceDecisions.$inferInsert['status'],
+        teamId: (row.teamId as string | null) ?? null,
+        businessPriorityId: (row.businessPriorityId as string | null) ?? null,
+        ownerEmployeeId: (row.ownerEmployeeId as string | null) ?? null,
+        rationale: (row.rationale as string | null) ?? null,
+        confidence: typeof row.confidence === 'number' ? row.confidence : null,
+        metadata: (row.metadata as Record<string, unknown>) ?? {},
+        createdAt: wiTimestamp(String(row.createdAt)),
+        updatedAt: wiTimestamp(String(row.updatedAt ?? row.createdAt)),
+      })),
+    )
+    .onConflictDoNothing();
+
+  await db
+    .insert(schema.decisionEvidence)
+    .values(
+      readJson<Array<Record<string, unknown>>>('decision-evidence.json').map((row) => ({
+        id: String(row.id),
+        organizationId: String(row.organizationId),
+        decisionId: String(row.decisionId),
+        evidenceType: String(row.evidenceType),
+        referenceId: (row.referenceId as string | null) ?? null,
+        label: String(row.label),
+        detail: (row.detail as string | null) ?? null,
+        confidence: typeof row.confidence === 'number' ? row.confidence : null,
+        createdAt: wiTimestamp(String(row.createdAt)),
+      })),
+    )
+    .onConflictDoNothing();
+
+  await db
+    .insert(schema.decisionOutcomes)
+    .values(
+      readJson<Array<Record<string, unknown>>>('decision-outcomes.json').map((row) => ({
+        id: String(row.id),
+        organizationId: String(row.organizationId),
+        decisionId: String(row.decisionId),
+        outcomeType: String(row.outcomeType),
+        description: String(row.description),
+        status: row.status as schema.decisionOutcomes.$inferInsert['status'],
+        metricLabel: (row.metricLabel as string | null) ?? null,
+        metricValue: typeof row.metricValue === 'number' ? row.metricValue : null,
+        targetValue: typeof row.targetValue === 'number' ? row.targetValue : null,
+        recordedAt: row.recordedAt ? wiTimestamp(String(row.recordedAt)) : null,
+        recordedByEmployeeId: (row.recordedByEmployeeId as string | null) ?? null,
+        createdAt: wiTimestamp(String(row.createdAt)),
+        updatedAt: wiTimestamp(String(row.updatedAt ?? row.createdAt)),
+      })),
+    )
+    .onConflictDoNothing();
+
+  await db
+    .insert(schema.decisionParticipants)
+    .values(
+      readJson<Array<Record<string, unknown>>>('decision-participants.json').map((row) => ({
+        id: String(row.id),
+        organizationId: String(row.organizationId),
+        decisionId: String(row.decisionId),
+        employeeId: String(row.employeeId),
+        role: row.role as schema.decisionParticipants.$inferInsert['role'],
+        createdAt: wiTimestamp(String(row.createdAt)),
+      })),
+    )
+    .onConflictDoNothing();
+
+  await db
+    .insert(schema.teamScenarios)
+    .values(
+      readJson<Array<Record<string, unknown>>>('team-scenarios.json').map((row) => ({
+        id: String(row.id),
+        organizationId: String(row.organizationId),
+        title: String(row.title),
+        description: (row.description as string | null) ?? null,
+        teamId: String(row.teamId),
+        scenarioType: row.scenarioType as schema.teamScenarios.$inferInsert['scenarioType'],
+        status: row.status as schema.teamScenarios.$inferInsert['status'],
+        businessPriorityId: (row.businessPriorityId as string | null) ?? null,
+        rationale: (row.rationale as string | null) ?? null,
+        confidence: typeof row.confidence === 'number' ? row.confidence : null,
+        metadata: (row.metadata as Record<string, unknown>) ?? {},
+        createdAt: wiTimestamp(String(row.createdAt)),
+        updatedAt: wiTimestamp(String(row.updatedAt ?? row.createdAt)),
+      })),
+    )
+    .onConflictDoNothing();
+
+  await db
+    .insert(schema.teamScenarioRoles)
+    .values(
+      readJson<Array<Record<string, unknown>>>('team-scenario-roles.json').map((row) => ({
+        id: String(row.id),
+        organizationId: String(row.organizationId),
+        scenarioId: String(row.scenarioId),
+        roleId: String(row.roleId),
+        headcount: typeof row.headcount === 'number' ? row.headcount : 1,
+        notes: (row.notes as string | null) ?? null,
+        createdAt: wiTimestamp(String(row.createdAt)),
+      })),
+    )
+    .onConflictDoNothing();
+
+  await db
+    .insert(schema.teamScenarioSkills)
+    .values(
+      readJson<Array<Record<string, unknown>>>('team-scenario-skills.json').map((row) => ({
+        id: String(row.id),
+        organizationId: String(row.organizationId),
+        scenarioId: String(row.scenarioId),
+        skillId: String(row.skillId),
+        demandLevel: Number(row.demandLevel),
+        supplyLevel: Number(row.supplyLevel),
+        gap: Number(row.gap),
+        notes: (row.notes as string | null) ?? null,
+        createdAt: wiTimestamp(String(row.createdAt)),
+      })),
+    )
+    .onConflictDoNothing();
+
+  await db
+    .insert(schema.roleEvolutionScenarios)
+    .values(
+      readJson<Array<Record<string, unknown>>>('role-evolution-scenarios.json').map((row) => ({
+        id: String(row.id),
+        organizationId: String(row.organizationId),
+        title: String(row.title),
+        description: (row.description as string | null) ?? null,
+        currentRoleId: String(row.currentRoleId),
+        futureRoleId: (row.futureRoleId as string | null) ?? null,
+        futureRoleTitle: (row.futureRoleTitle as string | null) ?? null,
+        status: row.status as schema.roleEvolutionScenarios.$inferInsert['status'],
+        rationale: (row.rationale as string | null) ?? null,
+        confidence: typeof row.confidence === 'number' ? row.confidence : null,
+        metadata: (row.metadata as Record<string, unknown>) ?? {},
+        createdAt: wiTimestamp(String(row.createdAt)),
+        updatedAt: wiTimestamp(String(row.updatedAt ?? row.createdAt)),
+      })),
+    )
+    .onConflictDoNothing();
+
+  await db
+    .insert(schema.roleTaskChanges)
+    .values(
+      readJson<Array<Record<string, unknown>>>('role-task-changes.json').map((row) => ({
+        id: String(row.id),
+        organizationId: String(row.organizationId),
+        roleEvolutionScenarioId: String(row.roleEvolutionScenarioId),
+        taskDescription: String(row.taskDescription),
+        changeType: row.changeType as schema.roleTaskChanges.$inferInsert['changeType'],
+        impactLevel: String(row.impactLevel ?? 'medium'),
+        notes: (row.notes as string | null) ?? null,
+        createdAt: wiTimestamp(String(row.createdAt)),
+      })),
+    )
+    .onConflictDoNothing();
+
+  await db
+    .insert(schema.agentActionPlans)
+    .values(
+      readJson<Array<Record<string, unknown>>>('agent-action-plans.json').map((row) => ({
+        id: String(row.id),
+        organizationId: String(row.organizationId),
+        agentId: String(row.agentId),
+        employeeId: (row.employeeId as string | null) ?? null,
+        teamId: (row.teamId as string | null) ?? null,
+        title: String(row.title),
+        summary: (row.summary as string | null) ?? null,
+        sourceDecisionId: (row.sourceDecisionId as string | null) ?? null,
+        governanceStatus: row.governanceStatus as schema.agentActionPlans.$inferInsert['governanceStatus'],
+        metadata: (row.metadata as Record<string, unknown>) ?? {},
+        createdAt: wiTimestamp(String(row.createdAt)),
+        updatedAt: wiTimestamp(String(row.updatedAt ?? row.createdAt)),
+      })),
+    )
+    .onConflictDoNothing();
+
+  await db
+    .insert(schema.agentProposedActions)
+    .values(
+      readJson<Array<Record<string, unknown>>>('agent-proposed-actions.json').map((row) => ({
+        id: String(row.id),
+        organizationId: String(row.organizationId),
+        actionPlanId: String(row.actionPlanId),
+        actionType: row.actionType as schema.agentProposedActions.$inferInsert['actionType'],
+        title: String(row.title),
+        description: (row.description as string | null) ?? null,
+        status: row.status as schema.agentProposedActions.$inferInsert['status'],
+        targetEmployeeId: (row.targetEmployeeId as string | null) ?? null,
+        referenceId: (row.referenceId as string | null) ?? null,
+        confidence: typeof row.confidence === 'number' ? row.confidence : null,
+        explanation: (row.explanation as string | null) ?? null,
+        metadata: (row.metadata as Record<string, unknown>) ?? {},
+        createdAt: wiTimestamp(String(row.createdAt)),
+        updatedAt: wiTimestamp(String(row.updatedAt ?? row.createdAt)),
+      })),
+    )
+    .onConflictDoNothing();
+
   await sql.end();
-  console.log('Seed complete: TechForward demo data loaded.');
+  console.log('Seed complete: TechForward demo data loaded (including workforce intelligence).');
 }
 
 void main();

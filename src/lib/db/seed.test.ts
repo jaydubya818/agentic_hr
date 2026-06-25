@@ -10,5 +10,7 @@ describe('drizzle seed', () => {
     expect(content).toContain('DATABASE_URL');
     expect(content).toContain('data/mock');
     expect(content).toContain('userRoles');
+    expect(content).toContain('workforceDecisions');
+    expect(content).toContain('business-priorities.json');
   });
 });
