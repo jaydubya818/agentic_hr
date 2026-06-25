@@ -19,6 +19,8 @@ const managerNav: NavItem[] = [
   { label: 'Team Skills', href: '/manager/team-skills' },
   { label: 'Coaching', href: '/manager/coaching' },
   { label: 'Team Capability Plan', href: '/manager/team-capability-plan' },
+  { label: 'Decisions', href: '/manager/decisions' },
+  { label: 'Team Scenarios', href: '/manager/team-scenarios' },
 ];
 
 const hrNav: NavItem[] = [
@@ -27,6 +29,9 @@ const hrNav: NavItem[] = [
   { label: 'Mobility Insights', href: '/hr/mobility-insights' },
   { label: 'Talent Density', href: '/hr/talent-density' },
   { label: 'Workforce Readiness', href: '/hr/workforce-readiness' },
+  { label: 'Decisions', href: '/hr/decisions' },
+  { label: 'Work Design', href: '/hr/work-design' },
+  { label: 'Organizational Learning', href: '/hr/organizational-learning' },
   { label: 'Audit Log', href: '/hr/audit' },
 ];
 
