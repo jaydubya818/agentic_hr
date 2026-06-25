@@ -328,6 +328,20 @@ When executing any task:
 
 Phases 0–11 delivered the mock-first MVP. Continued engineering and roadmap horizons H0–H6 are defined in **[IMPLEMENTATION_PLAN_POST_MVP.md](./IMPLEMENTATION_PLAN_POST_MVP.md)** (pilot persistence, audit UI, enablement Q&A, integrations, dynamic workforce, PRD v2 gate).
 
+### Phase WI — Workforce Intelligence Foundation
+
+Implemented in sub-phases 12A–12G. Full specification: [WORKFORCE_INTELLIGENCE.md](./WORKFORCE_INTELLIGENCE.md).
+
+| Sub-phase | Deliverable |
+|-----------|-------------|
+| 12A | Canonical doc updates, Zod schemas, types |
+| 12B | Context graph tables, fixtures, `context-graph-service` |
+| 12C | Decision memory APIs and manager/HR UI |
+| 12D | Team scenarios and HR work design |
+| 12E | Agent action plans and `ActionPlanPanel` |
+| 12F | Outcome services and `/hr/organizational-learning` |
+| 12G | RLS migration `0003`, evals, smoke routes |
+
 ---
 
 ## 6. Cross-References

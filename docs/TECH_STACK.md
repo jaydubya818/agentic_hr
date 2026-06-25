@@ -433,6 +433,8 @@ Do **not** introduce these without updating this document and [IMPLEMENTATION_PL
 | Enterprise SSO | Supabase SAML / WorkOS |
 | HRIS integration | Custom adapters (Workday, SF) |
 
+**Workforce Context Graph (Phase WI):** Implemented with Postgres relational edges (`workforce_context_edges`)—no graph database in this iteration. Query via `context-graph-service` helpers.
+
 ---
 
 ## 15. Cross-References

@@ -1,67 +1,60 @@
 # GrowthOS Project Progress
 
 Project: GrowthOS
-Last updated: 2026-06-08 (Post-MVP Phases 12–18)
+Last updated: 2026-06-08 (Workforce Intelligence Phase WI complete)
 
 ---
 
 ## Current Phase
 
-**Post-MVP horizons H0–H5 complete; H6 gated** — Pilot persistence, HR audit UI, enablement Q&A, inferred-skill review, HRIS read stubs, onboarding wizard, and PRD v2 gate documented. Mock-first demo remains default.
+**Workforce Intelligence (Phase WI) complete** — Context graph, decision memory, team/role scenarios, agent action plans, organizational learning, RLS, evals. Post-MVP horizons H0–H5 complete; H6 gated on PRD v2.
 
 ---
 
-## Completed (Phases 12–18)
+## Phase WI — Workforce Intelligence Foundation (12A–12G)
+
+| Sub-phase | Status | Notes |
+|-----------|--------|-------|
+| 12A Documentation | COMPLETE | PRD §21, APP_FLOW §4.20, BACKEND/EVALS/SECURITY/TECH/FRONTEND updates, WORKFORCE_INTELLIGENCE.md |
+| 12B Context graph | COMPLETE | `0002` migration, fixtures, `context-graph-service`, context APIs |
+| 12C Decision memory | COMPLETE | Manager/HR routes, decision APIs, mock + provider layer |
+| 12D Team scenarios | COMPLETE | `/manager/team-scenarios`, `/hr/work-design` |
+| 12E Answer-to-action | COMPLETE | `AgentActionPlan`, `ActionPlanPanel`, governance |
+| 12F Org learning | COMPLETE | `/hr/organizational-learning`, outcome services |
+| 12G RLS & polish | COMPLETE | `0003_workforce_intelligence_rls.sql`, smoke routes, evals |
+
+**Assumption:** Phase numbering WI is distinct from POST_MVP Phases 12–18 (H0–H6).
+
+---
+
+## Completed (Post-MVP Phases 12–18)
 
 ### Phase 12 — H0 Pilot Persistence Release
-- Dual-path `getSessionContext()` (Supabase Auth + mock cookie fallback)
-- Login route: Supabase `signInWithPassword` when `USE_MOCK_DATA=false`
-- `supabase-persistence.ts`: recommendations, accept/dismiss, audit logs
-- Agent invoke wires `persistAgentRecommendations`
-- `PATCH /api/recommendations/[id]/status`, `GET /api/hr/audit-logs`, export CSV
-- `npm run db:verify-env`, `rbac-matrix.test.ts`
-- `PILOT_PERSISTENCE_RELEASE.md` exit criteria checked
+- Dual-path session, Supabase persistence, audit APIs, rbac-matrix tests
 
 ### Phase 13 — H2 Decision Context
-- `/hr/audit` page with filters and CSV export
-- `APP_FLOW.md` §4.19 audit route; HR nav link
-- `audit-api.test.ts`, `hr-audit.test.ts`
+- `/hr/audit`, export CSV, audit tests
 
 ### Phase 14 — H1 Enablement Q&A
-- Employee growth + supermanager prompt Q&A scope expansion
-- `enablement-qa-eval.test.ts`, rate limit on agent invoke (`lib/agent/rate-limit.ts`)
+- Prompt scope expansion, enablement-qa evals
 
 ### Phase 15 — H3 Self-maintaining enablement data
-- Inferred skill confirm/reject on growth profile (`InferredSkillReviewRow`)
-- `PATCH /api/employee-skills/[id]/review` + audit entries
-- Taxonomy assistant on `/hr/skills-readiness` (Skills Intelligence agent)
-- `src/integrations/` types + mock adapter stub
+- Inferred skill review, taxonomy assistant
 
 ### Phase 16 — H5 HRIS read fabric
-- `workday/` and `successfactors/` read-only stubs
-- `sync-hris-read.ts` + `USE_HRIS_READ` flag (default false)
-- `hris-read.test.ts`; `BACKEND_STRUCTURE.md` adapter paths updated
+- Workday/SF stubs, `USE_HRIS_READ` flag
 
 ### Phase 17 — H4 Dynamic workforce
-- `/onboarding` three-step wizard + Employee Growth agent panel
-- Work redesign framing in `dynamic-learning` prompt
-- `HrWorkforceAgentSection` on `/hr/workforce-readiness`
-- `onboarding.test.ts`
+- Onboarding wizard, workforce agent sections
 
 ### Phase 18 — H6 Agentic HRIS core (gated)
-- `docs/PRD_V2_GATE.md` — **no H6 implementation** until leadership approves
+- `docs/PRD_V2_GATE.md` — no H6 implementation until approved
 
 ---
 
 ## Completed (Phases 0–11)
 
-- Phase 0–7: Documentation, scaffold, mock data, employee/manager/HR UX, mock agent layer
-- Phase 8A–8C: Drizzle schema, RLS, Supabase persistence scaffolding
-- Phase 9A–9C: LLM abstraction, prompts, controlled live agent calls
-- Phase 10A–10C: Agent evals, governance enforcement, audit logging
-- Phase 11: Demo readiness + packaging
-
-See earlier entries in git history for detailed Phase 0–11 notes.
+Core MVP: documentation, scaffold, mock data, employee/manager/HR UX, agents, Drizzle/RLS, evals, demo packaging.
 
 ---
 
@@ -70,50 +63,22 @@ See earlier entries in git history for detailed Phase 0–11 notes.
 | Phase | Name | Status |
 |-------|------|--------|
 | 0–11 | Core MVP + demo packaging | COMPLETE |
-| 12 | H0 Pilot persistence | COMPLETE |
-| 13 | H2 Audit + decision context UI | COMPLETE |
-| 14 | H1 Enablement Q&A | COMPLETE |
-| 15 | H3 Inferred skills + taxonomy | COMPLETE |
-| 16 | H5 HRIS read fabric stubs | COMPLETE |
-| 17 | H4 Onboarding + workforce agents | COMPLETE |
-| 18 | H6 PRD v2 gate (planning only) | GATED |
+| 12–18 (POST_MVP) | H0–H5 horizons + H6 gate | H0–H5 COMPLETE; H6 GATED |
+| WI | Workforce Intelligence | COMPLETE |
 
 ---
 
-## Assumptions Log
+## Validation (Phase WI gate)
 
-- A-08: `USE_HRIS_READ` defaults false; HRIS sync returns empty when disabled
-- A-09: Inferred skill DB updates apply only when `shouldPersistWrites()`; mock store updates on next reload from seed in demo mode
-- A-10: H6 Agentic HRIS core deferred per `PRD_V2_GATE.md` (2026-06-08)
-
----
-
-## Validation (2026-06-08 — post-MVP pass)
-
-Run before pilot handoff:
-
-```bash
-npm run typecheck && npm run lint && npm run test && npm run build && npm run evals
-npm run smoke   # with dev server; SMOKE_BASE_URL as needed
-```
+- `npm run typecheck` — pass
+- `npm run lint` — pass
+- `npm run test` — 104 tests pass
+- `npm run build` — pass (mock mode, no credentials)
+- `npm run evals` — pass
+- `npm run smoke` — run with dev server on configured port
 
 ---
 
-## Environment Status
+## Recommended next milestone
 
-**Mock mode (default):**
-- `USE_MOCK_DATA=true`
-- `USE_MOCK_AGENTS=true`
-- `USE_HRIS_READ=false`
-
-**Pilot persistence:**
-- `USE_MOCK_DATA=false` + `DATABASE_URL` + Supabase keys
-- `npm run db:verify-env` → migrate → seed
-
----
-
-## Out-of-Scope Reminders
-
-- NO termination / layoff / compensation / promotion / performance rating / succession **decision outputs**
-- NO automated hiring decisions
-- NO H6 HRIS core implementation until PRD v2 gate approval
+Pilot customer persistence hardening + live Supabase WI table seeding; expand executive aggregate views for organizational learning without individual deliberation exposure.

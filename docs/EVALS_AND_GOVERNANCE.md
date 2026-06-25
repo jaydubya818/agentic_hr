@@ -483,7 +483,17 @@ Route: `/hr/governance` (Phase 10+)
 
 ---
 
-## 16. Cross-References
+## 16. Workforce Intelligence governance (Phase WI)
+
+- **Action-plan validation:** `action-plan-governance.ts` blocks disallowed action types before persistence.
+- **Decision memory:** Only allowed categories; prohibited employment topics → block + minimal audit metadata.
+- **Scenario modeling:** Scenarios are proposals; approval requires human review; no layoff or headcount-reduction language.
+- **Outcome review:** Organizational learning uses aggregated, non-causal phrasing; no automatic model retraining.
+- **Evals:** `workforce-intelligence-eval.test.ts`, `action-plan-governance.test.ts`.
+
+---
+
+## 17. Cross-References
 
 - Product non-goals: [PRD.md](./PRD.md) Section 8
 - Agent API: [BACKEND_STRUCTURE.md](./BACKEND_STRUCTURE.md) Section 9

@@ -538,7 +538,22 @@ Use `cn()` utility (clsx + tailwind-merge) for conditional classes.
 
 ---
 
-## 19. Cross-References
+## 19. Workforce Intelligence UI patterns (Phase WI)
+
+Components under `src/components/workforce-intelligence/`:
+
+| Pattern | Component | Use |
+|---------|-----------|-----|
+| Context relationships | `ContextGraphSummary`, `RelationshipCard` | Grouped entity links, not node-link graphs |
+| Decision memory | `DecisionCard`, `DecisionTimeline`, `DecisionEvidenceList` | Manager/HR decision views |
+| Outcomes | `DecisionOutcomeComparison` | Expected vs actual, non-causal labels |
+| Scenarios | `ScenarioComparison`, `SkillSupplyDemandCard`, `RoleEvolutionCard` | Team and role modeling |
+| Agent actions | `ActionPlanPanel`, `ProposedActionItem`, `HumanReviewBadge` | Answer-to-action flows |
+| Learning | `OutcomePatternCard`, `LearningSignalCard` | HR organizational learning |
+
+---
+
+## 20. Cross-References
 
 - Routes and page content: [APP_FLOW.md](./APP_FLOW.md)
 - Tech implementation: [TECH_STACK.md](./TECH_STACK.md)

@@ -309,6 +309,26 @@ Internal opportunity matches are **not** a separate route in MVP. They appear as
 - Export affordance → `GET /api/hr/audit-logs/export` (CSV)
 - RBAC: `hr_admin` and `org_admin` only; managers and employees receive `/forbidden`
 
+### 4.20 Workforce Intelligence routes (Phase WI)
+
+See [WORKFORCE_INTELLIGENCE.md](./WORKFORCE_INTELLIGENCE.md) for full specification.
+
+| Route | Role | Purpose |
+|-------|------|---------|
+| `/manager/decisions` | Manager | List workforce decisions for scoped teams |
+| `/manager/decisions/[id]` | Manager | Decision detail, evidence, outcomes |
+| `/manager/team-scenarios` | Manager | Team capability scenarios |
+| `/manager/team-scenarios/[id]` | Manager | Scenario comparison (skills, roles) |
+| `/hr/decisions` | HR Admin | Organization decision memory |
+| `/hr/decisions/[id]` | HR Admin | Decision detail and governance |
+| `/hr/work-design` | HR Admin | Role evolution and work design scenarios |
+| `/hr/work-design/[id]` | HR Admin | Role task change comparison |
+| `/hr/organizational-learning` | HR Admin | Outcome patterns and learning signals |
+
+**Employee:** No decision-memory routes in this phase; approved actions may appear on growth plan only.
+
+**Executive readonly:** Aggregate learning summaries where published; no private deliberation.
+
 ---
 
 ## 5. Employee Flows

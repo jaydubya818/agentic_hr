@@ -19,6 +19,8 @@
 - GrowthOS is an agentic enablement layer beside existing HRIS, not a full HRIS replacement; horizon H6 is gated on PRD v2 (`docs/PRD_V2_GATE.md`).
 - Mock mode uses `src/services/data-provider/mock-provider.ts` and `data/mock/`; when `USE_MOCK_DATA=false`, Supabase auth/session and persistence (recommendations, audit) activate with mock fallback.
 - Post-MVP Phases 12–18 are complete through H5; H6 remains documentation-only until PRD v2.
+- **Workforce Intelligence (Phase WI)** adds context graph, decision memory, team scenarios, agent action plans, and organizational learning; see `docs/WORKFORCE_INTELLIGENCE.md`.
+- Tagline: Grow people. Reconfigure work. Remember why. Learn what works.
 - Demo fixtures use TechForward Inc. with deterministic IDs in `src/lib/mock/ids.ts` (e.g., Alex Chen employee, Jordan Lee manager).
 - UI uses GrowthOS design tokens: primary `#1E4D8C`, accent `#0D9488`, Inter, card-based dashboards per `docs/FRONTEND_GUIDELINES.md`.
 - Every AI recommendation must include explanation, confidence score, and at least one evidence item.

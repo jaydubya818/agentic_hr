@@ -44,6 +44,7 @@ Before contributing or using an AI coding assistant, read:
 | [`docs/RECORDING_SCRIPT.md`](./docs/RECORDING_SCRIPT.md) | 5–7 minute demo talk track |
 | [`docs/SMOKE_TEST_CHECKLIST.md`](./docs/SMOKE_TEST_CHECKLIST.md) | Pre-demo manual smoke checklist |
 | [`docs/PILOT_PERSISTENCE_RELEASE.md`](./docs/PILOT_PERSISTENCE_RELEASE.md) | Next engineering milestone |
+| [`docs/WORKFORCE_INTELLIGENCE.md`](./docs/WORKFORCE_INTELLIGENCE.md) | Workforce Intelligence extension (Phase WI) |
 
 ---
 

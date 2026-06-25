@@ -72,6 +72,8 @@ GrowthOS connects employee growth, manager coaching, skills intelligence, intern
 - HR transformation framing: service delivery → dynamic enablement
 - Designed for future work redesign and talent density expansion
 - **Agentic enablement layer** category—depth on growth, skills, and readiness beside HRIS (see [STRATEGY.md](./STRATEGY.md))
+- **Workforce Intelligence (Phase WI):** Context graph, decision memory, dynamic work design scenarios, agent action plans, organizational learning loop—works with existing HRIS, not a replacement ([WORKFORCE_INTELLIGENCE.md](./WORKFORCE_INTELLIGENCE.md))
+- **Tagline:** Grow people. Reconfigure work. Remember why. Learn what works.
 
 ## Category and market
 

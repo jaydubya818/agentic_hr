@@ -962,7 +962,19 @@ All integrations write to canonical tables (`skills`, `employee_skills`, etc.) â
 
 ---
 
-## 15. Cross-References
+## 15. Workforce Intelligence entities (Phase WI)
+
+See [WORKFORCE_INTELLIGENCE.md](./WORKFORCE_INTELLIGENCE.md). Migration: `0002_workforce_intelligence.sql`, RLS: `0003_workforce_intelligence_rls.sql`.
+
+**New tables:** `business_priorities`, `projects`, `project_memberships`, `workforce_context_edges`, `workforce_decisions`, `decision_evidence`, `decision_outcomes`, `decision_participants`, `team_scenarios`, `team_scenario_roles`, `team_scenario_skills`, `role_evolution_scenarios`, `role_task_changes`, `agent_action_plans`, `agent_proposed_actions`.
+
+**Services:** `context-graph-service`, `workforce-decision-service`, `team-scenario-service`, `decision-outcome-service`, `organizational-learning-service`, `agent-action-service`, `action-plan-governance`.
+
+**API routes:** `/api/decisions`, `/api/decisions/[id]`, `/api/decisions/[id]/outcomes`, `/api/team-scenarios`, `/api/context/employee/[id]`, `/api/context/team/[id]`, `/api/organizational-learning`, `/api/agent-actions`.
+
+---
+
+## 16. Cross-References
 
 - Product requirements: [PRD.md](./PRD.md)
 - UI routes: [APP_FLOW.md](./APP_FLOW.md)

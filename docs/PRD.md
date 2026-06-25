@@ -485,3 +485,23 @@ Full RBAC in [SECURITY_AND_PRIVACY.md](./SECURITY_AND_PRIVACY.md).
 | [EVALS_AND_GOVERNANCE.md](./EVALS_AND_GOVERNANCE.md) | AI governance |
 | [SECURITY_AND_PRIVACY.md](./SECURITY_AND_PRIVACY.md) | Security model |
 | [IMPLEMENTATION_PLAN.md](./IMPLEMENTATION_PLAN.md) | Build phases |
+| [WORKFORCE_INTELLIGENCE.md](./WORKFORCE_INTELLIGENCE.md) | Workforce Intelligence extension (Phase WI) |
+
+---
+
+## 21. Workforce Intelligence Extension (Phase WI)
+
+GrowthOS Workforce Intelligence adds context graph, decision memory, dynamic team/role modeling, answer-to-action agent plans, and organizational learning—see [WORKFORCE_INTELLIGENCE.md](./WORKFORCE_INTELLIGENCE.md).
+
+**Updated product promise:** GrowthOS helps organizations understand how work is changing, identify how people can grow into what is needed next, guide managers and employees through the transition, and retain the context behind workforce decisions so the organization continuously learns.
+
+**Tagline:** Grow people. Reconfigure work. Remember why. Learn what works.
+
+**Non-goals (unchanged):** Not payroll, benefits, time tracking, core HRIS replacement, compliance case management, generic HR chatbot, or black-box workforce decision engine.
+
+**New functional themes:**
+- FR-WI-001: Context graph edges with evidence and confidence
+- FR-WI-002: Decision memory for allowed development and capability decisions
+- FR-WI-003: Team and role scenario modeling without autonomous enactment
+- FR-WI-004: Agent action plans with human approval gates
+- FR-WI-005: Organizational learning from expected vs actual outcomes (aggregated, non-causal)

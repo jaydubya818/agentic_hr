@@ -447,7 +447,17 @@ USE_MOCK_AGENTS=true
 
 ---
 
-## 18. Cross-References
+## 18. Workforce Intelligence privacy (Phase WI)
+
+- **Decision rationale:** Visible to decision owner, scoped managers, and HR; not to unrelated employees.
+- **Deliberation:** Employees do not access manager decision-memory routes in this phase.
+- **Team scenarios:** Manager team scope; HR org scope; employees only if explicitly published to growth surfaces.
+- **Outcomes:** Recorded by authorized roles; aggregated in organizational learning without individual narrative exposure.
+- **Retention:** Decision and outcome records follow org audit retention policy; fixtures are fictional demo data.
+
+---
+
+## 19. Cross-References
 
 - RBAC data model: [BACKEND_STRUCTURE.md](./BACKEND_STRUCTURE.md) Section 6
 - AI governance: [EVALS_AND_GOVERNANCE.md](./EVALS_AND_GOVERNANCE.md)

@@ -36,6 +36,7 @@ Before making any code or documentation changes, always read in this order:
 - `/docs/EVALS_AND_GOVERNANCE.md`
 - `/docs/SECURITY_AND_PRIVACY.md`
 - `/docs/IMPLEMENTATION_PLAN.md`
+- `/docs/WORKFORCE_INTELLIGENCE.md` (Phase WI — context graph, decision memory, scenarios, action plans, org learning)
 
 Do not implement features, routes, schema changes, or agent behaviors not defined in these documents.
 
