@@ -7,6 +7,7 @@ import {
 } from '@/lib/auth/rbac';
 import { getSessionContext } from '@/lib/auth/session-context';
 import { updateTeamScenarioInputSchema } from '@/schemas/workforce-intelligence';
+import { updateTeamScenarioInDb } from '@/services/data-provider/workforce-intelligence-persistence';
 import { getTeamScenario, updateTeamScenario } from '@/services/team-scenario-service';
 
 interface RouteParams {
@@ -50,6 +51,7 @@ export async function PATCH(request: Request, { params }: RouteParams) {
     if (!scenario) {
       return NextResponse.json({ error: 'Not found' }, { status: 404 });
     }
+    await updateTeamScenarioInDb(scenario);
     return NextResponse.json({ scenario });
   } catch (error) {
     return NextResponse.json(

@@ -7,6 +7,7 @@ import {
 } from '@/lib/auth/rbac';
 import { getSessionContext } from '@/lib/auth/session-context';
 import { createTeamScenarioInputSchema } from '@/schemas/workforce-intelligence';
+import { persistTeamScenario } from '@/services/data-provider/workforce-intelligence-persistence';
 import { createTeamScenario, listTeamScenarios } from '@/services/team-scenario-service';
 
 export async function GET() {
@@ -36,6 +37,7 @@ export async function POST(request: Request) {
   try {
     const body = createTeamScenarioInputSchema.parse(await request.json());
     const scenario = createTeamScenario(session, body);
+    await persistTeamScenario(scenario);
     return NextResponse.json({ scenario }, { status: 201 });
   } catch (error) {
     return NextResponse.json(

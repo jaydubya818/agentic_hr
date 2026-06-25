@@ -42,8 +42,8 @@ Move GrowthOS from mock demo to pilot-ready persistence while preserving mock fa
 ## Implementation Order
 
 1. **Supabase environment setup verification** — confirm all vars, test connectivity
-2. **Apply migration instructions and validation** — `npm run db:migrate` (0000 schema + 0001 RLS)
-3. **Seed script validation** — `npm run db:seed`, verify TechForward fixture data
+2. **Apply migration instructions and validation** — `npm run db:migrate` (0000 schema + 0001 RLS + 0002 workforce intelligence + 0003 WI RLS)
+3. **Seed script validation** — `npm run db:seed`, verify TechForward fixture data (MVP + workforce intelligence tables)
 4. **Supabase Auth/session integration** — replace mock cookie session where safe; preserve demo fallback
 5. **RLS role matrix tests** — automated tests per matrix below
 6. **Recommendation persistence** — write agent recommendations to Postgres
@@ -73,7 +73,7 @@ Cross-org access is **never** allowed.
 - **org_admin** — Manage org-scoped configuration, users, and roles within the organization.
 - **executive_readonly** — Read-only, aggregate-first access; no individual employee PII unless policy allows.
 
-Reference: `drizzle/migrations/0001_rls_rbac.sql`, `src/lib/auth/rbac.ts`, `docs/SECURITY_AND_PRIVACY.md`.
+Reference: `drizzle/migrations/0001_rls_rbac.sql`, `drizzle/migrations/0003_workforce_intelligence_rls.sql`, `src/lib/auth/rbac.ts`, `docs/SECURITY_AND_PRIVACY.md`.
 
 ## Validation Commands
 
@@ -98,6 +98,10 @@ npm run smoke   # requires running server; SMOKE_BASE_URL=http://localhost:3002 
 - [x] Governance blocked-output demo still works (`Demo: governance block`)
 - [x] No prohibited employment-decision logic introduced
 - [x] Mock fallback still works when database unavailable
+- [x] Workforce intelligence fixtures seed into Postgres (`business_priorities`, decisions, scenarios, action plans)
+- [x] Supabase store loader reads WI tables when seeded (fixture overlay per-table when DB empty)
+- [x] WI mutations persist when `USE_MOCK_DATA=false` (decisions, outcomes, scenarios, action plans)
+- [ ] `npm run smoke` with dev server (manual gate)
 
 ## Related Documents
 

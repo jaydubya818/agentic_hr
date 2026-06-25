@@ -7,6 +7,7 @@ import {
 } from '@/lib/auth/rbac';
 import { getSessionContext } from '@/lib/auth/session-context';
 import { createWorkforceDecisionInputSchema } from '@/schemas/workforce-intelligence';
+import { persistWorkforceDecision } from '@/services/data-provider/workforce-intelligence-persistence';
 import {
   createWorkforceDecision,
   listWorkforceDecisions,
@@ -39,6 +40,7 @@ export async function POST(request: Request) {
   try {
     const body = createWorkforceDecisionInputSchema.parse(await request.json());
     const decision = createWorkforceDecision(session, body);
+    await persistWorkforceDecision(decision);
     return NextResponse.json({ decision }, { status: 201 });
   } catch (error) {
     return NextResponse.json(

@@ -7,6 +7,7 @@ import {
 } from '@/lib/auth/rbac';
 import { getSessionContext } from '@/lib/auth/session-context';
 import { updateWorkforceDecisionInputSchema } from '@/schemas/workforce-intelligence';
+import { updateWorkforceDecisionInDb } from '@/services/data-provider/workforce-intelligence-persistence';
 import {
   getWorkforceDecision,
   updateWorkforceDecision,
@@ -53,6 +54,7 @@ export async function PATCH(request: Request, { params }: RouteParams) {
     if (!decision) {
       return NextResponse.json({ error: 'Not found' }, { status: 404 });
     }
+    await updateWorkforceDecisionInDb(decision);
     return NextResponse.json({ decision });
   } catch (error) {
     return NextResponse.json(

@@ -10,6 +10,7 @@ import {
   createExpectedOutcome,
   recordActualOutcome,
 } from '@/services/decision-outcome-service';
+import { persistDecisionOutcome } from '@/services/data-provider/workforce-intelligence-persistence';
 
 const createOutcomeRequestSchema = z.object({
   outcomeType: z.enum(['expected', 'actual']).optional().default('expected'),
@@ -58,6 +59,7 @@ export async function POST(request: Request, { params }: RouteParams) {
       return NextResponse.json({ error: 'Not found' }, { status: 404 });
     }
 
+    await persistDecisionOutcome(outcome);
     return NextResponse.json({ outcome }, { status: 201 });
   } catch (error) {
     return NextResponse.json(

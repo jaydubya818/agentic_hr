@@ -6,6 +6,8 @@ import {
   applyActionToGrowthPlan,
   updateProposedActionStatus,
 } from '@/services/agent-action-service';
+import { getMockStore } from '@/services/data-provider/mock-provider';
+import { updateAgentProposedActionInDb } from '@/services/data-provider/workforce-intelligence-persistence';
 import { z } from 'zod';
 
 interface RouteParams {
@@ -38,7 +40,11 @@ export async function PATCH(request: Request, { params }: RouteParams) {
       applyActionToGrowthPlan(id, employeeId);
     }
 
-    return NextResponse.json({ action });
+    const latestAction =
+      getMockStore().agentProposedActions.find((candidate) => candidate.id === id) ?? action;
+    await updateAgentProposedActionInDb(latestAction);
+
+    return NextResponse.json({ action: latestAction });
   } catch (error) {
     return NextResponse.json(
       { error: error instanceof Error ? error.message : 'Invalid request' },

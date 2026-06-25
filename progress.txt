@@ -1,7 +1,7 @@
 # GrowthOS Project Progress
 
 Project: GrowthOS
-Last updated: 2026-06-08 (Workforce Intelligence Phase WI complete)
+Last updated: 2026-06-08 (WI pilot persistence)
 
 ---
 
@@ -75,10 +75,11 @@ Core MVP: documentation, scaffold, mock data, employee/manager/HR UX, agents, Dr
 - `npm run test` — 104 tests pass
 - `npm run build` — pass (mock mode, no credentials)
 - `npm run evals` — pass
+- WI pilot persistence (seed, loader, mutation writes) — complete
 - `npm run smoke` — run with dev server on configured port
 
 ---
 
 ## Recommended next milestone
 
-Pilot customer persistence hardening + live Supabase WI table seeding; expand executive aggregate views for organizational learning without individual deliberation exposure.
+PRD v2 gate (H6) when stakeholder approves; optional executive nav for `executive_readonly` organizational learning.

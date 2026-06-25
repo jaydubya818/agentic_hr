@@ -6,6 +6,7 @@ import {
   createAgentActionPlanInputSchema,
 } from '@/schemas/workforce-intelligence';
 import { createActionPlanFromInput } from '@/services/agent-action-service';
+import { persistAgentActionPlan } from '@/services/data-provider/workforce-intelligence-persistence';
 import { z } from 'zod';
 
 const createActionPlanRequestSchema = createAgentActionPlanInputSchema.extend({
@@ -30,6 +31,7 @@ export async function POST(request: Request) {
     const body = createActionPlanRequestSchema.parse(await request.json());
     const { actions, ...planInput } = body;
     const plan = createActionPlanFromInput(session, planInput, actions);
+    await persistAgentActionPlan(plan);
     return NextResponse.json({ plan }, { status: 201 });
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Invalid request';
