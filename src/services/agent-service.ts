@@ -22,6 +22,8 @@ import { selectMockResponseText } from './agent/mock-responses';
 import { createAgentRecommendations } from './recommendation-service';
 import { persistAgentRecommendations } from './data-provider/supabase-persistence';
 import { validateAgentOutput } from './governance-service';
+import { shouldUseMockAgents } from '@/lib/ai/config';
+import type { AgentActionPlan, AgentProposedAction } from '@/schemas/workforce-intelligence';
 
 type ResponseMode = 'mock' | 'live' | 'fallback';
 
@@ -209,6 +211,175 @@ function buildSupermanagerRecommendations(managerEmployeeId: string): CreateReco
   }));
 }
 
+function buildMockActionPlan(
+  agentId: AgentId,
+  employeeId: string,
+  managerEmployeeId?: string,
+): (AgentActionPlan & { actions: AgentProposedAction[] }) | undefined {
+  if (!shouldUseMockAgents()) return undefined;
+
+  const timestamp = new Date().toISOString();
+  const orgId = MOCK_IDS.organization;
+
+  switch (agentId) {
+    case 'employee-growth': {
+      const planId = MOCK_IDS.actionPlans.employeeGrowth;
+      return {
+        id: planId,
+        organizationId: orgId,
+        agentId,
+        employeeId,
+        teamId: null,
+        title: 'Growth actions from career path analysis',
+        summary: 'Development-focused actions grounded in confirmed skills and career goals.',
+        sourceDecisionId: null,
+        governanceStatus: 'passed',
+        metadata: { mock: true },
+        createdAt: timestamp,
+        updatedAt: timestamp,
+        actions: [
+          {
+            id: '16161616-1616-4161-8161-161616161601',
+            organizationId: orgId,
+            actionPlanId: planId,
+            actionType: 'skill_development',
+            title: 'Deepen System Design skills',
+            description: 'Focus development on system design for Staff Engineer readiness.',
+            status: 'pending_review',
+            targetEmployeeId: employeeId,
+            referenceId: '40000000-0000-4000-8000-000000000003',
+            confidence: 0.82,
+            explanation: 'Career path analysis shows system design as primary gap.',
+            metadata: {},
+            createdAt: timestamp,
+            updatedAt: timestamp,
+          },
+          {
+            id: '16161616-1616-4161-8161-161616161602',
+            organizationId: orgId,
+            actionPlanId: planId,
+            actionType: 'learning_assignment',
+            title: 'Enroll in architecture workshop',
+            description: 'Optional workshop aligned to system design skill gap.',
+            status: 'draft',
+            targetEmployeeId: employeeId,
+            referenceId: null,
+            confidence: 0.75,
+            explanation: 'Learning resource match from dynamic learning catalog.',
+            metadata: {},
+            createdAt: timestamp,
+            updatedAt: timestamp,
+          },
+        ],
+      };
+    }
+    case 'supermanager': {
+      const planId = MOCK_IDS.actionPlans.supermanager;
+      const team = dataProvider.getTeamByManager(managerEmployeeId ?? DEMO_MANAGER_EMPLOYEE_ID);
+      return {
+        id: planId,
+        organizationId: orgId,
+        agentId,
+        employeeId: null,
+        teamId: team?.id ?? MOCK_IDS.teams.platform,
+        title: 'Team coaching and capability actions',
+        summary: 'Manager enablement actions for direct report development.',
+        sourceDecisionId: null,
+        governanceStatus: 'passed',
+        metadata: { mock: true },
+        createdAt: timestamp,
+        updatedAt: timestamp,
+        actions: [
+          {
+            id: '16161616-1616-4161-8161-161616161603',
+            organizationId: orgId,
+            actionPlanId: planId,
+            actionType: 'coaching_prompt',
+            title: 'Discuss quality automation progress',
+            description: 'Coaching conversation about quality automation contribution.',
+            status: 'pending_review',
+            targetEmployeeId: employeeId,
+            referenceId: null,
+            confidence: 0.79,
+            explanation: 'Direct report contributing to quality automation project.',
+            metadata: {},
+            createdAt: timestamp,
+            updatedAt: timestamp,
+          },
+        ],
+      };
+    }
+    case 'dynamic-learning':
+      return {
+        id: 'cccccccc-cccc-4ccc-8ccc-ccccccccccc3',
+        organizationId: orgId,
+        agentId,
+        employeeId,
+        teamId: null,
+        title: 'Learning plan actions',
+        summary: 'Optional learning assignments for identified skill gaps.',
+        sourceDecisionId: null,
+        governanceStatus: 'passed',
+        metadata: { mock: true },
+        createdAt: timestamp,
+        updatedAt: timestamp,
+        actions: [
+          {
+            id: '16161616-1616-4161-8161-161616161605',
+            organizationId: orgId,
+            actionPlanId: 'cccccccc-cccc-4ccc-8ccc-ccccccccccc3',
+            actionType: 'learning_assignment',
+            title: 'Complete targeted learning module',
+            description: 'Learning assignment for top skill gap from profile analysis.',
+            status: 'draft',
+            targetEmployeeId: employeeId,
+            referenceId: null,
+            confidence: 0.7,
+            explanation: 'Aligned to dynamic learning recommendations.',
+            metadata: {},
+            createdAt: timestamp,
+            updatedAt: timestamp,
+          },
+        ],
+      };
+    case 'internal-mobility':
+      return {
+        id: 'cccccccc-cccc-4ccc-8ccc-ccccccccccc4',
+        organizationId: orgId,
+        agentId,
+        employeeId,
+        teamId: null,
+        title: 'Mobility exploration actions',
+        summary: 'Exploratory internal mobility guidance — not hiring decisions.',
+        sourceDecisionId: null,
+        governanceStatus: 'passed',
+        metadata: { mock: true },
+        createdAt: timestamp,
+        updatedAt: timestamp,
+        actions: [
+          {
+            id: '16161616-1616-4161-8161-161616161606',
+            organizationId: orgId,
+            actionPlanId: 'cccccccc-cccc-4ccc-8ccc-ccccccccccc4',
+            actionType: 'mobility_exploration',
+            title: 'Explore internal opportunity match',
+            description: 'Review open internal role alignment and discuss with manager.',
+            status: 'pending_review',
+            targetEmployeeId: employeeId,
+            referenceId: null,
+            confidence: 0.65,
+            explanation: 'Mobility match based on skill overlap — exploratory only.',
+            metadata: {},
+            createdAt: timestamp,
+            updatedAt: timestamp,
+          },
+        ],
+      };
+    default:
+      return undefined;
+  }
+}
+
 function buildRecommendationsForAgent(
   agentId: AgentId,
   employeeId: string,
@@ -343,6 +514,13 @@ export async function invokeAgent(agentId: AgentId, params: AgentInvokeParams): 
     recommendations,
     governanceStatus: governance.status,
     governanceBlocked: false,
+    actionPlan: buildMockActionPlan(
+      agentId,
+      agentId === 'supermanager'
+        ? (params.context?.employeeId ?? employeeId)
+        : employeeId,
+      params.session.employeeId,
+    ),
     metadata: {
       mode: resolved.mode,
       responseMode: resolved.mode,

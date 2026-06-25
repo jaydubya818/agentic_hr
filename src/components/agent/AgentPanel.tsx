@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import type { AgentId, AgentRecommendationResult, AgentResult } from '@/types/agent';
 import type { Recommendation, RecommendationEvidence } from '@/services/data-provider/types';
+import { ActionPlanPanel } from '@/components/workforce-intelligence/ActionPlanPanel';
 
 const AGENT_LABELS: Record<AgentId, string> = {
   'employee-growth': 'Employee Growth Agent',
@@ -97,6 +98,7 @@ export function AgentPanel({
   const [error, setError] = useState<string | null>(null);
   const [responseMode, setResponseMode] = useState<'mock' | 'live' | 'fallback' | null>(null);
   const [governanceStatus, setGovernanceStatus] = useState<string | null>(null);
+  const [actionPlan, setActionPlan] = useState<AgentResult['actionPlan'] | null>(null);
 
   const invoke = useCallback(
     async (message: string) => {
@@ -143,6 +145,9 @@ export function AgentPanel({
 
         if (result.recommendations.length > 0) {
           setRecommendations((prev) => [...result.recommendations, ...prev]);
+        }
+        if (result.actionPlan) {
+          setActionPlan(result.actionPlan);
         }
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Something went wrong');
@@ -252,6 +257,47 @@ export function AgentPanel({
               ))}
             </div>
           </div>
+        )}
+
+        {actionPlan && (
+          <ActionPlanPanel
+            actionPlan={actionPlan}
+            onAddToGrowthPlan={(actionId) => {
+              void fetch(`/api/agent-actions/${actionId}`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  status: 'applied',
+                  applyToGrowthPlan: true,
+                  employeeId: context?.employeeId,
+                }),
+              });
+            }}
+            onSaveAsDecision={() => {
+              void fetch('/api/decisions', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  title: actionPlan.title,
+                  description: actionPlan.summary,
+                  decisionType: 'skill_development',
+                  status: 'draft',
+                }),
+              });
+            }}
+            onSendForReview={() => {
+              void Promise.all(
+                actionPlan.actions.map((action) =>
+                  fetch(`/api/agent-actions/${action.id}`, {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ status: 'pending_review' }),
+                  }),
+                ),
+              );
+            }}
+            onDismiss={() => setActionPlan(null)}
+          />
         )}
 
         <form

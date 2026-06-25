@@ -1,5 +1,6 @@
 import type { z } from 'zod';
 import type { createRecommendationInputSchema } from '@/schemas/entities';
+import type { AgentActionPlan, AgentProposedAction } from '@/schemas/workforce-intelligence';
 import type { SessionContext } from './session';
 
 export const AGENT_IDS = [
@@ -58,4 +59,7 @@ export interface AgentResult {
   governanceBlocked: boolean;
   matchedPatterns?: string[];
   metadata: Record<string, unknown>;
+  actionPlan?: AgentActionPlan & { actions: AgentProposedAction[] };
 }
+
+export type { AgentActionPlan, AgentProposedAction };
