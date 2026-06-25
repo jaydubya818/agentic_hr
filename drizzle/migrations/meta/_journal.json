@@ -15,6 +15,20 @@
       "when": 1780877293354,
       "tag": "0001_rls_rbac",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1780880893354,
+      "tag": "0002_workforce_intelligence",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1780884493354,
+      "tag": "0003_workforce_intelligence_rls",
+      "breakpoints": true
     }
   ]
 }

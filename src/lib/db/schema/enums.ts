@@ -87,3 +87,100 @@ export const readinessScopeTypeEnum = pgEnum('readiness_scope_type', [
 ]);
 
 export const roleSkillImportanceEnum = pgEnum('role_skill_importance', ['required', 'preferred']);
+
+export const decisionTypeEnum = pgEnum('decision_type', [
+  'team_composition',
+  'skill_development',
+  'work_redesign',
+  'project_assignment',
+  'capability_building',
+  'learning_investment',
+  'internal_mobility_exploration',
+  'coaching_intervention',
+]);
+
+export const decisionStatusEnum = pgEnum('decision_status', [
+  'draft',
+  'proposed',
+  'under_review',
+  'approved',
+  'implemented',
+  'cancelled',
+  'archived',
+]);
+
+export const scenarioTypeEnum = pgEnum('scenario_type', [
+  'current_state',
+  'future_state',
+  'comparison',
+]);
+
+export const scenarioStatusEnum = pgEnum('scenario_status', [
+  'draft',
+  'active',
+  'archived',
+  'completed',
+]);
+
+export const roleTaskChangeTypeEnum = pgEnum('role_task_change_type', [
+  'add',
+  'remove',
+  'increase',
+  'decrease',
+  'automate',
+  'delegate',
+]);
+
+export const outcomeStatusEnum = pgEnum('outcome_status', [
+  'pending',
+  'on_track',
+  'achieved',
+  'partially_achieved',
+  'missed',
+  'cancelled',
+]);
+
+export const contextEntityTypeEnum = pgEnum('context_entity_type', [
+  'employee',
+  'skill',
+  'role',
+  'team',
+  'project',
+  'business_priority',
+  'learning_resource',
+  'opportunity',
+]);
+
+export const contextRelationshipTypeEnum = pgEnum('context_relationship_type', [
+  'has_skill',
+  'requires_skill',
+  'works_on',
+  'supports',
+  'member_of',
+  'reports_to',
+  'aligned_with',
+  'at_risk_for',
+  'interested_in',
+  'depends_on',
+]);
+
+export const proposedActionTypeEnum = pgEnum('proposed_action_type', [
+  'skill_development',
+  'learning_assignment',
+  'stretch_assignment',
+  'coaching_prompt',
+  'growth_plan_item',
+  'team_capability_action',
+  'mobility_exploration',
+  'work_redesign_suggestion',
+  'conversation_prep',
+]);
+
+export const proposedActionStatusEnum = pgEnum('proposed_action_status', [
+  'draft',
+  'pending_review',
+  'approved',
+  'rejected',
+  'applied',
+  'dismissed',
+]);
