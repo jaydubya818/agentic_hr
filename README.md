@@ -142,7 +142,7 @@ npm run smoke
 SMOKE_BASE_URL=http://localhost:3002 npm run smoke
 ```
 
-See [`docs/SMOKE_TEST_CHECKLIST.md`](./docs/SMOKE_TEST_CHECKLIST.md) for the full manual checklist (25 production routes; 21 automated HTTP checks).
+See [`docs/SMOKE_TEST_CHECKLIST.md`](./docs/SMOKE_TEST_CHECKLIST.md) for the full manual checklist (25 production routes; 27 automated HTTP checks).
 
 ---
 
