@@ -1,5 +1,5 @@
 const WINDOW_MS = 60_000;
-const MAX_INVOCATIONS = 30;
+const MAX_INVOCATIONS = 20;
 
 const invocationTimestamps = new Map<string, number[]>();
 
