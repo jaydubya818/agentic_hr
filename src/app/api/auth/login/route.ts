@@ -6,7 +6,12 @@ import { createSupabaseServerClient } from '@/lib/supabase/server';
 import { shouldUseMockData } from '@/services/data-provider/provider-config';
 
 export async function POST(request: Request) {
-  const body = (await request.json()) as { email?: string; password?: string };
+  let body: { email?: string; password?: string };
+  try {
+    body = (await request.json()) as { email?: string; password?: string };
+  } catch {
+    return NextResponse.json({ error: 'Invalid JSON body' }, { status: 400 });
+  }
 
   if (!body.email) {
     return NextResponse.json({ error: 'Email required' }, { status: 400 });

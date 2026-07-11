@@ -16,7 +16,12 @@ export async function PATCH(
   }
 
   const { id } = await context.params;
-  const body = (await request.json()) as { status?: string };
+  let body: { status?: string };
+  try {
+    body = (await request.json()) as { status?: string };
+  } catch {
+    return NextResponse.json({ error: 'Invalid JSON body' }, { status: 400 });
+  }
 
   if (!body.status || !ALLOWED_STATUSES.has(body.status)) {
     return NextResponse.json({ error: 'Invalid status' }, { status: 400 });

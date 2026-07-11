@@ -18,7 +18,12 @@ export async function PATCH(
   }
 
   const { id } = await context.params;
-  const body = (await request.json()) as { action?: string };
+  let body: { action?: string };
+  try {
+    body = (await request.json()) as { action?: string };
+  } catch {
+    return NextResponse.json({ error: 'Invalid JSON body' }, { status: 400 });
+  }
 
   if (!body.action || !ALLOWED.has(body.action as InferredSkillReviewAction)) {
     return NextResponse.json({ error: 'Invalid action' }, { status: 400 });

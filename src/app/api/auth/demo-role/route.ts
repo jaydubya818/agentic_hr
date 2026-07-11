@@ -3,7 +3,12 @@ import { ACTIVE_ROLE_COOKIE } from '@/lib/auth/constants';
 import type { DemoRole } from '@/lib/auth/types';
 
 export async function POST(request: Request) {
-  const body = (await request.json()) as { role?: DemoRole };
+  let body: { role?: DemoRole };
+  try {
+    body = (await request.json()) as { role?: DemoRole };
+  } catch {
+    return NextResponse.json({ error: 'Invalid JSON body' }, { status: 400 });
+  }
   const role = body.role;
 
   if (role !== 'employee' && role !== 'manager' && role !== 'hr') {
