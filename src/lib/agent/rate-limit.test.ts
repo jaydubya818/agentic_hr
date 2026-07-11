@@ -39,4 +39,25 @@ describe('checkAgentRateLimit', () => {
     vi.advanceTimersByTime(60_001);
     expect(checkAgentRateLimit('session-a').allowed).toBe(true);
   });
+
+  it('sweeps aged-out sessions at the tracking cap without breaking behavior', () => {
+    for (let i = 0; i < 1000; i += 1) {
+      checkAgentRateLimit(`session-${i}`);
+    }
+    vi.advanceTimersByTime(60_001);
+    expect(checkAgentRateLimit('fresh-session').allowed).toBe(true);
+    expect(checkAgentRateLimit('session-0').allowed).toBe(true);
+  });
+
+  it('does not evict sessions with activity still inside the window', () => {
+    for (let i = 0; i < 20; i += 1) {
+      checkAgentRateLimit('busy');
+    }
+    for (let i = 0; i < 1000; i += 1) {
+      checkAgentRateLimit(`filler-${i}`);
+    }
+    vi.advanceTimersByTime(30_000);
+    checkAgentRateLimit('sweep-trigger');
+    expect(checkAgentRateLimit('busy').allowed).toBe(false);
+  });
 });
