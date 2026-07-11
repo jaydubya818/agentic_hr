@@ -35,7 +35,9 @@ export function logAuditEvent(params: {
     createdAt: new Date().toISOString(),
   };
   auditStore.push(entry);
-  void persistAuditLogEntry(entry);
+  void persistAuditLogEntry(entry).catch((error) => {
+    console.error('Failed to persist audit log entry', error);
+  });
   return entry;
 }
 
