@@ -1,15 +1,9 @@
 import { NextResponse } from 'next/server';
 
 import { canReadAuditLogs } from '@/lib/auth/rbac';
+import { escapeCsvCell } from '@/lib/format/csv';
 import { getSessionContext } from '@/lib/auth/session-context';
 import { listAuditLogsForOrganization } from '@/services/audit-service';
-
-function escapeCsv(value: string): string {
-  if (value.includes(',') || value.includes('"') || value.includes('\n')) {
-    return `"${value.replace(/"/g, '""')}"`;
-  }
-  return value;
-}
 
 export async function GET() {
   const session = await getSessionContext();
@@ -33,7 +27,7 @@ export async function GET() {
       log.userId ?? '',
       JSON.stringify(log.details),
     ]
-      .map((cell) => escapeCsv(String(cell)))
+      .map((cell) => escapeCsvCell(String(cell)))
       .join(','),
   );
 
