@@ -28,7 +28,7 @@ export async function PATCH(
   }
 
   const status = body.status as 'accepted' | 'dismissed';
-  const persisted = await updateRecommendationStatusInDb(id, status);
+  const persisted = await updateRecommendationStatusInDb(id, status, session.organizationId);
 
   logAuditEvent({
     session,

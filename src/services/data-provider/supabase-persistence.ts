@@ -1,6 +1,6 @@
 import { randomUUID } from 'crypto';
 
-import { desc, eq } from 'drizzle-orm';
+import { and, desc, eq } from 'drizzle-orm';
 
 import { getDb } from '@/lib/db';
 import {
@@ -65,6 +65,7 @@ export async function persistAgentRecommendations(
 export async function updateRecommendationStatusInDb(
   recommendationId: string,
   status: 'accepted' | 'dismissed',
+  organizationId: string,
 ): Promise<boolean> {
   if (!shouldPersistWrites()) return false;
 
@@ -74,7 +75,12 @@ export async function updateRecommendationStatusInDb(
   const result = await db
     .update(recommendations)
     .set({ status, updatedAt: new Date() })
-    .where(eq(recommendations.id, recommendationId))
+    .where(
+      and(
+        eq(recommendations.id, recommendationId),
+        eq(recommendations.organizationId, organizationId),
+      ),
+    )
     .returning({ id: recommendations.id });
 
   if (result.length === 0) return false;
