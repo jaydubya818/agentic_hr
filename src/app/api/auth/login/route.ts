@@ -22,12 +22,18 @@ export async function POST(request: Request) {
   if (!shouldUseMockData()) {
     const supabase = await createSupabaseServerClient();
     if (supabase && body.password) {
-      const { error } = await supabase.auth.signInWithPassword({
+      const { data, error } = await supabase.auth.signInWithPassword({
         email: body.email,
         password: body.password,
       });
 
-      if (!error) {
+      if (!error && data.user) {
+        response.cookies.set(SESSION_COOKIE, JSON.stringify({ authenticated: true, userId: data.user.id }), {
+          httpOnly: true,
+          sameSite: 'lax',
+          path: '/',
+          maxAge: 60 * 60 * 24 * 7,
+        });
         response.cookies.set(ACTIVE_ROLE_COOKIE, 'employee', {
           httpOnly: true,
           sameSite: 'lax',
