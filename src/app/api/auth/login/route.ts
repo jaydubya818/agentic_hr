@@ -42,6 +42,8 @@ export async function POST(request: Request) {
         });
         return response;
       }
+
+      return NextResponse.json({ error: 'Invalid email or password' }, { status: 401 });
     }
   }
 
