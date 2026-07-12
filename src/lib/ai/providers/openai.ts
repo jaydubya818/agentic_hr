@@ -1,6 +1,9 @@
 import type { LlmCompletionParams, LlmCompletionResult, LlmProvider } from '../types';
 import { getOpenAiModel } from '../config';
 
+/** Upstream cutoff so a hung OpenAI call cannot stall the request indefinitely (docs: APP_FLOW agent timeout). */
+const OPENAI_TIMEOUT_MS = 30_000;
+
 interface OpenAiChatResponse {
   choices?: Array<{ message?: { content?: string | null } }>;
   usage?: { prompt_tokens?: number; completion_tokens?: number };
@@ -24,14 +27,23 @@ export class OpenAiLlmProvider implements LlmProvider {
       ...(params.responseFormat === 'json' ? { response_format: { type: 'json_object' } } : {}),
     };
 
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${this.apiKey}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(body),
-    });
+    let response: Response;
+    try {
+      response = await fetch('https://api.openai.com/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${this.apiKey}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(body),
+        signal: AbortSignal.timeout(OPENAI_TIMEOUT_MS),
+      });
+    } catch (error) {
+      if (error instanceof Error && error.name === 'TimeoutError') {
+        throw new Error(`OpenAI request timed out after ${OPENAI_TIMEOUT_MS}ms`);
+      }
+      throw error;
+    }
 
     if (!response.ok) {
       const detail = await response.text();
