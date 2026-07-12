@@ -271,7 +271,11 @@ export function AgentPanel({
                   applyToGrowthPlan: true,
                   employeeId: context?.employeeId,
                 }),
-              });
+              })
+                .then((res) => {
+                  if (!res.ok) setError('Could not add the action to the growth plan.');
+                })
+                .catch(() => setError('Could not add the action to the growth plan.'));
             }}
             onSaveAsDecision={() => {
               void fetch('/api/decisions', {
@@ -283,7 +287,11 @@ export function AgentPanel({
                   decisionType: 'skill_development',
                   status: 'draft',
                 }),
-              });
+              })
+                .then((res) => {
+                  if (!res.ok) setError('Could not save the plan as a decision.');
+                })
+                .catch(() => setError('Could not save the plan as a decision.'));
             }}
             onSendForReview={() => {
               void Promise.all(
@@ -294,7 +302,13 @@ export function AgentPanel({
                     body: JSON.stringify({ status: 'pending_review' }),
                   }),
                 ),
-              );
+              )
+                .then((responses) => {
+                  if (responses.some((res) => !res.ok)) {
+                    setError('Could not send every action for review.');
+                  }
+                })
+                .catch(() => setError('Could not send every action for review.'));
             }}
             onDismiss={() => setActionPlan(null)}
           />
