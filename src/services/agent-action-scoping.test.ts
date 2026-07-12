@@ -1,0 +1,64 @@
+import { describe, expect, it } from 'vitest';
+
+import { MOCK_IDS } from '@/lib/mock/ids';
+import {
+  applyActionToGrowthPlan,
+  updateProposedActionStatus,
+} from '@/services/agent-action-service';
+import { getMockStore } from '@/services/data-provider/mock-provider';
+
+const ORG_ID = MOCK_IDS.organization;
+const OTHER_ORG_ID = 'ffffffff-ffff-4fff-8fff-ffffffffffff';
+
+describe('agent-action-service organization scoping', () => {
+  it('does not update actions belonging to another organization', () => {
+    const action = getMockStore().agentProposedActions[0]!;
+    const before = action.status;
+
+    const result = updateProposedActionStatus(OTHER_ORG_ID, action.id, {
+      status: 'approved',
+    });
+
+    expect(result).toBeNull();
+    expect(getMockStore().agentProposedActions[0]!.status).toBe(before);
+  });
+
+  it('updates actions within the caller organization', () => {
+    const action = getMockStore().agentProposedActions[0]!;
+
+    const result = updateProposedActionStatus(ORG_ID, action.id, {
+      status: 'pending_review',
+    });
+
+    expect(result).not.toBeNull();
+    expect(result!.status).toBe('pending_review');
+  });
+
+  it('refuses to apply an action from another organization to a growth plan', () => {
+    const action = getMockStore().agentProposedActions[0]!;
+
+    const applied = applyActionToGrowthPlan(OTHER_ORG_ID, action.id, MOCK_IDS.employees.alex);
+
+    expect(applied).toBe(false);
+  });
+
+  it('refuses to apply an action to an unknown or cross-organization employee', () => {
+    const action = getMockStore().agentProposedActions[0]!;
+
+    const applied = applyActionToGrowthPlan(ORG_ID, action.id, OTHER_ORG_ID);
+
+    expect(applied).toBe(false);
+  });
+
+  it('applies an in-organization action to the employee growth plan', () => {
+    const store = getMockStore();
+    const action = store.agentProposedActions[0]!;
+    const itemsBefore = store.growthPlanItems.length;
+
+    const applied = applyActionToGrowthPlan(ORG_ID, action.id, MOCK_IDS.employees.alex);
+
+    expect(applied).toBe(true);
+    expect(store.growthPlanItems.length).toBe(itemsBefore + 1);
+    expect(store.agentProposedActions[0]!.status).toBe('applied');
+  });
+});
