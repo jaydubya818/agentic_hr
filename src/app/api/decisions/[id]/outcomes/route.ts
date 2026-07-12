@@ -41,6 +41,7 @@ export async function POST(request: Request, { params }: RouteParams) {
 
   const { id } = await params;
 
+  let outcome;
   try {
     const payload = createOutcomeRequestSchema.parse(await request.json());
 
@@ -50,21 +51,21 @@ export async function POST(request: Request, { params }: RouteParams) {
       status: rest.status ?? (outcomeType === 'actual' ? 'achieved' : 'pending'),
     };
 
-    const outcome =
+    outcome =
       outcomeType === 'actual'
         ? recordActualOutcome(session, id, outcomeInput)
         : createExpectedOutcome(session, id, outcomeInput);
-
-    if (!outcome) {
-      return NextResponse.json({ error: 'Not found' }, { status: 404 });
-    }
-
-    await persistDecisionOutcome(outcome);
-    return NextResponse.json({ outcome }, { status: 201 });
   } catch (error) {
     return NextResponse.json(
       { error: error instanceof Error ? error.message : 'Invalid request' },
       { status: 400 },
     );
   }
+
+  if (!outcome) {
+    return NextResponse.json({ error: 'Not found' }, { status: 404 });
+  }
+
+  await persistDecisionOutcome(outcome);
+  return NextResponse.json({ outcome }, { status: 201 });
 }

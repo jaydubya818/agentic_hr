@@ -37,15 +37,17 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
   }
 
+  let decision;
   try {
     const body = createWorkforceDecisionInputSchema.parse(await request.json());
-    const decision = createWorkforceDecision(session, body);
-    await persistWorkforceDecision(decision);
-    return NextResponse.json({ decision }, { status: 201 });
+    decision = createWorkforceDecision(session, body);
   } catch (error) {
     return NextResponse.json(
       { error: error instanceof Error ? error.message : 'Invalid request' },
       { status: 400 },
     );
   }
+
+  await persistWorkforceDecision(decision);
+  return NextResponse.json({ decision }, { status: 201 });
 }

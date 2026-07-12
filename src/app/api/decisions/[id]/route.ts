@@ -48,18 +48,20 @@ export async function PATCH(request: Request, { params }: RouteParams) {
 
   const { id } = await params;
 
+  let decision;
   try {
     const body = updateWorkforceDecisionInputSchema.parse(await request.json());
-    const decision = updateWorkforceDecision(session, id, body);
-    if (!decision) {
-      return NextResponse.json({ error: 'Not found' }, { status: 404 });
-    }
-    await updateWorkforceDecisionInDb(decision);
-    return NextResponse.json({ decision });
+    decision = updateWorkforceDecision(session, id, body);
   } catch (error) {
     return NextResponse.json(
       { error: error instanceof Error ? error.message : 'Invalid request' },
       { status: 400 },
     );
   }
+
+  if (!decision) {
+    return NextResponse.json({ error: 'Not found' }, { status: 404 });
+  }
+  await updateWorkforceDecisionInDb(decision);
+  return NextResponse.json({ decision });
 }

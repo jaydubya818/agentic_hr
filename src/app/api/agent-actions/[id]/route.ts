@@ -31,37 +31,39 @@ export async function PATCH(request: Request, { params }: RouteParams) {
 
   const { id } = await params;
 
+  let parsed;
   try {
-    const body = patchBodySchema.parse(await request.json());
-    const { applyToGrowthPlan, employeeId, ...updateInput } = body;
-
-    const action = updateProposedActionStatus(session.organizationId, id, updateInput);
-    if (!action) {
-      return NextResponse.json({ error: 'Not found' }, { status: 404 });
-    }
-
-    if (applyToGrowthPlan && employeeId) {
-      const canApplyForEmployee =
-        canReadOrganizationWorkforceData(session.roles) ||
-        employeeId === session.employeeId ||
-        (isManagerRole(session.roles) &&
-          session.employeeId != null &&
-          isDirectReport(session.employeeId, employeeId));
-      if (!canApplyForEmployee) {
-        return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
-      }
-      applyActionToGrowthPlan(session.organizationId, id, employeeId);
-    }
-
-    const latestAction =
-      getMockStore().agentProposedActions.find((candidate) => candidate.id === id) ?? action;
-    await updateAgentProposedActionInDb(latestAction);
-
-    return NextResponse.json({ action: latestAction });
+    parsed = patchBodySchema.parse(await request.json());
   } catch (error) {
     return NextResponse.json(
       { error: error instanceof Error ? error.message : 'Invalid request' },
       { status: 400 },
     );
   }
+
+  const { applyToGrowthPlan, employeeId, ...updateInput } = parsed;
+
+  const action = updateProposedActionStatus(session.organizationId, id, updateInput);
+  if (!action) {
+    return NextResponse.json({ error: 'Not found' }, { status: 404 });
+  }
+
+  if (applyToGrowthPlan && employeeId) {
+    const canApplyForEmployee =
+      canReadOrganizationWorkforceData(session.roles) ||
+      employeeId === session.employeeId ||
+      (isManagerRole(session.roles) &&
+        session.employeeId != null &&
+        isDirectReport(session.employeeId, employeeId));
+    if (!canApplyForEmployee) {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+    }
+    applyActionToGrowthPlan(session.organizationId, id, employeeId);
+  }
+
+  const latestAction =
+    getMockStore().agentProposedActions.find((candidate) => candidate.id === id) ?? action;
+  await updateAgentProposedActionInDb(latestAction);
+
+  return NextResponse.json({ action: latestAction });
 }

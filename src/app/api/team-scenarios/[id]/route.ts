@@ -45,18 +45,20 @@ export async function PATCH(request: Request, { params }: RouteParams) {
 
   const { id } = await params;
 
+  let scenario;
   try {
     const body = updateTeamScenarioInputSchema.parse(await request.json());
-    const scenario = updateTeamScenario(session, id, body);
-    if (!scenario) {
-      return NextResponse.json({ error: 'Not found' }, { status: 404 });
-    }
-    await updateTeamScenarioInDb(scenario);
-    return NextResponse.json({ scenario });
+    scenario = updateTeamScenario(session, id, body);
   } catch (error) {
     return NextResponse.json(
       { error: error instanceof Error ? error.message : 'Invalid request' },
       { status: 400 },
     );
   }
+
+  if (!scenario) {
+    return NextResponse.json({ error: 'Not found' }, { status: 404 });
+  }
+  await updateTeamScenarioInDb(scenario);
+  return NextResponse.json({ scenario });
 }

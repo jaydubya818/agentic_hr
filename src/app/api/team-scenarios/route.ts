@@ -34,15 +34,17 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
   }
 
+  let scenario;
   try {
     const body = createTeamScenarioInputSchema.parse(await request.json());
-    const scenario = createTeamScenario(session, body);
-    await persistTeamScenario(scenario);
-    return NextResponse.json({ scenario }, { status: 201 });
+    scenario = createTeamScenario(session, body);
   } catch (error) {
     return NextResponse.json(
       { error: error instanceof Error ? error.message : 'Invalid request' },
       { status: 400 },
     );
   }
+
+  await persistTeamScenario(scenario);
+  return NextResponse.json({ scenario }, { status: 201 });
 }
