@@ -67,7 +67,12 @@ export async function updateWorkforceDecisionInDb(
       metadata: decision.metadata ?? {},
       updatedAt: new Date(decision.updatedAt),
     })
-    .where(eq(workforceDecisions.id, decision.id))
+    .where(
+      and(
+        eq(workforceDecisions.id, decision.id),
+        eq(workforceDecisions.organizationId, decision.organizationId),
+      ),
+    )
     .returning({ id: workforceDecisions.id });
 
   if (result.length === 0) return false;
@@ -145,7 +150,12 @@ export async function updateTeamScenarioInDb(scenario: TeamScenario): Promise<bo
       metadata: scenario.metadata ?? {},
       updatedAt: new Date(scenario.updatedAt),
     })
-    .where(eq(teamScenarios.id, scenario.id))
+    .where(
+      and(
+        eq(teamScenarios.id, scenario.id),
+        eq(teamScenarios.organizationId, scenario.organizationId),
+      ),
+    )
     .returning({ id: teamScenarios.id });
 
   if (result.length === 0) return false;
