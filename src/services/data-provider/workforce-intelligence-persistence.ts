@@ -1,4 +1,4 @@
-import { eq } from 'drizzle-orm';
+import { and, eq } from 'drizzle-orm';
 
 import { getDb } from '@/lib/db';
 import {
@@ -219,7 +219,12 @@ export async function updateAgentProposedActionInDb(
       metadata: action.metadata ?? {},
       updatedAt: new Date(action.updatedAt),
     })
-    .where(eq(agentProposedActions.id, action.id))
+    .where(
+      and(
+        eq(agentProposedActions.id, action.id),
+        eq(agentProposedActions.organizationId, action.organizationId),
+      ),
+    )
     .returning({ id: agentProposedActions.id });
 
   if (result.length === 0) return false;

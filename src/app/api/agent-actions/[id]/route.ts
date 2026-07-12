@@ -1,12 +1,16 @@
 import { NextResponse } from 'next/server';
 
+import {
+  canReadOrganizationWorkforceData,
+  isManagerRole,
+} from '@/lib/auth/rbac';
 import { getSessionContext } from '@/lib/auth/session-context';
 import { updateAgentProposedActionInputSchema } from '@/schemas/workforce-intelligence';
 import {
   applyActionToGrowthPlan,
   updateProposedActionStatus,
 } from '@/services/agent-action-service';
-import { getMockStore } from '@/services/data-provider/mock-provider';
+import { getMockStore, isDirectReport } from '@/services/data-provider/mock-provider';
 import { updateAgentProposedActionInDb } from '@/services/data-provider/workforce-intelligence-persistence';
 import { z } from 'zod';
 
@@ -31,13 +35,22 @@ export async function PATCH(request: Request, { params }: RouteParams) {
     const body = patchBodySchema.parse(await request.json());
     const { applyToGrowthPlan, employeeId, ...updateInput } = body;
 
-    const action = updateProposedActionStatus(id, updateInput);
+    const action = updateProposedActionStatus(session.organizationId, id, updateInput);
     if (!action) {
       return NextResponse.json({ error: 'Not found' }, { status: 404 });
     }
 
     if (applyToGrowthPlan && employeeId) {
-      applyActionToGrowthPlan(id, employeeId);
+      const canApplyForEmployee =
+        canReadOrganizationWorkforceData(session.roles) ||
+        employeeId === session.employeeId ||
+        (isManagerRole(session.roles) &&
+          session.employeeId != null &&
+          isDirectReport(session.employeeId, employeeId));
+      if (!canApplyForEmployee) {
+        return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+      }
+      applyActionToGrowthPlan(session.organizationId, id, employeeId);
     }
 
     const latestAction =

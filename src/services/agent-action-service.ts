@@ -8,7 +8,7 @@ import {
   type AgentActionPlan,
   type AgentProposedAction,
 } from '@/schemas/workforce-intelligence';
-import { getMockStore } from '@/services/data-provider/mock-provider';
+import { getEmployee, getMockStore } from '@/services/data-provider/mock-provider';
 import type { SessionContext } from '@/types/session';
 import { validateActionPlan, filterDisallowedActions } from '@/services/action-plan-governance';
 
@@ -79,11 +79,14 @@ export function getActionPlan(planId: string): AgentActionPlanDetail | null {
 }
 
 export function updateProposedActionStatus(
+  organizationId: string,
   actionId: string,
   input: UpdateActionInput,
 ): AgentProposedAction | null {
   const store = getMockStore();
-  const index = store.agentProposedActions.findIndex((a) => a.id === actionId);
+  const index = store.agentProposedActions.findIndex(
+    (a) => a.id === actionId && a.organizationId === organizationId,
+  );
   if (index < 0) return null;
 
   const updated: AgentProposedAction = {
@@ -95,10 +98,19 @@ export function updateProposedActionStatus(
   return updated;
 }
 
-export function applyActionToGrowthPlan(actionId: string, employeeId: string): boolean {
+export function applyActionToGrowthPlan(
+  organizationId: string,
+  actionId: string,
+  employeeId: string,
+): boolean {
   const store = getMockStore();
-  const action = store.agentProposedActions.find((a) => a.id === actionId);
+  const action = store.agentProposedActions.find(
+    (a) => a.id === actionId && a.organizationId === organizationId,
+  );
   if (!action) return false;
+
+  const employee = getEmployee(employeeId);
+  if (!employee || employee.organizationId !== organizationId) return false;
 
   const growthPlan = store.growthPlans.find(
     (p) => p.employeeId === employeeId && (p.status === 'active' || p.status === 'draft'),
