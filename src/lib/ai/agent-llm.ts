@@ -78,10 +78,12 @@ export async function generateLiveAgentResponse(
       systemPrompt,
       messages: [
         { role: 'user', content: `Grounding data:\n${grounding}` },
-        ...(request.conversationHistory ?? []).map((m) => ({
-          role: m.role as 'user' | 'assistant',
-          content: m.content,
-        })),
+        ...(request.conversationHistory ?? [])
+          .filter((m) => m.role === 'user' || m.role === 'assistant')
+          .map((m) => ({
+            role: m.role as 'user' | 'assistant',
+            content: m.content,
+          })),
         { role: 'user', content: request.userMessage },
       ],
       responseFormat: 'json',
