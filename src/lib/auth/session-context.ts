@@ -79,8 +79,9 @@ async function getSupabaseBackedSessionContext(): Promise<SessionContext | null>
 
 export async function getSessionContext(): Promise<SessionContext | null> {
   if (!shouldUseMockData()) {
-    const supabaseSession = await getSupabaseBackedSessionContext();
-    if (supabaseSession) return supabaseSession;
+    // Live mode is fail-secure: never fall back to the unsigned mock session
+    // cookie (docs/SECURITY_AND_PRIVACY.md "deny on ambiguity").
+    return getSupabaseBackedSessionContext();
   }
 
   const session = await getMockSession();
