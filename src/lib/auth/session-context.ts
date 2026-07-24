@@ -14,7 +14,7 @@ import { demoRoleToUserRoles, getMockSession } from './mock-session';
  * may only select among views the user's database-backed roles actually
  * grant; anything else falls back to the employee view.
  */
-function clampActiveRoleToHeldRoles(requested: DemoRole, roles: UserRole[]): DemoRole {
+export function clampActiveRoleToHeldRoles(requested: DemoRole, roles: UserRole[]): DemoRole {
   if (requested === 'hr' && userHasAnyRole(roles, ['hr_admin', 'org_admin'])) return 'hr';
   if (requested === 'manager' && userHasAnyRole(roles, ['manager', 'hr_admin', 'org_admin'])) {
     return 'manager';
