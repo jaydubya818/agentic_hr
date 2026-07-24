@@ -1,4 +1,5 @@
 import { DEMO_EMPLOYEE_ID, DEMO_MANAGER_EMPLOYEE_ID, MOCK_IDS } from '@/lib/mock/ids';
+import { canReadOrganizationWorkforceData, isManagerRole } from '@/lib/auth/rbac';
 import { DEMO_GOVERNANCE_BLOCK_TRIGGER } from '@/lib/governance/demo-triggers';
 import { GOVERNANCE_BLOCK_MESSAGE } from '@/lib/governance/prohibited-patterns';
 import { dataProvider } from '@/services/data-provider';
@@ -414,6 +415,18 @@ function assertAgentAccess(agentId: AgentId, params: AgentInvokeParams): void {
     const managerId = session.employeeId ?? DEMO_MANAGER_EMPLOYEE_ID;
     if (!dataProvider.isDirectReport(managerId, context.employeeId)) {
       throw new AgentAccessError('Cannot access data for non-direct report');
+    }
+    return;
+  }
+
+  if (context?.employeeId && context.employeeId !== session.employeeId) {
+    const canAccessOtherEmployee =
+      canReadOrganizationWorkforceData(session.roles) ||
+      (isManagerRole(session.roles) &&
+        session.employeeId != null &&
+        dataProvider.isDirectReport(session.employeeId, context.employeeId));
+    if (!canAccessOtherEmployee) {
+      throw new AgentAccessError('Cannot access data for another employee');
     }
   }
 }
