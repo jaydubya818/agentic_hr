@@ -1,17 +1,32 @@
 import { NextResponse } from 'next/server';
+import { z } from 'zod';
+
 import { getSessionContext } from '@/lib/auth/session-context';
 import { AgentAccessError, invokeAgent } from '@/services/agent-service';
 import { isAgentId } from '@/types/agent';
 
-interface InvokeBody {
-  message?: string;
-  context?: {
-    employeeId?: string;
-    teamId?: string;
-    contextType?: string;
-  };
-  conversationHistory?: Array<{ role: 'user' | 'assistant' | 'system'; content: string }>;
-}
+const MAX_MESSAGE_LENGTH = 4000;
+const MAX_HISTORY_MESSAGES = 20;
+
+const invokeRequestSchema = z.object({
+  message: z.string().trim().min(1, 'Message is required').max(MAX_MESSAGE_LENGTH),
+  context: z
+    .object({
+      employeeId: z.string().max(64).optional(),
+      teamId: z.string().max(64).optional(),
+      contextType: z.string().max(64).optional(),
+    })
+    .optional(),
+  conversationHistory: z
+    .array(
+      z.object({
+        role: z.enum(['user', 'assistant']),
+        content: z.string().max(MAX_MESSAGE_LENGTH),
+      }),
+    )
+    .max(MAX_HISTORY_MESSAGES)
+    .optional(),
+});
 
 export async function POST(
   request: Request,
@@ -28,16 +43,21 @@ export async function POST(
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  let body: InvokeBody;
+  let rawBody: unknown;
   try {
-    body = (await request.json()) as InvokeBody;
+    rawBody = await request.json();
   } catch {
     return NextResponse.json({ error: 'Invalid JSON body' }, { status: 400 });
   }
 
-  if (!body.message?.trim()) {
-    return NextResponse.json({ error: 'Message is required' }, { status: 400 });
+  const parsedBody = invokeRequestSchema.safeParse(rawBody);
+  if (!parsedBody.success) {
+    return NextResponse.json(
+      { error: parsedBody.error.issues[0]?.message ?? 'Invalid request body' },
+      { status: 400 },
+    );
   }
+  const body = parsedBody.data;
 
   const { checkAgentRateLimit } = await import('@/lib/agent/rate-limit');
   const rate = checkAgentRateLimit(session.userId);
@@ -56,7 +76,7 @@ export async function POST(
   try {
     const result = await invokeAgent(rawAgentId, {
       session,
-      message: body.message.trim(),
+      message: body.message,
       context: body.context,
       conversationHistory: body.conversationHistory,
     });
