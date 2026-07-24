@@ -3,6 +3,7 @@ import { canReadOrganizationWorkforceData, isManagerRole } from '@/lib/auth/rbac
 import { DEMO_GOVERNANCE_BLOCK_TRIGGER } from '@/lib/governance/demo-triggers';
 import { GOVERNANCE_BLOCK_MESSAGE } from '@/lib/governance/prohibited-patterns';
 import { dataProvider } from '@/services/data-provider';
+import { shouldUseMockData } from '@/services/data-provider/provider-config';
 import type {
   AgentContext,
   AgentId,
@@ -412,8 +413,11 @@ function assertAgentAccess(agentId: AgentId, params: AgentInvokeParams): void {
   }
 
   if (agentId === 'supermanager' && context?.employeeId) {
-    const managerId = session.employeeId ?? DEMO_MANAGER_EMPLOYEE_ID;
-    if (!dataProvider.isDirectReport(managerId, context.employeeId)) {
+    // The demo-manager fallback is a mock-data convenience; in live mode a
+    // session without an employee record gets no direct reports.
+    const managerId =
+      session.employeeId ?? (shouldUseMockData() ? DEMO_MANAGER_EMPLOYEE_ID : undefined);
+    if (!managerId || !dataProvider.isDirectReport(managerId, context.employeeId)) {
       throw new AgentAccessError('Cannot access data for non-direct report');
     }
     return;
