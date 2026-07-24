@@ -369,7 +369,7 @@ USE_MOCK_AGENTS=true
 | API key exposure | Low | Critical | Server-only; env vars; code review |
 | Over-permissive RLS | Medium | High | Policy review; integration tests |
 | Agent outputs PII leak | Low | High | Governance; no cross-employee data |
-| Demo role switch in prod | Low | Medium | Disable in production env |
+| Demo role switch in prod | Low | Medium | Live mode requires the database-backed role before switching; the active role is clamped to held roles on every request |
 | Dependency vulnerability | Medium | Medium | npm audit; Dependabot |
 
 ---
