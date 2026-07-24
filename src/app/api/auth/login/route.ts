@@ -21,32 +21,37 @@ export async function POST(request: Request) {
 
   if (!shouldUseMockData()) {
     const supabase = await createSupabaseServerClient();
-    if (supabase && body.password) {
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email: body.email,
-        password: body.password,
-      });
-
-      if (!error && data.user) {
-        response.cookies.set(SESSION_COOKIE, JSON.stringify({ authenticated: true, userId: data.user.id }), {
-          httpOnly: true,
-          secure: process.env.NODE_ENV === 'production',
-          sameSite: 'lax',
-          path: '/',
-          maxAge: 60 * 60 * 24 * 7,
-        });
-        response.cookies.set(ACTIVE_ROLE_COOKIE, 'employee', {
-          httpOnly: true,
-          secure: process.env.NODE_ENV === 'production',
-          sameSite: 'lax',
-          path: '/',
-          maxAge: 60 * 60 * 24 * 7,
-        });
-        return response;
-      }
-
-      return NextResponse.json({ error: 'Invalid email or password' }, { status: 401 });
+    if (!supabase) {
+      return NextResponse.json({ error: 'Authentication is not configured' }, { status: 503 });
     }
+    if (!body.password) {
+      return NextResponse.json({ error: 'Password required' }, { status: 400 });
+    }
+
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email: body.email,
+      password: body.password,
+    });
+
+    if (!error && data.user) {
+      response.cookies.set(SESSION_COOKIE, JSON.stringify({ authenticated: true, userId: data.user.id }), {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+        path: '/',
+        maxAge: 60 * 60 * 24 * 7,
+      });
+      response.cookies.set(ACTIVE_ROLE_COOKIE, 'employee', {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+        path: '/',
+        maxAge: 60 * 60 * 24 * 7,
+      });
+      return response;
+    }
+
+    return NextResponse.json({ error: 'Invalid email or password' }, { status: 401 });
   }
 
   response.cookies.set(SESSION_COOKIE, createMockSessionCookie(), {
