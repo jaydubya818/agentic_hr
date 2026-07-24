@@ -18,6 +18,7 @@ export async function POST(request: Request) {
   const response = NextResponse.json({ success: true, role });
   response.cookies.set(ACTIVE_ROLE_COOKIE, role, {
     httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
     sameSite: 'lax',
     path: '/',
     maxAge: 60 * 60 * 24 * 7,

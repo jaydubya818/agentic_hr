@@ -30,12 +30,14 @@ export async function POST(request: Request) {
       if (!error && data.user) {
         response.cookies.set(SESSION_COOKIE, JSON.stringify({ authenticated: true, userId: data.user.id }), {
           httpOnly: true,
+          secure: process.env.NODE_ENV === 'production',
           sameSite: 'lax',
           path: '/',
           maxAge: 60 * 60 * 24 * 7,
         });
         response.cookies.set(ACTIVE_ROLE_COOKIE, 'employee', {
           httpOnly: true,
+          secure: process.env.NODE_ENV === 'production',
           sameSite: 'lax',
           path: '/',
           maxAge: 60 * 60 * 24 * 7,
@@ -49,12 +51,14 @@ export async function POST(request: Request) {
 
   response.cookies.set(SESSION_COOKIE, createMockSessionCookie(), {
     httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
     sameSite: 'lax',
     path: '/',
     maxAge: 60 * 60 * 24 * 7,
   });
   response.cookies.set(ACTIVE_ROLE_COOKIE, 'employee', {
     httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
     sameSite: 'lax',
     path: '/',
     maxAge: 60 * 60 * 24 * 7,
