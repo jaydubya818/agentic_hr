@@ -44,12 +44,7 @@ describe('inferred skill review scoping', () => {
 
   it('hides skills from sessions in another organization', async () => {
     const result = await reviewInferredSkill({
-      session: buildSession(
-        undefined,
-        ['hr_admin'],
-        'hr',
-        '99999999-0000-4000-8000-000000000000',
-      ),
+      session: buildSession(undefined, ['hr_admin'], 'hr', '99999999-0000-4000-8000-000000000000'),
       employeeSkillId: ALEX_INFERRED_SKILL_ID,
       action: 'confirm',
     });

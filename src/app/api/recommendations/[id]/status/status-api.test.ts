@@ -18,7 +18,10 @@ vi.mock('@/services/data-provider/supabase-persistence', async (importOriginal) 
 
 import { getSessionContext } from '@/lib/auth/session-context';
 
-function buildSession(employeeId: string | undefined, roles: SessionContext['roles']): SessionContext {
+function buildSession(
+  employeeId: string | undefined,
+  roles: SessionContext['roles'],
+): SessionContext {
   return {
     userId: MOCK_IDS.users.alex,
     organizationId: MOCK_IDS.organization,
