@@ -15,6 +15,9 @@ export interface AuditLogEntry {
   createdAt: string;
 }
 
+/** Bound the in-memory fallback store so long-running demo servers do not leak. */
+const MAX_IN_MEMORY_AUDIT_ENTRIES = 5000;
+
 const auditStore: AuditLogEntry[] = [];
 
 export function logAuditEvent(params: {
@@ -35,6 +38,9 @@ export function logAuditEvent(params: {
     createdAt: new Date().toISOString(),
   };
   auditStore.push(entry);
+  if (auditStore.length > MAX_IN_MEMORY_AUDIT_ENTRIES) {
+    auditStore.splice(0, auditStore.length - MAX_IN_MEMORY_AUDIT_ENTRIES);
+  }
   void persistAuditLogEntry(entry).catch((error) => {
     console.error('Failed to persist audit log entry', error);
   });
