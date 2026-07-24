@@ -5,8 +5,22 @@ import { employees, userRoles, users } from '@/lib/db/schema';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
 import { shouldUseMockData } from '@/services/data-provider/provider-config';
 import type { SessionContext } from '@/types/session';
-import type { UserRole } from './types';
+import type { DemoRole, UserRole } from './types';
+import { userHasAnyRole } from './rbac';
 import { demoRoleToUserRoles, getMockSession } from './mock-session';
+
+/**
+ * The active-role cookie is client-controlled and unsigned. In live mode it
+ * may only select among views the user's database-backed roles actually
+ * grant; anything else falls back to the employee view.
+ */
+function clampActiveRoleToHeldRoles(requested: DemoRole, roles: UserRole[]): DemoRole {
+  if (requested === 'hr' && userHasAnyRole(roles, ['hr_admin', 'org_admin'])) return 'hr';
+  if (requested === 'manager' && userHasAnyRole(roles, ['manager', 'hr_admin', 'org_admin'])) {
+    return 'manager';
+  }
+  return 'employee';
+}
 
 function resolveOrganizationId(orgId: string): string {
   return orgId === 'org-techforward' ? '11111111-1111-4111-8111-111111111111' : orgId;
@@ -66,7 +80,7 @@ async function getSupabaseBackedSessionContext(): Promise<SessionContext | null>
     .limit(1);
 
   const mockSession = await getMockSession();
-  const activeRole = mockSession?.activeRole ?? 'employee';
+  const activeRole = clampActiveRoleToHeldRoles(mockSession?.activeRole ?? 'employee', roles);
 
   return {
     userId: resolvedUser.id,
