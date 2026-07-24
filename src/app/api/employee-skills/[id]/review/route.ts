@@ -36,7 +36,7 @@ export async function PATCH(
   });
 
   if (!result.ok) {
-    return NextResponse.json({ error: result.reason ?? 'Failed' }, { status: 400 });
+    return NextResponse.json({ error: result.reason ?? 'Failed' }, { status: result.status ?? 400 });
   }
 
   return NextResponse.json({ id, action: body.action, ok: true });
