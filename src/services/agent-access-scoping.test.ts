@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { MOCK_IDS } from '@/lib/mock/ids';
 import { AgentAccessError, invokeAgent } from '@/services/agent-service';
@@ -68,5 +68,31 @@ describe('agent invocation employee-context scoping', () => {
       context: { employeeId: MOCK_IDS.employees.morgan, contextType: 'growth-profile' },
     });
     expect(result.agentId).toBe('employee-growth');
+  });
+});
+
+describe('supermanager employee-context scoping without an employee record', () => {
+  afterEach(() => {
+    vi.unstubAllEnvs();
+  });
+
+  it('falls back to the demo manager in mock mode', async () => {
+    const result = await invokeAgent('supermanager', {
+      session: buildSession(undefined as unknown as string, ['employee', 'manager'], 'manager'),
+      message: 'How is my team doing?',
+      context: { employeeId: MOCK_IDS.employees.alex, contextType: 'coaching' },
+    });
+    expect(result.agentId).toBe('supermanager');
+  });
+
+  it('denies access in live mode instead of using the demo-manager fallback', async () => {
+    vi.stubEnv('USE_MOCK_DATA', 'false');
+    await expect(
+      invokeAgent('supermanager', {
+        session: buildSession(undefined as unknown as string, ['employee', 'manager'], 'manager'),
+        message: 'How is my team doing?',
+        context: { employeeId: MOCK_IDS.employees.alex, contextType: 'coaching' },
+      }),
+    ).rejects.toBeInstanceOf(AgentAccessError);
   });
 });
