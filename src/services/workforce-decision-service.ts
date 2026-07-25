@@ -56,6 +56,33 @@ function filterDecisionsForSession(
   return [];
 }
 
+function assertDecisionWriteScope(
+  session: SessionContext,
+  input: { teamId?: string | null; ownerEmployeeId?: string | null },
+): void {
+  const store = getMockStore();
+
+  if (input.teamId != null) {
+    const team = store.teams.find((t) => t.id === input.teamId);
+    if (!team || team.organizationId !== session.organizationId) {
+      throw new Error('Unknown team for this organization');
+    }
+    if (
+      !canReadOrganizationWorkforceData(session.roles) &&
+      team.managerEmployeeId !== session.employeeId
+    ) {
+      throw new Error('Forbidden');
+    }
+  }
+
+  if (input.ownerEmployeeId != null) {
+    const owner = store.employees.find((e) => e.id === input.ownerEmployeeId);
+    if (!owner || owner.organizationId !== session.organizationId) {
+      throw new Error('Unknown owner for this organization');
+    }
+  }
+}
+
 export function listWorkforceDecisions(session: SessionContext): WorkforceDecision[] {
   const store = getMockStore();
   return filterDecisionsForSession(session, store.workforceDecisions);
@@ -85,6 +112,8 @@ export function createWorkforceDecision(
   if (!canReadOrganizationWorkforceData(session.roles) && !isManagerRole(session.roles)) {
     throw new Error('Forbidden');
   }
+
+  assertDecisionWriteScope(session, input);
 
   const store = getMockStore();
   const timestamp = nowIso();
@@ -116,6 +145,8 @@ export function updateWorkforceDecision(
 ): WorkforceDecision | null {
   const existing = getWorkforceDecision(session, decisionId);
   if (!existing) return null;
+
+  assertDecisionWriteScope(session, input);
 
   const store = getMockStore();
   const index = store.workforceDecisions.findIndex((d) => d.id === decisionId);
