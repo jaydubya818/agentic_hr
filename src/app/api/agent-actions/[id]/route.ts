@@ -1,9 +1,6 @@
 import { NextResponse } from 'next/server';
 
-import {
-  canReadOrganizationWorkforceData,
-  isManagerRole,
-} from '@/lib/auth/rbac';
+import { canReadOrganizationWorkforceData, isManagerRole } from '@/lib/auth/rbac';
 import { getSessionContext } from '@/lib/auth/session-context';
 import { updateAgentProposedActionInputSchema } from '@/schemas/workforce-intelligence';
 import {
@@ -42,6 +39,29 @@ export async function PATCH(request: Request, { params }: RouteParams) {
   }
 
   const { applyToGrowthPlan, employeeId, ...updateInput } = parsed;
+
+  const existing = getMockStore().agentProposedActions.find(
+    (candidate) => candidate.id === id && candidate.organizationId === session.organizationId,
+  );
+  if (!existing) {
+    return NextResponse.json({ error: 'Not found' }, { status: 404 });
+  }
+
+  // A proposed action may only be updated by its target employee, that
+  // employee's direct manager, or an org-wide role. Actions without a target
+  // employee (plan/team level) require a manager or org-wide role.
+  const isOrgWide = canReadOrganizationWorkforceData(session.roles);
+  const isSelfTarget =
+    existing.targetEmployeeId != null && existing.targetEmployeeId === session.employeeId;
+  const isManagerOfTarget =
+    isManagerRole(session.roles) &&
+    session.employeeId != null &&
+    existing.targetEmployeeId != null &&
+    isDirectReport(session.employeeId, existing.targetEmployeeId);
+  const isManagerForPlanAction = existing.targetEmployeeId == null && isManagerRole(session.roles);
+  if (!isOrgWide && !isSelfTarget && !isManagerOfTarget && !isManagerForPlanAction) {
+    return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+  }
 
   const action = updateProposedActionStatus(session.organizationId, id, updateInput);
   if (!action) {
