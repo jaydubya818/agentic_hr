@@ -51,6 +51,20 @@ function filterScenariosForSession(session: SessionContext): TeamScenario[] {
   return [];
 }
 
+function assertTeamWriteScope(session: SessionContext, teamId: string): void {
+  const store = getMockStore();
+  const team = store.teams.find((t) => t.id === teamId);
+  if (!team || team.organizationId !== session.organizationId) {
+    throw new Error('Unknown team for this organization');
+  }
+  if (
+    !canReadOrganizationWorkforceData(session.roles) &&
+    team.managerEmployeeId !== session.employeeId
+  ) {
+    throw new Error('Forbidden');
+  }
+}
+
 export function listTeamScenarios(session: SessionContext): TeamScenario[] {
   return filterScenariosForSession(session);
 }
@@ -74,6 +88,8 @@ export function createTeamScenario(session: SessionContext, input: CreateInput):
   if (!canReadOrganizationWorkforceData(session.roles) && !isManagerRole(session.roles)) {
     throw new Error('Forbidden');
   }
+
+  assertTeamWriteScope(session, input.teamId);
 
   const store = getMockStore();
   const timestamp = nowIso();
@@ -104,6 +120,10 @@ export function updateTeamScenario(
 ): TeamScenario | null {
   const existing = getTeamScenario(session, scenarioId);
   if (!existing) return null;
+
+  if (input.teamId != null) {
+    assertTeamWriteScope(session, input.teamId);
+  }
 
   const store = getMockStore();
   const index = store.teamScenarios.findIndex((s) => s.id === scenarioId);
