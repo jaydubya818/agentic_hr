@@ -370,6 +370,7 @@ USE_MOCK_AGENTS=true
 | Over-permissive RLS | Medium | High | Policy review; integration tests |
 | Agent outputs PII leak | Low | High | Governance; no cross-employee data |
 | Demo role switch in prod | Low | Medium | Live mode requires the database-backed role before switching; the active role is clamped to held roles on every request |
+| Cross-team writes via crafted IDs | Medium | High | Team-scenario and workforce-decision writes validate that the target team belongs to the organization and is managed by the caller (unless the role has org-wide access), and that decision owners are in-organization employees |
 | Dependency vulnerability | Medium | Medium | npm audit; Dependabot |
 
 ---
