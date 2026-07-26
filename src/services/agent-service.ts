@@ -65,7 +65,14 @@ async function resolveAgentResponseText(
 }
 
 function resolveEmployeeId(sessionEmployeeId: string | undefined, context?: AgentContext): string {
-  return context?.employeeId ?? sessionEmployeeId ?? DEMO_EMPLOYEE_ID;
+  const resolved = context?.employeeId ?? sessionEmployeeId;
+  if (resolved) return resolved;
+  // The demo-employee fallback is a mock-data convenience; a live session
+  // without an employee record must not be grounded on demo fixtures.
+  if (!shouldUseMockData()) {
+    throw new AgentAccessError('Session has no employee record');
+  }
+  return DEMO_EMPLOYEE_ID;
 }
 
 function buildEmployeeGrowthRecommendations(employeeId: string): CreateRecommendationInput[] {
