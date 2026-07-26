@@ -19,7 +19,10 @@ export async function GET() {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  if (!canReadTeamScopedEmployeeData(session.roles) && !canReadOrganizationWorkforceData(session.roles)) {
+  if (
+    !canReadTeamScopedEmployeeData(session.roles) &&
+    !canReadOrganizationWorkforceData(session.roles)
+  ) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
   }
 
@@ -42,10 +45,9 @@ export async function POST(request: Request) {
     const body = createWorkforceDecisionInputSchema.parse(await request.json());
     decision = createWorkforceDecision(session, body);
   } catch (error) {
-    return NextResponse.json(
-      { error: error instanceof Error ? error.message : 'Invalid request' },
-      { status: 400 },
-    );
+    const message = error instanceof Error ? error.message : 'Invalid request';
+    const status = message === 'Forbidden' ? 403 : 400;
+    return NextResponse.json({ error: message }, { status });
   }
 
   await persistWorkforceDecision(decision);
