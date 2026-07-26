@@ -118,6 +118,47 @@ export function createActionPlanFromInput(
   return { ...plan, actions };
 }
 
+/**
+ * List action plans visible to the session: org-wide roles see every plan in
+ * the organization; managers additionally see plans for their teams and
+ * direct reports; employees see plans for themselves or actions targeting
+ * them.
+ */
+export function listActionPlansForSession(session: SessionContext): AgentActionPlanDetail[] {
+  const store = getMockStore();
+  const withActions = (plan: AgentActionPlan): AgentActionPlanDetail => ({
+    ...plan,
+    actions: store.agentProposedActions.filter((a) => a.actionPlanId === plan.id),
+  });
+
+  const orgPlans = store.agentActionPlans
+    .filter((p) => p.organizationId === session.organizationId)
+    .map(withActions);
+
+  if (canReadOrganizationWorkforceData(session.roles)) {
+    return orgPlans;
+  }
+
+  const employeeId = session.employeeId;
+  if (!employeeId) return [];
+
+  const isManager = isManagerRole(session.roles);
+  const managedTeamIds = isManager
+    ? store.teams.filter((t) => t.managerEmployeeId === employeeId).map((t) => t.id)
+    : [];
+
+  const inScope = (candidateId: string | null | undefined): boolean =>
+    candidateId != null &&
+    (candidateId === employeeId || (isManager && isDirectReport(employeeId, candidateId)));
+
+  return orgPlans.filter(
+    (plan) =>
+      inScope(plan.employeeId) ||
+      (plan.teamId != null && managedTeamIds.includes(plan.teamId)) ||
+      plan.actions.some((a) => inScope(a.targetEmployeeId)),
+  );
+}
+
 export function getActionPlan(planId: string): AgentActionPlanDetail | null {
   const store = getMockStore();
   const plan = store.agentActionPlans.find((p) => p.id === planId);

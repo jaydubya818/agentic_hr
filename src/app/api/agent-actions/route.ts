@@ -6,7 +6,10 @@ import {
   createAgentActionPlanInputSchema,
 } from '@/schemas/workforce-intelligence';
 import { validateActionPlan } from '@/services/action-plan-governance';
-import { createActionPlanFromInput } from '@/services/agent-action-service';
+import {
+  createActionPlanFromInput,
+  listActionPlansForSession,
+} from '@/services/agent-action-service';
 import { logAuditEvent } from '@/services/audit-service';
 import { persistAgentActionPlan } from '@/services/data-provider/workforce-intelligence-persistence';
 import { z } from 'zod';
@@ -22,6 +25,16 @@ const createActionPlanRequestSchema = createAgentActionPlanInputSchema.extend({
     }),
   ),
 });
+
+export async function GET() {
+  const session = await getSessionContext();
+  if (!session) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
+  const plans = listActionPlansForSession(session);
+  return NextResponse.json({ plans });
+}
 
 export async function POST(request: Request) {
   const session = await getSessionContext();
