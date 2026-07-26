@@ -96,3 +96,27 @@ describe('supermanager employee-context scoping without an employee record', () 
     ).rejects.toBeInstanceOf(AgentAccessError);
   });
 });
+
+describe('agent grounding without an employee record', () => {
+  afterEach(() => {
+    vi.unstubAllEnvs();
+  });
+
+  it('grounds on the demo employee in mock mode', async () => {
+    const result = await invokeAgent('employee-growth', {
+      session: buildSession(undefined as unknown as string, ['employee'], 'employee'),
+      message: 'What should I focus on next?',
+    });
+    expect(result.metadata?.employeeId).toBe(MOCK_IDS.employees.alex);
+  });
+
+  it('denies invocation in live mode instead of grounding on demo fixtures', async () => {
+    vi.stubEnv('USE_MOCK_DATA', 'false');
+    await expect(
+      invokeAgent('employee-growth', {
+        session: buildSession(undefined as unknown as string, ['employee'], 'employee'),
+        message: 'What should I focus on next?',
+      }),
+    ).rejects.toBeInstanceOf(AgentAccessError);
+  });
+});
