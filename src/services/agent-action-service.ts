@@ -8,7 +8,8 @@ import {
   type AgentActionPlan,
   type AgentProposedAction,
 } from '@/schemas/workforce-intelligence';
-import { getEmployee, getMockStore } from '@/services/data-provider/mock-provider';
+import { canReadOrganizationWorkforceData, isManagerRole } from '@/lib/auth/rbac';
+import { getEmployee, getMockStore, isDirectReport } from '@/services/data-provider/mock-provider';
 import type { SessionContext } from '@/types/session';
 import { validateActionPlan, filterDisallowedActions } from '@/services/action-plan-governance';
 
@@ -23,11 +24,61 @@ function nowIso(): string {
   return new Date().toISOString();
 }
 
+/**
+ * Action plans may only be created within the caller's write scope: a plan
+ * team must be managed by the caller, and the plan employee plus every action
+ * target must be the caller, one of their direct reports, or (for org-wide
+ * roles) any employee in the organization.
+ */
+function assertActionPlanWriteScope(
+  session: SessionContext,
+  input: CreatePlanInput,
+  proposedActions: Pick<AgentProposedAction, 'targetEmployeeId'>[],
+): void {
+  const isOrgWide = canReadOrganizationWorkforceData(session.roles);
+
+  if (input.teamId != null) {
+    const team = getMockStore().teams.find((t) => t.id === input.teamId);
+    if (!team || team.organizationId !== session.organizationId) {
+      throw new Error('Unknown team for this organization');
+    }
+    if (!isOrgWide && team.managerEmployeeId !== session.employeeId) {
+      throw new Error('Forbidden');
+    }
+  }
+
+  const employeeIds = new Set<string>();
+  if (input.employeeId != null) employeeIds.add(input.employeeId);
+  for (const action of proposedActions) {
+    if (action.targetEmployeeId != null) employeeIds.add(action.targetEmployeeId);
+  }
+
+  for (const employeeId of employeeIds) {
+    const employee = getEmployee(employeeId);
+    if (!employee || employee.organizationId !== session.organizationId) {
+      throw new Error('Unknown employee for this organization');
+    }
+    if (isOrgWide || employeeId === session.employeeId) continue;
+    const managesEmployee =
+      isManagerRole(session.roles) &&
+      session.employeeId != null &&
+      isDirectReport(session.employeeId, employeeId);
+    if (!managesEmployee) {
+      throw new Error('Forbidden');
+    }
+  }
+}
+
 export function createActionPlanFromInput(
   session: SessionContext,
   input: CreatePlanInput,
-  proposedActions: Omit<AgentProposedAction, 'id' | 'organizationId' | 'actionPlanId' | 'createdAt' | 'updatedAt'>[],
+  proposedActions: Omit<
+    AgentProposedAction,
+    'id' | 'organizationId' | 'actionPlanId' | 'createdAt' | 'updatedAt'
+  >[],
 ): AgentActionPlanDetail {
+  assertActionPlanWriteScope(session, input, proposedActions);
+
   const validation = validateActionPlan(proposedActions);
   if (!validation.valid) {
     throw new Error(validation.errors.join('; '));
