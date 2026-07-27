@@ -6,6 +6,7 @@ import {
   isManagerRole,
 } from '@/lib/auth/rbac';
 import { getSessionContext } from '@/lib/auth/session-context';
+import { logAuditEvent } from '@/services/audit-service';
 import {
   createExpectedOutcome,
   recordActualOutcome,
@@ -66,5 +67,12 @@ export async function POST(request: Request, { params }: RouteParams) {
   }
 
   await persistDecisionOutcome(outcome);
+  logAuditEvent({
+    session,
+    action: 'decision.outcome_recorded',
+    entityType: 'decision_outcome',
+    entityId: outcome.id,
+    details: { decisionId: id, outcomeType: outcome.outcomeType, status: outcome.status },
+  });
   return NextResponse.json({ outcome }, { status: 201 });
 }

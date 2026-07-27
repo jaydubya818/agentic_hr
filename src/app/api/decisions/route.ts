@@ -6,6 +6,7 @@ import {
   isManagerRole,
 } from '@/lib/auth/rbac';
 import { getSessionContext } from '@/lib/auth/session-context';
+import { logAuditEvent } from '@/services/audit-service';
 import { createWorkforceDecisionInputSchema } from '@/schemas/workforce-intelligence';
 import { persistWorkforceDecision } from '@/services/data-provider/workforce-intelligence-persistence';
 import {
@@ -51,5 +52,12 @@ export async function POST(request: Request) {
   }
 
   await persistWorkforceDecision(decision);
+  logAuditEvent({
+    session,
+    action: 'decision.created',
+    entityType: 'workforce_decision',
+    entityId: decision.id,
+    details: { decisionType: decision.decisionType, teamId: decision.teamId },
+  });
   return NextResponse.json({ decision }, { status: 201 });
 }

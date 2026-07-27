@@ -6,6 +6,7 @@ import {
   isManagerRole,
 } from '@/lib/auth/rbac';
 import { getSessionContext } from '@/lib/auth/session-context';
+import { logAuditEvent } from '@/services/audit-service';
 import { updateWorkforceDecisionInputSchema } from '@/schemas/workforce-intelligence';
 import { updateWorkforceDecisionInDb } from '@/services/data-provider/workforce-intelligence-persistence';
 import {
@@ -65,5 +66,12 @@ export async function PATCH(request: Request, { params }: RouteParams) {
     return NextResponse.json({ error: 'Not found' }, { status: 404 });
   }
   await updateWorkforceDecisionInDb(decision);
+  logAuditEvent({
+    session,
+    action: 'decision.updated',
+    entityType: 'workforce_decision',
+    entityId: decision.id,
+    details: { status: decision.status },
+  });
   return NextResponse.json({ decision });
 }
