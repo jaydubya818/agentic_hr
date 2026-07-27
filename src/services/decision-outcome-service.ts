@@ -8,7 +8,10 @@ import {
   type OutcomeStatus,
 } from '@/schemas/workforce-intelligence';
 import { getMockStore } from '@/services/data-provider/mock-provider';
-import { getWorkforceDecision } from '@/services/workforce-decision-service';
+import {
+  canWriteWorkforceDecision,
+  getWorkforceDecision,
+} from '@/services/workforce-decision-service';
 import type { SessionContext } from '@/types/session';
 
 type CreateInput = z.infer<typeof createDecisionOutcomeInputSchema>;
@@ -26,6 +29,10 @@ export function createExpectedOutcome(
 ): DecisionOutcome | null {
   const decision = getWorkforceDecision(session, decisionId);
   if (!decision) return null;
+
+  if (!canWriteWorkforceDecision(session, decision)) {
+    throw new Error('Forbidden');
+  }
 
   const store = getMockStore();
   const timestamp = nowIso();
@@ -58,6 +65,10 @@ export function recordActualOutcome(
 ): DecisionOutcome | null {
   const decision = getWorkforceDecision(session, decisionId);
   if (!decision) return null;
+
+  if (!canWriteWorkforceDecision(session, decision)) {
+    throw new Error('Forbidden');
+  }
 
   const store = getMockStore();
   const timestamp = nowIso();

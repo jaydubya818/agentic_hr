@@ -138,6 +138,26 @@ export function createWorkforceDecision(
   return decision;
 }
 
+/**
+ * Write access to an existing decision: org-wide roles, the decision owner,
+ * or the manager of the decision's team. Participation alone grants read
+ * access but not write access.
+ */
+export function canWriteWorkforceDecision(
+  session: SessionContext,
+  decision: WorkforceDecision,
+): boolean {
+  if (decision.organizationId !== session.organizationId) return false;
+  if (canReadOrganizationWorkforceData(session.roles)) return true;
+  if (!isManagerRole(session.roles) || !session.employeeId) return false;
+  if (decision.ownerEmployeeId === session.employeeId) return true;
+  if (decision.teamId) {
+    const team = getMockStore().teams.find((t) => t.id === decision.teamId);
+    if (team?.managerEmployeeId === session.employeeId) return true;
+  }
+  return false;
+}
+
 export function updateWorkforceDecision(
   session: SessionContext,
   decisionId: string,
@@ -145,6 +165,10 @@ export function updateWorkforceDecision(
 ): WorkforceDecision | null {
   const existing = getWorkforceDecision(session, decisionId);
   if (!existing) return null;
+
+  if (!canWriteWorkforceDecision(session, existing)) {
+    throw new Error('Forbidden');
+  }
 
   assertDecisionWriteScope(session, input);
 

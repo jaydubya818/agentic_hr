@@ -56,10 +56,9 @@ export async function POST(request: Request, { params }: RouteParams) {
         ? recordActualOutcome(session, id, outcomeInput)
         : createExpectedOutcome(session, id, outcomeInput);
   } catch (error) {
-    return NextResponse.json(
-      { error: error instanceof Error ? error.message : 'Invalid request' },
-      { status: 400 },
-    );
+    const message = error instanceof Error ? error.message : 'Invalid request';
+    const status = message === 'Forbidden' ? 403 : 400;
+    return NextResponse.json({ error: message }, { status });
   }
 
   if (!outcome) {
