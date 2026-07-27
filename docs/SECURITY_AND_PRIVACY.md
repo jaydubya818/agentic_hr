@@ -24,7 +24,7 @@ GrowthOS handles sensitive employment-related data including skills profiles, ca
 | Audit sensitive actions | All agent and recommendation events logged |
 | Fail secure | 403 on permission failure; no data leakage in errors |
 | Input validation | Zod on all API inputs |
-| Dependency hygiene | Regular `npm audit`; pin versions |
+| Dependency hygiene | Regular `npm audit`; all dependencies pinned to exact lockfile versions |
 
 ---
 
@@ -250,6 +250,7 @@ When `false`:
 | Data | profile_update, goal_update, plan_activate |
 | Recommendations | created, accepted, dismissed |
 | Agents | invoked, blocked, error |
+| Workforce intelligence | decision.created, decision.updated, decision.outcome_recorded, team_scenario.created, team_scenario.updated, agent_action.updated |
 | Admin | role_granted, user_deactivated |
 | Demo | role_switched |
 
@@ -371,6 +372,8 @@ USE_MOCK_AGENTS=true
 | Agent outputs PII leak | Low | High | Governance; no cross-employee data |
 | Demo role switch in prod | Low | Medium | Live mode requires the database-backed role before switching; the active role is clamped to held roles on every request |
 | Cross-team writes via crafted IDs | Medium | High | Team-scenario and workforce-decision writes validate that the target team belongs to the organization and is managed by the caller (unless the role has org-wide access), and that decision owners are in-organization employees; scope violations return 403 |
+| Participant-only decision edits | Medium | Medium | Decision updates and outcome recording require the decision owner, the manager of the decision's team, or an org-wide role; participation alone grants read access only |
+| Login credential stuffing | Medium | High | Live-mode password login is throttled per email (10 attempts / 15 minutes, 429 with Retry-After); successful login clears the counter |
 | Action plans targeting arbitrary employees | Medium | High | Action-plan creation validates that the plan team is managed by the caller and that the plan employee and every proposed-action target are the caller, a direct report, or covered by an org-wide role |
 | Dependency vulnerability | Medium | Medium | npm audit; Dependabot |
 
