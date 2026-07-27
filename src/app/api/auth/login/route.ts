@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 
 import { ACTIVE_ROLE_COOKIE, SESSION_COOKIE } from '@/lib/auth/constants';
+import { checkLoginRateLimit, clearLoginRateLimit } from '@/lib/auth/login-rate-limit';
 import { createMockSessionCookie } from '@/lib/auth/mock-session';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
 import { shouldUseMockData } from '@/services/data-provider/provider-config';
@@ -28,12 +29,26 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Password required' }, { status: 400 });
     }
 
+    const rate = checkLoginRateLimit(body.email);
+    if (!rate.allowed) {
+      return NextResponse.json(
+        { error: 'Too many login attempts. Try again later.' },
+        {
+          status: 429,
+          headers: rate.retryAfterMs
+            ? { 'Retry-After': String(Math.ceil(rate.retryAfterMs / 1000)) }
+            : undefined,
+        },
+      );
+    }
+
     const { data, error } = await supabase.auth.signInWithPassword({
       email: body.email,
       password: body.password,
     });
 
     if (!error && data.user) {
+      clearLoginRateLimit(body.email);
       response.cookies.set(SESSION_COOKIE, JSON.stringify({ authenticated: true, userId: data.user.id }), {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
