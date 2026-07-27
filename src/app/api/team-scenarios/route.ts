@@ -6,6 +6,7 @@ import {
   isManagerRole,
 } from '@/lib/auth/rbac';
 import { getSessionContext } from '@/lib/auth/session-context';
+import { logAuditEvent } from '@/services/audit-service';
 import { createTeamScenarioInputSchema } from '@/schemas/workforce-intelligence';
 import { persistTeamScenario } from '@/services/data-provider/workforce-intelligence-persistence';
 import { createTeamScenario, listTeamScenarios } from '@/services/team-scenario-service';
@@ -48,5 +49,12 @@ export async function POST(request: Request) {
   }
 
   await persistTeamScenario(scenario);
+  logAuditEvent({
+    session,
+    action: 'team_scenario.created',
+    entityType: 'team_scenario',
+    entityId: scenario.id,
+    details: { teamId: scenario.teamId, scenarioType: scenario.scenarioType },
+  });
   return NextResponse.json({ scenario }, { status: 201 });
 }

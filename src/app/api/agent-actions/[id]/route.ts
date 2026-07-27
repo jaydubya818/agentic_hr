@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 
 import { canReadOrganizationWorkforceData, isManagerRole } from '@/lib/auth/rbac';
 import { getSessionContext } from '@/lib/auth/session-context';
+import { logAuditEvent } from '@/services/audit-service';
 import { updateAgentProposedActionInputSchema } from '@/schemas/workforce-intelligence';
 import {
   applyActionToGrowthPlan,
@@ -84,6 +85,17 @@ export async function PATCH(request: Request, { params }: RouteParams) {
   const latestAction =
     getMockStore().agentProposedActions.find((candidate) => candidate.id === id) ?? action;
   await updateAgentProposedActionInDb(latestAction);
+
+  logAuditEvent({
+    session,
+    action: 'agent_action.updated',
+    entityType: 'agent_proposed_action',
+    entityId: id,
+    details: {
+      status: latestAction.status,
+      appliedToGrowthPlan: Boolean(applyToGrowthPlan && employeeId),
+    },
+  });
 
   return NextResponse.json({ action: latestAction });
 }
