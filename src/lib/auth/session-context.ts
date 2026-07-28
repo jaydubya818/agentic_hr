@@ -45,7 +45,10 @@ async function getSupabaseBackedSessionContext(): Promise<SessionContext | null>
 
   let resolvedUser = userRow;
 
-  if (!resolvedUser && authUser.email) {
+  // Linking a database user by email is only safe when the auth provider has
+  // verified that email; otherwise an attacker who signs up with a victim's
+  // address (with confirmations disabled) would inherit the victim's account.
+  if (!resolvedUser && authUser.email && authUser.email_confirmed_at) {
     const [byEmail] = await db
       .select()
       .from(users)
