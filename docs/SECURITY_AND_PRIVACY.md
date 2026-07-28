@@ -375,6 +375,8 @@ USE_MOCK_AGENTS=true
 | Participant-only decision edits | Medium | Medium | Decision updates and outcome recording require the decision owner, the manager of the decision's team, or an org-wide role; participation alone grants read access only |
 | Login credential stuffing | Medium | High | Live-mode password login is throttled per email (10 attempts / 15 minutes, 429 with Retry-After); successful login clears the counter |
 | Action plans targeting arbitrary employees | Medium | High | Action-plan creation validates that the plan team is managed by the caller and that the plan employee and every proposed-action target are the caller, a direct report, or covered by an org-wide role |
+| Account takeover via unverified email linking | Low | Critical | Live-mode session resolution only links a database user to a Supabase auth user by email when the provider reports the email as confirmed |
+| Internal error text leaking in API responses | Medium | Medium | Workforce write routes map only Zod issues, malformed JSON, and known scope messages to 4xx bodies via a shared helper; unexpected errors surface as generic 500s |
 | Dependency vulnerability | Medium | Medium | npm audit; Dependabot |
 
 ---
