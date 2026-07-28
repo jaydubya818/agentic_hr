@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 
+import { writeErrorResponse } from '@/lib/api/write-error-response';
 import { canReadOrganizationWorkforceData, isManagerRole } from '@/lib/auth/rbac';
 import { getSessionContext } from '@/lib/auth/session-context';
 import { logAuditEvent } from '@/services/audit-service';
@@ -33,10 +34,7 @@ export async function PATCH(request: Request, { params }: RouteParams) {
   try {
     parsed = patchBodySchema.parse(await request.json());
   } catch (error) {
-    return NextResponse.json(
-      { error: error instanceof Error ? error.message : 'Invalid request' },
-      { status: 400 },
-    );
+    return writeErrorResponse(error);
   }
 
   const { applyToGrowthPlan, employeeId, ...updateInput } = parsed;
