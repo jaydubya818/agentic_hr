@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
 
+import { writeErrorResponse } from '@/lib/api/write-error-response';
 import {
   canReadOrganizationWorkforceData,
   isManagerRole,
@@ -57,9 +58,7 @@ export async function POST(request: Request, { params }: RouteParams) {
         ? recordActualOutcome(session, id, outcomeInput)
         : createExpectedOutcome(session, id, outcomeInput);
   } catch (error) {
-    const message = error instanceof Error ? error.message : 'Invalid request';
-    const status = message === 'Forbidden' ? 403 : 400;
-    return NextResponse.json({ error: message }, { status });
+    return writeErrorResponse(error);
   }
 
   if (!outcome) {

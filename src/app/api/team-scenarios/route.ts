@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 
+import { writeErrorResponse } from '@/lib/api/write-error-response';
 import {
   canReadOrganizationWorkforceData,
   canReadTeamScopedEmployeeData,
@@ -43,9 +44,7 @@ export async function POST(request: Request) {
     const body = createTeamScenarioInputSchema.parse(await request.json());
     scenario = createTeamScenario(session, body);
   } catch (error) {
-    const message = error instanceof Error ? error.message : 'Invalid request';
-    const status = message === 'Forbidden' ? 403 : 400;
-    return NextResponse.json({ error: message }, { status });
+    return writeErrorResponse(error);
   }
 
   await persistTeamScenario(scenario);

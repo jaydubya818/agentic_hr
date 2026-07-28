@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 
+import { writeErrorResponse } from '@/lib/api/write-error-response';
 import { getSessionContext } from '@/lib/auth/session-context';
 import {
   agentProposedActionSchema,
@@ -64,9 +65,7 @@ export async function POST(request: Request) {
 
     plan = createActionPlanFromInput(session, planInput, actions);
   } catch (error) {
-    const message = error instanceof Error ? error.message : 'Invalid request';
-    const status = message === 'Forbidden' ? 403 : 400;
-    return NextResponse.json({ error: message }, { status });
+    return writeErrorResponse(error);
   }
 
   await persistAgentActionPlan(plan);
