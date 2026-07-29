@@ -11,6 +11,10 @@ import type { AgentId, AgentRecommendationResult, AgentResult } from '@/types/ag
 import type { Recommendation, RecommendationEvidence } from '@/services/data-provider/types';
 import { ActionPlanPanel } from '@/components/workforce-intelligence/ActionPlanPanel';
 
+// Keep in sync with MAX_HISTORY_MESSAGES in the invoke route; sending more
+// history than the API accepts fails validation and bricks the conversation.
+const HISTORY_LIMIT = 20;
+
 const AGENT_LABELS: Record<AgentId, string> = {
   'employee-growth': 'Employee Growth Agent',
   supermanager: 'Supermanager Agent',
@@ -115,7 +119,9 @@ export function AgentPanel({
           body: JSON.stringify({
             message: message.trim(),
             context,
-            conversationHistory: messages.map((m) => ({ role: m.role, content: m.content })),
+            conversationHistory: messages
+              .slice(-HISTORY_LIMIT)
+              .map((m) => ({ role: m.role, content: m.content })),
           }),
         });
 
