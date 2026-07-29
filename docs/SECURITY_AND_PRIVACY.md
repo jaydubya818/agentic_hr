@@ -377,6 +377,7 @@ USE_MOCK_AGENTS=true
 | Action plans targeting arbitrary employees | Medium | High | Action-plan creation validates that the plan team is managed by the caller and that the plan employee and every proposed-action target are the caller, a direct report, or covered by an org-wide role |
 | Account takeover via unverified email linking | Low | Critical | Live-mode session resolution only links a database user to a Supabase auth user by email when the provider reports the email as confirmed |
 | Internal error text leaking in API responses | Medium | Medium | Workforce write routes map only Zod issues, malformed JSON, and known scope messages to 4xx bodies via a shared helper; unexpected errors surface as generic 500s |
+| Cross-organization reads via context graphs or agent grounding | Low | High | Context-graph endpoints resolve targets only within the caller's organization (cross-org ids read as 404), and agent invocation rejects a known employee context from another organization before grounding |
 | Dependency vulnerability | Medium | Medium | npm audit; Dependabot |
 
 ---
