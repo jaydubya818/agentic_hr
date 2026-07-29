@@ -42,6 +42,17 @@ describe('agent invocation employee-context scoping', () => {
     ).rejects.toBeInstanceOf(AgentAccessError);
   });
 
+  it('rejects an HR session targeting an employee in another organization', async () => {
+    const session = buildSession(MOCK_IDS.employees.jordan, ['employee', 'hr_admin'], 'hr');
+    await expect(
+      invokeAgent('employee-growth', {
+        session: { ...session, organizationId: '99999999-9999-4999-8999-999999999999' },
+        message: 'What should this employee focus on next?',
+        context: { employeeId: MOCK_IDS.employees.alex, contextType: 'growth-profile' },
+      }),
+    ).rejects.toBeInstanceOf(AgentAccessError);
+  });
+
   it('allows an employee to use their own context', async () => {
     const result = await invokeAgent('employee-growth', {
       session: buildSession(MOCK_IDS.employees.alex, ['employee'], 'employee'),
