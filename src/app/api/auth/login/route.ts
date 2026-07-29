@@ -14,7 +14,9 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Invalid JSON body' }, { status: 400 });
   }
 
-  if (!body.email) {
+  // Guard the types before use: a non-string email would throw inside the
+  // rate limiter and surface as a 500 instead of a 400.
+  if (typeof body.email !== 'string' || body.email.trim() === '') {
     return NextResponse.json({ error: 'Email required' }, { status: 400 });
   }
 
@@ -25,7 +27,7 @@ export async function POST(request: Request) {
     if (!supabase) {
       return NextResponse.json({ error: 'Authentication is not configured' }, { status: 503 });
     }
-    if (!body.password) {
+    if (typeof body.password !== 'string' || body.password === '') {
       return NextResponse.json({ error: 'Password required' }, { status: 400 });
     }
 
