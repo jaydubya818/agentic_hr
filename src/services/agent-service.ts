@@ -415,6 +415,15 @@ function buildRecommendationsForAgent(
 function assertAgentAccess(agentId: AgentId, params: AgentInvokeParams): void {
   const { session, context } = params;
 
+  if (context?.employeeId) {
+    // Role checks below never span organizations: a known employee context in
+    // another organization is concealed as inaccessible.
+    const target = dataProvider.getEmployee(context.employeeId);
+    if (target && target.organizationId !== session.organizationId) {
+      throw new AgentAccessError('Cannot access data for another employee');
+    }
+  }
+
   if (agentId === 'supermanager' && session.activeRole !== 'manager' && session.activeRole !== 'hr') {
     throw new AgentAccessError('Supermanager agent requires manager role');
   }
