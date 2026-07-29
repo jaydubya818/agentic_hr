@@ -123,19 +123,26 @@ function edgesForEntity(entityType: ContextEntityType, entityId: string): Workfo
   );
 }
 
-export function getEmployeeContextGraph(employeeId: string): ContextGraph | null {
+export function getEmployeeContextGraph(
+  employeeId: string,
+  organizationId?: string,
+): ContextGraph | null {
   const store = getMockStore();
   const employee = store.employees.find((e) => e.id === employeeId);
   if (!employee) return null;
+  // Do not reveal cross-organization employees; treat them as not found.
+  if (organizationId !== undefined && employee.organizationId !== organizationId) return null;
 
   const edges = edgesForEntity('employee', employeeId);
   return buildGraphFromEdges('employee', employeeId, edges, store);
 }
 
-export function getTeamContextGraph(teamId: string): ContextGraph | null {
+export function getTeamContextGraph(teamId: string, organizationId?: string): ContextGraph | null {
   const store = getMockStore();
   const team = store.teams.find((t) => t.id === teamId);
   if (!team) return null;
+  // Do not reveal cross-organization teams; treat them as not found.
+  if (organizationId !== undefined && team.organizationId !== organizationId) return null;
 
   const edges = edgesForEntity('team', teamId);
   return buildGraphFromEdges('team', teamId, edges, store);

@@ -32,7 +32,7 @@ export async function GET(_request: Request, { params }: RouteParams) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
   }
 
-  const graph = getEmployeeContextGraph(id);
+  const graph = getEmployeeContextGraph(id, session.organizationId);
   if (!graph) {
     return NextResponse.json({ error: 'Not found' }, { status: 404 });
   }
