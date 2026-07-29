@@ -48,11 +48,18 @@ export function TopBar({
     .toUpperCase();
 
   async function handleRoleChange(value: DemoRole) {
-    await fetch('/api/auth/demo-role', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ role: value }),
-    });
+    // Only navigate once the server has accepted the role; a rejected switch
+    // (e.g. 403 in live mode) would otherwise land on a forbidden redirect.
+    try {
+      const response = await fetch('/api/auth/demo-role', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ role: value }),
+      });
+      if (!response.ok) return;
+    } catch {
+      return;
+    }
     const home =
       value === 'hr' ? '/hr/home' : value === 'manager' ? '/manager/home' : '/employee/home';
     router.push(home);

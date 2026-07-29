@@ -19,19 +19,30 @@ export function SettingsRoleSwitcher({ initialRole }: SettingsRoleSwitcherProps)
   const router = useRouter();
   const [activeRole, setActiveRole] = useState<DemoRole>(initialRole);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   async function switchRole(role: DemoRole) {
     setLoading(true);
-    await fetch('/api/auth/demo-role', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ role }),
-    });
-    setActiveRole(role);
-    const home = role === 'hr' ? '/hr/home' : role === 'manager' ? '/manager/home' : '/employee/home';
-    router.push(home);
-    router.refresh();
-    setLoading(false);
+    setError(null);
+    try {
+      const response = await fetch('/api/auth/demo-role', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ role }),
+      });
+      if (!response.ok) {
+        setError('Could not switch roles. Your account may not have access to that view.');
+        return;
+      }
+      setActiveRole(role);
+      const home = role === 'hr' ? '/hr/home' : role === 'manager' ? '/manager/home' : '/employee/home';
+      router.push(home);
+      router.refresh();
+    } catch {
+      setError('Could not switch roles. Check your connection and try again.');
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (
@@ -52,6 +63,11 @@ export function SettingsRoleSwitcher({ initialRole }: SettingsRoleSwitcherProps)
           <span className="text-sm text-muted-foreground">{role.description}</span>
         </button>
       ))}
+      {error ? (
+        <p role="alert" className="text-sm text-destructive">
+          {error}
+        </p>
+      ) : null}
       <Button variant="outline" disabled className="w-fit">
         Active role: {ROLES.find((r) => r.value === activeRole)?.label}
       </Button>
