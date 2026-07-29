@@ -18,11 +18,19 @@ export default function LoginPage() {
     setLoading(true);
     setError('');
 
-    const response = await fetch('/api/auth/login', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password }),
-    });
+    let response: Response;
+    try {
+      response = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+      });
+    } catch {
+      // A network failure would otherwise leave the form stuck in loading.
+      setError('Could not reach the server. Check your connection and try again.');
+      setLoading(false);
+      return;
+    }
 
     if (!response.ok) {
       setError('Invalid credentials. Use the demo email and any password.');
