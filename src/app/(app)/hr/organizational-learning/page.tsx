@@ -19,11 +19,13 @@ export default function HrOrganizationalLearningPage() {
   const [effectiveness, setEffectiveness] = useState<RecommendationEffectiveness[]>([]);
   const [signals, setSignals] = useState<LearningSignal[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
     async function load() {
       setLoading(true);
+      setLoadError(false);
       try {
         const response = await fetch('/api/organizational-learning');
         if (response.ok) {
@@ -39,7 +41,13 @@ export default function HrOrganizationalLearningPage() {
             setEffectiveness(data.recommendationEffectiveness);
             setSignals(data.learningSignals);
           }
+        } else if (!cancelled) {
+          setLoadError(true);
         }
+      } catch {
+        // A network failure would otherwise escape the effect as an unhandled
+        // rejection and render an empty dashboard with no explanation.
+        if (!cancelled) setLoadError(true);
       } finally {
         if (!cancelled) setLoading(false);
       }
@@ -59,6 +67,10 @@ export default function HrOrganizationalLearningPage() {
       />
       {loading ? (
         <p className="text-sm text-muted-foreground">Loading learning signals…</p>
+      ) : loadError ? (
+        <p role="alert" className="text-sm text-destructive">
+          Could not load learning signals. Refresh the page to try again.
+        </p>
       ) : (
         <div className="space-y-8">
           <section className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
