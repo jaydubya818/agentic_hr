@@ -33,9 +33,11 @@ export function RecommendationCard({
 }: RecommendationCardProps) {
   const [status, setStatus] = useState(recommendation.status);
   const [isUpdating, setIsUpdating] = useState(false);
+  const [updateError, setUpdateError] = useState<string | null>(null);
 
   async function updateStatus(next: 'accepted' | 'dismissed') {
     setIsUpdating(true);
+    setUpdateError(null);
     try {
       const response = await fetch(`/api/recommendations/${recommendation.id}/status`, {
         method: 'PATCH',
@@ -44,7 +46,13 @@ export function RecommendationCard({
       });
       if (response.ok) {
         setStatus(next);
+      } else {
+        setUpdateError('Could not update this recommendation. Try again.');
       }
+    } catch {
+      // A network failure would otherwise surface as an unhandled rejection
+      // and leave the card looking interactive with no feedback.
+      setUpdateError('Could not update this recommendation. Check your connection and try again.');
     } finally {
       setIsUpdating(false);
     }
@@ -96,7 +104,7 @@ export function RecommendationCard({
         <p className="text-xs text-muted-foreground">Created {createdDate}</p>
       </CardContent>
       {showActions && status === 'pending' && (
-        <CardFooter className="gap-2 border-t pt-4">
+        <CardFooter className="flex-wrap gap-2 border-t pt-4">
           <Button size="sm" disabled={isUpdating} onClick={() => updateStatus('accepted')}>
             Accept
           </Button>
@@ -108,6 +116,11 @@ export function RecommendationCard({
           >
             Dismiss
           </Button>
+          {updateError ? (
+            <p role="alert" className="w-full text-sm text-destructive">
+              {updateError}
+            </p>
+          ) : null}
         </CardFooter>
       )}
       {status === 'accepted' && (
