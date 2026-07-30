@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { useState } from 'react';
 import { Menu } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
@@ -40,6 +41,9 @@ export function TopBar({
 }: TopBarProps) {
   const router = useRouter();
   const pathname = usePathname();
+  // The top bar lives in the persistent (app) layout, so an uncontrolled
+  // sheet would stay open across client-side navigations.
+  const [navOpen, setNavOpen] = useState(false);
   const initials = userName
     .split(' ')
     .map((part) => part[0])
@@ -69,7 +73,7 @@ export function TopBar({
   return (
     <header className="sticky top-0 z-40 flex h-14 items-center justify-between border-b border-border bg-surface px-4 md:px-6">
       <div className="flex items-center gap-3">
-        <Sheet>
+        <Sheet open={navOpen} onOpenChange={setNavOpen}>
           <SheetTrigger
             render={
               <Button variant="ghost" size="icon" className="lg:hidden" aria-label="Open navigation">
@@ -88,6 +92,7 @@ export function TopBar({
                   <Link
                     key={item.href}
                     href={item.href}
+                    onClick={() => setNavOpen(false)}
                     className={cn(
                       'rounded-lg px-3 py-2 text-sm font-medium transition-colors',
                       isActive
