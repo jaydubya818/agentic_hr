@@ -28,6 +28,7 @@ interface AuditLogRow {
 export default function HrAuditPage() {
   const [logs, setLogs] = useState<AuditLogRow[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
   const [actionFilter, setActionFilter] = useState<string>('all');
   const [agentFilter, setAgentFilter] = useState<string>('all');
   const [search, setSearch] = useState('');
@@ -36,12 +37,19 @@ export default function HrAuditPage() {
     let cancelled = false;
     async function load() {
       setLoading(true);
+      setLoadError(false);
       try {
         const response = await fetch('/api/hr/audit-logs');
         if (response.ok) {
           const data = (await response.json()) as { logs: AuditLogRow[] };
           if (!cancelled) setLogs(data.logs);
+        } else if (!cancelled) {
+          setLoadError(true);
         }
+      } catch {
+        // A network failure would otherwise escape the effect as an unhandled
+        // rejection and the empty state would misread as "no events".
+        if (!cancelled) setLoadError(true);
       } finally {
         if (!cancelled) setLoading(false);
       }
@@ -160,6 +168,10 @@ export default function HrAuditPage() {
           <CardContent className="overflow-x-auto">
             {loading ? (
               <p className="text-sm text-muted-foreground">Loading audit events…</p>
+            ) : loadError ? (
+              <p role="alert" className="text-sm text-destructive">
+                Could not load audit events. Refresh the page to try again.
+              </p>
             ) : filtered.length === 0 ? (
               <p className="text-sm text-muted-foreground">No audit events match your filters.</p>
             ) : (
