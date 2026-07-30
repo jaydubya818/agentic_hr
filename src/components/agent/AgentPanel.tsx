@@ -155,11 +155,15 @@ export function AgentPanel({
         if (result.actionPlan) {
           setActionPlan(result.actionPlan);
         }
+        setInput('');
       } catch (err) {
+        // Roll back the optimistic user bubble and restore the draft so a
+        // failed message can be corrected and resent instead of being lost.
+        setMessages((prev) => prev.slice(0, -1));
+        setInput(message.trim());
         setError(err instanceof Error ? err.message : 'Something went wrong');
       } finally {
         setLoading(false);
-        setInput('');
       }
     },
     [agentId, context, loading, messages],
