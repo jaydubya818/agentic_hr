@@ -14,7 +14,33 @@ export interface ActionPlanValidationResult {
   blockedActionTypes: string[];
 }
 
-type ActionInput = Pick<AgentProposedAction, 'actionType' | 'title' | 'description' | 'explanation'>;
+type ActionInput = Pick<
+  AgentProposedAction,
+  'actionType' | 'title' | 'description' | 'explanation'
+>;
+
+/**
+ * Employment-decision language that must never appear in a proposed action.
+ * Shared by validation and filtering so both paths block the same terms
+ * (EVALS_AND_GOVERNANCE.md prohibited outputs).
+ */
+const PROHIBITED_ACTION_TERMS = [
+  'terminate',
+  'layoff',
+  'fire',
+  'promote',
+  'promotion',
+  'compensation',
+  'performance rating',
+  'not promotable',
+  'low performer',
+] as const;
+
+function containsProhibitedTerm(action: ActionInput): boolean {
+  const combined =
+    `${action.title} ${action.description ?? ''} ${action.explanation ?? ''}`.toLowerCase();
+  return PROHIBITED_ACTION_TERMS.some((term) => combined.includes(term));
+}
 
 function isDisallowedActionType(value: string): boolean {
   return (DISALLOWED_ACTION_TYPES as readonly string[]).includes(value);
@@ -52,23 +78,9 @@ export function validateActionPlan(actions: ActionInput[]): ActionPlanValidation
       warnings.push(`Action type not in allowed list: ${rawType}`);
     }
 
-    const combined = `${action.title} ${action.description ?? ''} ${action.explanation ?? ''}`.toLowerCase();
-    const prohibitedTerms = [
-      'terminate',
-      'layoff',
-      'fire',
-      'promote',
-      'promotion',
-      'compensation',
-      'performance rating',
-      'not promotable',
-      'low performer',
-    ];
-    for (const term of prohibitedTerms) {
-      if (combined.includes(term)) {
-        errors.push(`Prohibited language detected in action: ${action.title}`);
-        blockedActionTypes.push(rawType);
-      }
+    if (containsProhibitedTerm(action)) {
+      errors.push(`Prohibited language detected in action: ${action.title}`);
+      blockedActionTypes.push(rawType);
     }
   }
 
@@ -89,9 +101,7 @@ export function filterDisallowedActions<T extends ActionInput>(actions: T[]): T[
     const parsed = proposedActionTypeSchema.safeParse(action.actionType);
     if (!parsed.success) return false;
 
-    const combined = `${action.title} ${action.description ?? ''} ${action.explanation ?? ''}`.toLowerCase();
-    const prohibitedTerms = ['terminate', 'layoff', 'fire', 'promote', 'promotion', 'compensation', 'performance rating'];
-    return !prohibitedTerms.some((term) => combined.includes(term));
+    return !containsProhibitedTerm(action);
   });
 }
 
