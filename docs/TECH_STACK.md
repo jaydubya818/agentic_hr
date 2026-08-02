@@ -87,7 +87,7 @@ flowchart TB
 | Styling | **Tailwind CSS** | 4.x |
 | Components | **shadcn/ui** | Latest compatible with Tailwind 4 |
 | Data fetching | **TanStack Query** | 5.x |
-| Validation | **Zod** | 3.x |
+| Validation | **Zod** | 4.x, `< 4.4` (zod 4.4.x breaks the Turbopack production build — verified 2026-08-02) |
 | ORM | **Drizzle ORM** | Latest stable |
 | Database | **Supabase Postgres** | Managed |
 | Auth | **Supabase Auth** | Email/password MVP |
