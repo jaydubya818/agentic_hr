@@ -64,6 +64,39 @@ describe('workforce intelligence governance evals', () => {
     expect(filtered[0]!.actionType).toBe('learning_assignment');
   });
 
+  it('WI-06 filters punitive-label language, matching validation', () => {
+    const filtered = filterDisallowedActions([
+      {
+        actionType: 'coaching_prompt',
+        title: 'Coach out a low performer',
+        description: 'Address the weakest team member',
+        explanation: 'Team health',
+      },
+      {
+        actionType: 'skill_development',
+        title: 'Practice systems design reviews',
+        description: 'Weekly design review participation',
+        explanation: 'Closes an active skill gap',
+      },
+    ]);
+    expect(filtered).toHaveLength(1);
+    expect(filtered[0]!.actionType).toBe('skill_development');
+  });
+
+  it('WI-07 reports one error per action even with multiple prohibited terms', () => {
+    const result = validateActionPlan([
+      {
+        actionType: 'coaching_prompt',
+        title: 'Promotion and compensation review',
+        description: 'Discuss promotion, compensation, and performance rating',
+        explanation: 'Cycle planning',
+      },
+    ]);
+    expect(result.valid).toBe(false);
+    expect(result.errors).toHaveLength(1);
+    expect(result.blockedActionTypes).toEqual(['coaching_prompt']);
+  });
+
   it('WI-05 mock fixture decision types are development-focused', () => {
     const prohibitedInDecisions = ['termination', 'layoff', 'promotion_decision'];
     for (const type of prohibitedInDecisions) {
