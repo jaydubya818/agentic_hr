@@ -15,9 +15,17 @@ describe('agentLlmResponseSchema', () => {
   });
 
   it('falls back to plain text when JSON invalid', () => {
-    const parsed = parseAgentLlmResponse('Plain text response with enough characters for fallback parsing.');
+    const parsed = parseAgentLlmResponse(
+      'Plain text response with enough characters for fallback parsing.',
+    );
     expect(parsed?.response).toContain('Plain text');
     expect(parsed?.evidence.length).toBeGreaterThan(0);
+  });
+
+  it('caps the plain-text fallback at the schema response limit', () => {
+    const parsed = parseAgentLlmResponse('x'.repeat(5000));
+    expect(parsed?.response).toHaveLength(4000);
+    expect(agentLlmResponseSchema.safeParse(parsed).success).toBe(true);
   });
 
   it('returns null for too-short text', () => {
