@@ -126,8 +126,10 @@ export function AgentPanel({
         });
 
         if (!response.ok) {
-          const payload = (await response.json()) as { error?: string };
-          throw new Error(payload.error ?? 'Agent request failed');
+          // Error bodies are not guaranteed to be JSON (e.g. proxy or
+          // platform errors), so fall back to a generic message.
+          const payload = (await response.json().catch(() => null)) as { error?: string } | null;
+          throw new Error(payload?.error ?? 'Agent request failed');
         }
 
         const payload = (await response.json()) as { data: AgentResult };
