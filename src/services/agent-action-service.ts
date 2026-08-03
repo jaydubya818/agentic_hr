@@ -210,16 +210,19 @@ export function applyActionToGrowthPlan(
   if (!growthPlan) return false;
 
   const timestamp = nowIso();
+  // referenceId is polymorphic per actionType: route it to the matching
+  // growth-plan FK column so a learning resource id never lands in skill_id.
+  const isLearningItem = action.actionType === 'learning_assignment';
   store.growthPlanItems.push({
     id: randomUUID(),
     growthPlanId: growthPlan.id,
-    itemType: action.actionType === 'learning_assignment' ? 'learning' : 'skill',
+    itemType: isLearningItem ? 'learning' : 'skill',
     title: action.title,
     description: action.description ?? action.explanation ?? null,
     status: 'pending',
     milestoneDay: 30,
-    skillId: action.referenceId ?? null,
-    learningResourceId: null,
+    skillId: isLearningItem ? null : (action.referenceId ?? null),
+    learningResourceId: isLearningItem ? (action.referenceId ?? null) : null,
     dueDate: null,
     sortOrder: store.growthPlanItems.filter((i) => i.growthPlanId === growthPlan.id).length,
     createdAt: timestamp,
