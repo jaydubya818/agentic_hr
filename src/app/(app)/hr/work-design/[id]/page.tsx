@@ -4,6 +4,7 @@ import { notFound } from 'next/navigation';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { RoleEvolutionCard } from '@/components/workforce-intelligence/RoleEvolutionCard';
 import { Button } from '@/components/ui/button';
+import { getSessionContext } from '@/lib/auth/session-context';
 import { getMockStore } from '@/services/data-provider/mock-provider';
 import { getRoleEvolutionScenario } from '@/services/team-scenario-service';
 
@@ -13,7 +14,8 @@ interface PageProps {
 
 export default async function HrWorkDesignDetailPage({ params }: PageProps) {
   const { id } = await params;
-  const scenario = getRoleEvolutionScenario(id);
+  const session = await getSessionContext();
+  const scenario = session ? getRoleEvolutionScenario(session.organizationId, id) : null;
 
   if (!scenario) {
     notFound();

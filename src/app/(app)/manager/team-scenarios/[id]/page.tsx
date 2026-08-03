@@ -19,12 +19,13 @@ export default async function ManagerTeamScenarioDetailPage({ params }: PageProp
   const { id } = await params;
   const scenario = session ? getTeamScenario(session, id) : null;
 
-  if (!scenario) {
+  if (!session || !scenario) {
     notFound();
   }
 
   const store = getMockStore();
   const comparison = compareTeamScenarios(
+    session.organizationId,
     MOCK_IDS.teamScenarios.productQualityCurrent,
     MOCK_IDS.teamScenarios.productQualityFuture,
   );

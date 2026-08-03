@@ -142,9 +142,14 @@ export function listRoleEvolutionScenarios(organizationId: string): RoleEvolutio
   return getMockStore().roleEvolutionScenarios.filter((s) => s.organizationId === organizationId);
 }
 
-export function getRoleEvolutionScenario(scenarioId: string): RoleEvolutionDetail | null {
+export function getRoleEvolutionScenario(
+  organizationId: string,
+  scenarioId: string,
+): RoleEvolutionDetail | null {
   const store = getMockStore();
-  const scenario = store.roleEvolutionScenarios.find((s) => s.id === scenarioId);
+  const scenario = store.roleEvolutionScenarios.find(
+    (s) => s.id === scenarioId && s.organizationId === organizationId,
+  );
   if (!scenario) return null;
 
   return {
@@ -154,6 +159,7 @@ export function getRoleEvolutionScenario(scenarioId: string): RoleEvolutionDetai
 }
 
 export function compareTeamScenarios(
+  organizationId: string,
   currentScenarioId: string,
   futureScenarioId: string,
 ): {
@@ -173,11 +179,19 @@ export function compareTeamScenarios(
   }>;
 } {
   const store = getMockStore();
-  const current = store.teamScenarios.find((s) => s.id === currentScenarioId);
-  const future = store.teamScenarios.find((s) => s.id === futureScenarioId);
+  const current = store.teamScenarios.find(
+    (s) => s.id === currentScenarioId && s.organizationId === organizationId,
+  );
+  const future = store.teamScenarios.find(
+    (s) => s.id === futureScenarioId && s.organizationId === organizationId,
+  );
 
-  const currentSkills = store.teamScenarioSkills.filter((s) => s.scenarioId === currentScenarioId);
-  const futureSkills = store.teamScenarioSkills.filter((s) => s.scenarioId === futureScenarioId);
+  const currentSkills = current
+    ? store.teamScenarioSkills.filter((s) => s.scenarioId === currentScenarioId)
+    : [];
+  const futureSkills = future
+    ? store.teamScenarioSkills.filter((s) => s.scenarioId === futureScenarioId)
+    : [];
   const skillIds = new Set([
     ...currentSkills.map((s) => s.skillId),
     ...futureSkills.map((s) => s.skillId),
@@ -196,8 +210,12 @@ export function compareTeamScenarios(
     };
   });
 
-  const currentRoles = store.teamScenarioRoles.filter((r) => r.scenarioId === currentScenarioId);
-  const futureRoles = store.teamScenarioRoles.filter((r) => r.scenarioId === futureScenarioId);
+  const currentRoles = current
+    ? store.teamScenarioRoles.filter((r) => r.scenarioId === currentScenarioId)
+    : [];
+  const futureRoles = future
+    ? store.teamScenarioRoles.filter((r) => r.scenarioId === futureScenarioId)
+    : [];
   const roleIds = new Set([
     ...currentRoles.map((r) => r.roleId),
     ...futureRoles.map((r) => r.roleId),

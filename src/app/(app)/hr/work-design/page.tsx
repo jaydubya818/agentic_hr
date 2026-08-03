@@ -3,11 +3,12 @@ import Link from 'next/link';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { MOCK_IDS } from '@/lib/mock/ids';
+import { getSessionContext } from '@/lib/auth/session-context';
 import { listRoleEvolutionScenarios } from '@/services/team-scenario-service';
 
-export default function HrWorkDesignPage() {
-  const scenarios = listRoleEvolutionScenarios(MOCK_IDS.organization);
+export default async function HrWorkDesignPage() {
+  const session = await getSessionContext();
+  const scenarios = session ? listRoleEvolutionScenarios(session.organizationId) : [];
 
   return (
     <>
