@@ -97,6 +97,19 @@ describe('agent governance pipeline', () => {
     expect(result.metadata.responseMode ?? result.metadata.mode).toBeDefined();
   });
 
+  it('demo governance trigger leaves blocked audit-trail entries', async () => {
+    const { invokeAgent } = await import('./agent-service');
+    const { DEMO_GOVERNANCE_BLOCK_TRIGGER } = await import('@/lib/governance/demo-triggers');
+    const { getAuditLogs } = await import('./audit-service');
+    await invokeAgent('employee-growth', {
+      session: TEST_SESSION,
+      message: DEMO_GOVERNANCE_BLOCK_TRIGGER,
+    });
+    const actions = getAuditLogs().map((entry) => entry.action);
+    expect(actions).toContain('agent.invocation.blocked');
+    expect(actions).toContain('recommendation.blocked');
+  });
+
   it('returns safe fallback when raw output is prohibited', async () => {
     const result = await invokeAgentWithRawOutput(
       'employee-growth',
