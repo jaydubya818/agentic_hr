@@ -3,6 +3,7 @@ import { ACTIVE_ROLE_COOKIE } from '@/lib/auth/constants';
 import { userHasAnyRole } from '@/lib/auth/rbac';
 import { getSessionContext } from '@/lib/auth/session-context';
 import type { DemoRole } from '@/lib/auth/types';
+import { logAuditEvent } from '@/services/audit-service';
 import { shouldUseMockData } from '@/services/data-provider/provider-config';
 
 export async function POST(request: Request) {
@@ -18,10 +19,11 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Invalid role' }, { status: 400 });
   }
 
+  const session = await getSessionContext();
+
   if (!shouldUseMockData()) {
     // In live mode the role switcher may only select views the caller's
     // database-backed roles actually grant.
-    const session = await getSessionContext();
     if (!session) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
@@ -32,6 +34,18 @@ export async function POST(request: Request) {
     if (!allowed) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
+  }
+
+  // Role switches are a documented audit event (BACKEND_STRUCTURE 11.1,
+  // EVALS_AND_GOVERNANCE 14.1: role.switched).
+  if (session) {
+    logAuditEvent({
+      session,
+      action: 'role.switched',
+      entityType: 'user',
+      entityId: session.userId,
+      details: { fromRole: session.activeRole, toRole: role },
+    });
   }
 
   const response = NextResponse.json({ success: true, role });
