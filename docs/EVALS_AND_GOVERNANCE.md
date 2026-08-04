@@ -321,7 +321,7 @@ When governance blocks output:
 
 > "We couldn't generate this suggestion right now. GrowthOS focuses on development and growth opportunities. Try rephrasing your request or contact your HR team for employment-related questions."
 
-Log: `governance.blocked` with matched pattern (not shown to user).
+Log: `agent.invocation.blocked` and `recommendation.blocked` with matched pattern (not shown to user).
 
 ---
 
@@ -431,7 +431,7 @@ Route: `/hr/governance` (Phase 10+)
 | Widget | Data Source |
 |--------|-------------|
 | Agent invocations (7d) | `agent_conversations` count |
-| Blocked outputs (7d) | `audit_logs` where action = `governance.blocked` |
+| Blocked outputs (7d) | `audit_logs` where action = `agent.invocation.blocked` |
 | Confidence distribution | `recommendations.confidence_level` histogram |
 | Acceptance rate by type | `recommendations.status` |
 | Top blocked patterns | `audit_logs.details.matchedPattern` |
@@ -445,9 +445,9 @@ Route: `/hr/governance` (Phase 10+)
 
 | Event | Retention | PII in details |
 |-------|-----------|----------------|
-| agent.invoked | 2 years | No raw prompts with PII |
+| agent.invocation | 2 years | Message preview only (200 chars) |
 | agent.response | 90 days | Truncated content |
-| governance.blocked | 2 years | Pattern only |
+| agent.invocation.blocked / recommendation.blocked | 2 years | Pattern only |
 | recommendation.* | 2 years | IDs only |
 | role.switched | 1 year | Role names |
 

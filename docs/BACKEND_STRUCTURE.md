@@ -846,12 +846,19 @@ const CreateRecommendationSchema = z.object({
 | `recommendation.created` | recommendation | Agent creates recommendation |
 | `recommendation.accepted` | recommendation | User accepts |
 | `recommendation.dismissed` | recommendation | User dismisses |
-| `growth_plan.created` | growth_plan | Plan generated |
-| `growth_plan.activated` | growth_plan | Status → active |
-| `agent.invoked` | agent_conversation | Agent called |
-| `governance.blocked` | agent_message | Output blocked |
-| `auth.login` | user | Successful login |
+| `recommendation.blocked` | agent | Recommendation output blocked by governance |
+| `agent.invocation` | agent | Agent called |
+| `agent.invocation.blocked` | agent | Invocation blocked by governance |
+| `agent.response` | agent | Agent response returned |
+| `agent_action.updated` | agent_proposed_action | Proposed action status change |
+| `action_plan_blocked` | agent_action_plan | Action plan blocked by governance |
+| `decision.created` / `decision.updated` | workforce_decision | Decision lifecycle |
+| `decision.outcome_recorded` | decision_outcome | Expected/actual outcome recorded |
+| `team_scenario.created` / `team_scenario.updated` | team_scenario | Scenario lifecycle |
+| `skill.inferred.*` | employee_skill | Inferred-skill review action |
 | `role.switched` | user | Demo role switch |
+
+Planned (not yet emitted): `growth_plan.created`, `growth_plan.activated`, `auth.login`.
 
 ### 11.2 Audit Service
 
