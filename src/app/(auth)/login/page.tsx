@@ -33,7 +33,15 @@ export default function LoginPage() {
     }
 
     if (!response.ok) {
-      setError('Invalid credentials. Use the demo email and any password.');
+      // Surface the server's reason for non-credential failures: a rate-limited
+      // (429) or unconfigured-auth (503) response otherwise reads as bad
+      // credentials and invites retries that extend the lockout.
+      let message = 'Invalid credentials. Use the demo email and any password.';
+      if (response.status !== 401) {
+        const payload = (await response.json().catch(() => null)) as { error?: string } | null;
+        message = payload?.error ?? 'Sign-in failed. Try again.';
+      }
+      setError(message);
       setLoading(false);
       return;
     }
