@@ -462,11 +462,30 @@ export async function invokeAgent(agentId: AgentId, params: AgentInvokeParams): 
   assertAgentAccess(agentId, params);
 
   if (params.message.trim() === DEMO_GOVERNANCE_BLOCK_TRIGGER) {
-    return invokeAgentWithRawOutput(
+    const result = await invokeAgentWithRawOutput(
       agentId,
       params,
       'You should terminate this employee immediately.',
     );
+    // The demo trigger must leave the same audit trail as a live block:
+    // /hr/audit lists agent.invocation.blocked and recommendation.blocked
+    // events (APP_FLOW), and the raw-output helper itself does not log.
+    logAgentInvocation({
+      session: params.session,
+      agentId,
+      message: params.message,
+      governanceStatus: result.governanceStatus,
+      blocked: result.governanceBlocked,
+      matchedPatterns: result.matchedPatterns,
+    });
+    if (result.governanceBlocked) {
+      logRecommendationBlocked({
+        session: params.session,
+        agentId,
+        matchedPatterns: result.matchedPatterns ?? [],
+      });
+    }
+    return result;
   }
 
   const employeeId = resolveEmployeeId(params.session.employeeId, params.context);
