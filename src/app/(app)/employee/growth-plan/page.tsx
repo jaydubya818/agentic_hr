@@ -6,11 +6,16 @@ import { PageHeader } from '@/components/layout/PageHeader';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { DEMO_EMPLOYEE_ID } from '@/lib/mock/ids';
+import { resolveActingEmployeeId } from '@/lib/auth/acting-ids';
+import { getSessionContext } from '@/lib/auth/session-context';
 import { dataProvider } from '@/services/data-provider';
 
-export default function GrowthPlanPage() {
-  const { plan, items } = dataProvider.getGrowthPlan(DEMO_EMPLOYEE_ID);
+export default async function GrowthPlanPage() {
+  const session = await getSessionContext();
+  const employeeId = resolveActingEmployeeId(session);
+  const { plan, items } = employeeId
+    ? dataProvider.getGrowthPlan(employeeId)
+    : { plan: undefined, items: [] };
   const targetRole = plan?.targetRoleId ? dataProvider.getRole(plan.targetRoleId) : undefined;
   const completedCount = items.filter((i) => i.status === 'completed').length;
   const inProgressCount = items.filter((i) => i.status === 'in_progress').length;

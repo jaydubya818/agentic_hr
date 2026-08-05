@@ -1,10 +1,12 @@
 import Link from 'next/link';
 import { ArrowRight, ClipboardList, HelpCircle, ListChecks, MessageSquare } from 'lucide-react';
+import { EmptyState } from '@/components/shared/EmptyState';
 import { SkillChip } from '@/components/shared/SkillChip';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { DEMO_EMPLOYEE_ID } from '@/lib/mock/ids';
+import { resolveActingEmployeeId } from '@/lib/auth/acting-ids';
+import { getSessionContext } from '@/lib/auth/session-context';
 import { dataProvider } from '@/services/data-provider';
 
 function PrepList({ items }: { items: string[] }) {
@@ -22,11 +24,26 @@ function PrepList({ items }: { items: string[] }) {
   );
 }
 
-export default function ManagerConversationPage() {
-  const prep = dataProvider.getManagerConversationPrep(DEMO_EMPLOYEE_ID);
-  const { plan } = dataProvider.getGrowthPlan(DEMO_EMPLOYEE_ID);
+export default async function ManagerConversationPage() {
+  const session = await getSessionContext();
+  const employeeId = resolveActingEmployeeId(session);
+
+  if (!employeeId) {
+    return (
+      <>
+        <PageHeader title="1:1 Prep" breadcrumbs={['Employee', '1:1 Prep']} />
+        <EmptyState
+          title="No employee record"
+          description="Your account is not linked to an employee record yet, so conversation prep cannot be shown."
+        />
+      </>
+    );
+  }
+
+  const prep = dataProvider.getManagerConversationPrep(employeeId);
+  const { plan } = dataProvider.getGrowthPlan(employeeId);
   const manager = dataProvider.getEmployee(
-    dataProvider.getEmployee(DEMO_EMPLOYEE_ID)?.managerId ?? '',
+    dataProvider.getEmployee(employeeId)?.managerId ?? '',
   );
   const managerUser = manager?.userId
     ? dataProvider.getCurrentUser(manager.userId)

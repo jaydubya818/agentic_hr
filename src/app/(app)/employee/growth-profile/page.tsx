@@ -10,7 +10,8 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { calculateProfileCompletion } from '@/lib/employee/profile-completion';
-import { DEMO_EMPLOYEE_ID, DEMO_USER_ID } from '@/lib/mock/ids';
+import { resolveActingEmployeeId, resolveActingUserId } from '@/lib/auth/acting-ids';
+import { getSessionContext } from '@/lib/auth/session-context';
 import { dataProvider } from '@/services/data-provider';
 
 const PREFERENCE_LABELS: Record<string, string> = {
@@ -30,14 +31,30 @@ function formatPreferenceValue(value: unknown): string {
   return value.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
 }
 
-export default function GrowthProfilePage() {
-  const user = dataProvider.getCurrentUser(DEMO_USER_ID);
-  const employee = dataProvider.getEmployee(DEMO_EMPLOYEE_ID);
-  const profile = dataProvider.getEmployeeProfile(DEMO_EMPLOYEE_ID);
-  const employeeSkills = dataProvider.getEmployeeSkills(DEMO_EMPLOYEE_ID);
+export default async function GrowthProfilePage() {
+  const session = await getSessionContext();
+  const employeeId = resolveActingEmployeeId(session);
+  const userId = resolveActingUserId(session);
+
+  if (!employeeId || !userId) {
+    return (
+      <>
+        <PageHeader title="Growth Profile" breadcrumbs={['Employee', 'Growth Profile']} />
+        <EmptyState
+          title="No employee record"
+          description="Your account is not linked to an employee record yet, so profile data cannot be shown."
+        />
+      </>
+    );
+  }
+
+  const user = dataProvider.getCurrentUser(userId);
+  const employee = dataProvider.getEmployee(employeeId);
+  const profile = dataProvider.getEmployeeProfile(employeeId);
+  const employeeSkills = dataProvider.getEmployeeSkills(employeeId);
   const skills = dataProvider.getSkills();
   const skillById = new Map(skills.map((s) => [s.id, s]));
-  const careerGoals = dataProvider.getCareerGoals(DEMO_EMPLOYEE_ID);
+  const careerGoals = dataProvider.getCareerGoals(employeeId);
   const activeGoal = careerGoals.find((g) => g.status === 'active');
   const targetRole = activeGoal?.targetRoleId
     ? dataProvider.getRole(activeGoal.targetRoleId)
@@ -45,8 +62,8 @@ export default function GrowthProfilePage() {
   const currentRole = employee?.currentRoleId
     ? dataProvider.getRole(employee.currentRoleId)
     : undefined;
-  const { plan } = dataProvider.getGrowthPlan(DEMO_EMPLOYEE_ID);
-  const recommendations = dataProvider.getRecommendations(DEMO_EMPLOYEE_ID).slice(0, 2);
+  const { plan } = dataProvider.getGrowthPlan(employeeId);
+  const recommendations = dataProvider.getRecommendations(employeeId).slice(0, 2);
 
   const profileCompletion = calculateProfileCompletion({
     profile,
@@ -215,7 +232,7 @@ export default function GrowthProfilePage() {
           </section>
         )}
 
-        <EmployeeAgentSection employeeId={DEMO_EMPLOYEE_ID} />
+        <EmployeeAgentSection employeeId={employeeId} />
 
         {recommendations.length > 0 && (
           <section className="space-y-4">

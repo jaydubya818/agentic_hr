@@ -7,12 +7,17 @@ import { PageHeader } from '@/components/layout/PageHeader';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { DEMO_EMPLOYEE_ID } from '@/lib/mock/ids';
+import { resolveActingEmployeeId } from '@/lib/auth/acting-ids';
+import { getSessionContext } from '@/lib/auth/session-context';
 import { dataProvider } from '@/services/data-provider';
 
-export default function CareerPathsPage() {
-  const careerPaths = dataProvider.getCareerPaths(DEMO_EMPLOYEE_ID);
-  const activeGoal = dataProvider.getCareerGoals(DEMO_EMPLOYEE_ID).find((g) => g.status === 'active');
+export default async function CareerPathsPage() {
+  const session = await getSessionContext();
+  const employeeId = resolveActingEmployeeId(session);
+  const careerPaths = employeeId ? dataProvider.getCareerPaths(employeeId) : [];
+  const activeGoal = employeeId
+    ? dataProvider.getCareerGoals(employeeId).find((g) => g.status === 'active')
+    : undefined;
 
   return (
     <>

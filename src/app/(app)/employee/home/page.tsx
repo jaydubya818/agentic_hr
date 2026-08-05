@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { ArrowRight, Compass, MessageSquare, Target, TrendingUp } from 'lucide-react';
 import { ConfidenceIndicator } from '@/components/shared/ConfidenceIndicator';
+import { EmptyState } from '@/components/shared/EmptyState';
 import { GrowthPlanTimeline } from '@/components/shared/GrowthPlanTimeline';
 import { RecommendationCard } from '@/components/shared/RecommendationCard';
 import { SkillChip } from '@/components/shared/SkillChip';
@@ -8,7 +9,8 @@ import { PageHeader } from '@/components/layout/PageHeader';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { calculateProfileCompletion } from '@/lib/employee/profile-completion';
-import { DEMO_EMPLOYEE_ID, DEMO_USER_ID } from '@/lib/mock/ids';
+import { resolveActingEmployeeId, resolveActingUserId } from '@/lib/auth/acting-ids';
+import { getSessionContext } from '@/lib/auth/session-context';
 import { dataProvider } from '@/services/data-provider';
 
 function KpiCard({
@@ -31,20 +33,36 @@ function KpiCard({
   );
 }
 
-export default function EmployeeHomePage() {
-  const user = dataProvider.getCurrentUser(DEMO_USER_ID);
-  const employee = dataProvider.getEmployee(DEMO_EMPLOYEE_ID);
-  const profile = dataProvider.getEmployeeProfile(DEMO_EMPLOYEE_ID);
-  const employeeSkills = dataProvider.getEmployeeSkills(DEMO_EMPLOYEE_ID);
+export default async function EmployeeHomePage() {
+  const session = await getSessionContext();
+  const employeeId = resolveActingEmployeeId(session);
+  const userId = resolveActingUserId(session);
+
+  if (!employeeId || !userId) {
+    return (
+      <>
+        <PageHeader title="My Growth Home" breadcrumbs={['Employee', 'My Growth Home']} />
+        <EmptyState
+          title="No employee record"
+          description="Your account is not linked to an employee record yet, so growth data cannot be shown."
+        />
+      </>
+    );
+  }
+
+  const user = dataProvider.getCurrentUser(userId);
+  const employee = dataProvider.getEmployee(employeeId);
+  const profile = dataProvider.getEmployeeProfile(employeeId);
+  const employeeSkills = dataProvider.getEmployeeSkills(employeeId);
   const skills = dataProvider.getSkills();
   const skillById = new Map(skills.map((s) => [s.id, s]));
-  const careerGoals = dataProvider.getCareerGoals(DEMO_EMPLOYEE_ID);
+  const careerGoals = dataProvider.getCareerGoals(employeeId);
   const activeGoal = careerGoals.find((g) => g.status === 'active');
-  const { plan, items } = dataProvider.getGrowthPlan(DEMO_EMPLOYEE_ID);
-  const recommendations = dataProvider.getRecommendations(DEMO_EMPLOYEE_ID).filter(
+  const { plan, items } = dataProvider.getGrowthPlan(employeeId);
+  const recommendations = dataProvider.getRecommendations(employeeId).filter(
     (r) => r.status === 'pending',
   );
-  const careerPaths = dataProvider.getCareerPaths(DEMO_EMPLOYEE_ID);
+  const careerPaths = dataProvider.getCareerPaths(employeeId);
   const currentRole = employee?.currentRoleId
     ? dataProvider.getRole(employee.currentRoleId)
     : undefined;
