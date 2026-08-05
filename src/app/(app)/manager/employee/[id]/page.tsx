@@ -10,7 +10,8 @@ import { PageHeader } from '@/components/layout/PageHeader';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { DEMO_MANAGER_EMPLOYEE_ID } from '@/lib/mock/ids';
+import { resolveActingManagerEmployeeId } from '@/lib/auth/acting-ids';
+import { getSessionContext } from '@/lib/auth/session-context';
 import { dataProvider } from '@/services/data-provider';
 
 interface PageProps {
@@ -19,7 +20,13 @@ interface PageProps {
 
 export default async function ManagerEmployeeDetailPage({ params }: PageProps) {
   const { id } = await params;
-  const summary = dataProvider.getEmployeeSummaryForManager(DEMO_MANAGER_EMPLOYEE_ID, id);
+  const session = await getSessionContext();
+  // Direct-report access is checked against the session's own employee; the
+  // demo-manager identity applies only in mock mode.
+  const managerEmployeeId = resolveActingManagerEmployeeId(session);
+  const summary = managerEmployeeId
+    ? dataProvider.getEmployeeSummaryForManager(managerEmployeeId, id)
+    : undefined;
 
   if (!summary) {
     redirect('/forbidden');
