@@ -37,7 +37,6 @@ import {
   userSchema,
 } from '@/schemas';
 import { getConfidenceLevel } from '@/lib/format/confidence';
-import { DEMO_EMPLOYEE_ID, DEMO_USER_ID } from '@/lib/mock/ids';
 import { shouldUseSupabaseProvider } from './provider-config';
 import { getCachedSupabaseStore } from './store-runtime';
 import type {
@@ -130,7 +129,7 @@ export function getMockStore(): MockDataStore {
   return store;
 }
 
-export function getCurrentUser(userId: string = DEMO_USER_ID): User | undefined {
+export function getCurrentUser(userId: string): User | undefined {
   return getMockStore().users.find((u) => u.id === userId);
 }
 
@@ -138,7 +137,7 @@ export function getEmployeeByUserId(userId: string): Employee | undefined {
   return getMockStore().employees.find((e) => e.userId === userId);
 }
 
-export function getEmployeeProfile(employeeId: string = DEMO_EMPLOYEE_ID): EmployeeProfile | undefined {
+export function getEmployeeProfile(employeeId: string): EmployeeProfile | undefined {
   return getMockStore().employeeProfiles.find((p) => p.employeeId === employeeId);
 }
 
@@ -170,7 +169,7 @@ export function getCareerGoals(employeeId: string): CareerGoal[] {
   return getMockStore().careerGoals.filter((g) => g.employeeId === employeeId);
 }
 
-export function getCareerPaths(employeeId: string = DEMO_EMPLOYEE_ID): CareerPathMatch[] {
+export function getCareerPaths(employeeId: string): CareerPathMatch[] {
   const data = getMockStore();
   const employee = data.employees.find((e) => e.id === employeeId);
   if (!employee) return [];
@@ -215,7 +214,7 @@ export function getCareerPaths(employeeId: string = DEMO_EMPLOYEE_ID): CareerPat
   });
 }
 
-export function getGrowthPlan(employeeId: string = DEMO_EMPLOYEE_ID): {
+export function getGrowthPlan(employeeId: string): {
   plan: GrowthPlan | undefined;
   items: GrowthPlanItem[];
 } {
@@ -229,7 +228,7 @@ export function getGrowthPlan(employeeId: string = DEMO_EMPLOYEE_ID): {
   return { plan, items };
 }
 
-export function getRecommendations(employeeId: string = DEMO_EMPLOYEE_ID): Array<
+export function getRecommendations(employeeId: string): Array<
   Recommendation & { evidence: RecommendationEvidence[] }
 > {
   const data = getMockStore();
@@ -259,7 +258,7 @@ export function getSkill(skillId: string): Skill | undefined {
 }
 
 export function getManagerConversationPrep(
-  employeeId: string = DEMO_EMPLOYEE_ID,
+  employeeId: string,
 ): ManagerConversationPrep {
   const data = getMockStore();
   const { plan, items } = getGrowthPlan(employeeId);
@@ -1179,7 +1178,7 @@ function buildStretchOpportunitiesForEmployee(employeeId: string): Array<
 }
 
 export function getManagerDashboard(
-  managerEmployeeId: string = '33333333-3333-4333-8333-333333333332',
+  managerEmployeeId: string,
 ): ManagerDashboard | null {
   const manager = getEmployee(managerEmployeeId);
   if (!manager) return null;
@@ -1294,7 +1293,7 @@ export function getManagerDashboard(
 }
 
 export function getTeamSkillsMatrix(
-  managerEmployeeId: string = '33333333-3333-4333-8333-333333333332',
+  managerEmployeeId: string,
 ): TeamSkillsMatrix | null {
   const manager = getEmployee(managerEmployeeId);
   if (!manager) return null;
@@ -1353,7 +1352,7 @@ export function getTeamSkillsMatrix(
 }
 
 export function getCoachingPrompts(
-  managerEmployeeId: string = '33333333-3333-4333-8333-333333333332',
+  managerEmployeeId: string,
 ): CoachingPrompt[] {
   const members = getTeamMembers(managerEmployeeId);
   return members.flatMap((employee) => {
@@ -1409,7 +1408,7 @@ export function getEmployeeSummaryForManager(
 }
 
 export function getTeamCapabilityPlan(
-  managerEmployeeId: string = '33333333-3333-4333-8333-333333333332',
+  managerEmployeeId: string,
 ): TeamCapabilityPlan | null {
   const matrix = getTeamSkillsMatrix(managerEmployeeId);
   if (!matrix) return null;
