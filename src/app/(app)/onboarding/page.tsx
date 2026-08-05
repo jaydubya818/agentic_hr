@@ -8,7 +8,6 @@ import { PageHeader } from '@/components/layout/PageHeader';
 import { AgentPanel } from '@/components/agent/AgentPanel';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { DEMO_EMPLOYEE_ID } from '@/lib/mock/ids';
 
 const STEPS = ['Welcome', 'Profile', 'Growth goal'] as const;
 
@@ -102,7 +101,7 @@ export default function OnboardingPage() {
             agentId="employee-growth"
             title="Onboarding assistant"
             description="Ask about your first growth steps — governed Q&A on development only."
-            context={{ employeeId: DEMO_EMPLOYEE_ID, contextType: 'onboarding' }}
+            context={{ contextType: 'onboarding' }}
           />
         </div>
       )}
