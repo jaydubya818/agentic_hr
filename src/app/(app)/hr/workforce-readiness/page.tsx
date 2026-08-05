@@ -5,6 +5,8 @@ import { PageHeader } from '@/components/layout/PageHeader';
 import { KpiCard } from '@/components/shared/KpiCard';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { redirect } from 'next/navigation';
+import { getSessionContext } from '@/lib/auth/session-context';
 import { dataProvider } from '@/services/data-provider';
 
 const demandVariant = {
@@ -20,8 +22,13 @@ const strategyLabels = {
   redeploy: 'Redeploy',
 } as const;
 
-export default function WorkforceReadinessPage() {
-  const report = dataProvider.getWorkforceReadinessReport();
+export default async function WorkforceReadinessPage() {
+  const session = await getSessionContext();
+  if (!session) {
+    redirect('/login');
+  }
+
+  const report = dataProvider.getWorkforceReadinessReport(session.organizationId);
 
   return (
     <>

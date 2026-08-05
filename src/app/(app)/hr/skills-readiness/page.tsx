@@ -5,10 +5,17 @@ import { HrInsightList } from '@/components/hr/HrInsightCard';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { KpiCard } from '@/components/shared/KpiCard';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { redirect } from 'next/navigation';
+import { getSessionContext } from '@/lib/auth/session-context';
 import { dataProvider } from '@/services/data-provider';
 
-export default function SkillsReadinessPage() {
-  const report = dataProvider.getSkillsReadinessReport();
+export default async function SkillsReadinessPage() {
+  const session = await getSessionContext();
+  if (!session) {
+    redirect('/login');
+  }
+
+  const report = dataProvider.getSkillsReadinessReport(session.organizationId);
   const { dimensions } = report;
 
   return (

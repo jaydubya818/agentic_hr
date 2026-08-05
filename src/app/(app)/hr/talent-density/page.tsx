@@ -5,6 +5,8 @@ import { PageHeader } from '@/components/layout/PageHeader';
 import { KpiCard } from '@/components/shared/KpiCard';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { redirect } from 'next/navigation';
+import { getSessionContext } from '@/lib/auth/session-context';
 import { dataProvider } from '@/services/data-provider';
 
 const trendLabel = {
@@ -13,8 +15,13 @@ const trendLabel = {
   down: 'Needs attention',
 } as const;
 
-export default function TalentDensityPage() {
-  const report = dataProvider.getTalentDensityReport();
+export default async function TalentDensityPage() {
+  const session = await getSessionContext();
+  if (!session) {
+    redirect('/login');
+  }
+
+  const report = dataProvider.getTalentDensityReport(session.organizationId);
 
   return (
     <>

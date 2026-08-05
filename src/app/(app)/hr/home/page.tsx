@@ -15,6 +15,8 @@ import { KpiCard } from '@/components/shared/KpiCard';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { redirect } from 'next/navigation';
+import { getSessionContext } from '@/lib/auth/session-context';
 import { dataProvider } from '@/services/data-provider';
 
 const severityVariant = {
@@ -23,9 +25,14 @@ const severityVariant = {
   low: 'outline',
 } as const;
 
-export default function HrHomePage() {
-  const dashboard = dataProvider.getHrDashboard();
-  const readiness = dataProvider.getSkillsReadinessReport();
+export default async function HrHomePage() {
+  const session = await getSessionContext();
+  if (!session) {
+    redirect('/login');
+  }
+
+  const dashboard = dataProvider.getHrDashboard(session.organizationId);
+  const readiness = dataProvider.getSkillsReadinessReport(session.organizationId);
 
   return (
     <>

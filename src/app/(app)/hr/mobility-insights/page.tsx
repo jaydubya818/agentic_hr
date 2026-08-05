@@ -3,10 +3,17 @@ import { HrInsightList } from '@/components/hr/HrInsightCard';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { KpiCard } from '@/components/shared/KpiCard';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { redirect } from 'next/navigation';
+import { getSessionContext } from '@/lib/auth/session-context';
 import { dataProvider } from '@/services/data-provider';
 
-export default function MobilityInsightsPage() {
-  const insights = dataProvider.getMobilityInsights();
+export default async function MobilityInsightsPage() {
+  const session = await getSessionContext();
+  if (!session) {
+    redirect('/login');
+  }
+
+  const insights = dataProvider.getMobilityInsights(session.organizationId);
 
   return (
     <>
