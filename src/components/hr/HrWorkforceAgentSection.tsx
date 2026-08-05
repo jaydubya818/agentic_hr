@@ -1,7 +1,6 @@
 'use client';
 
 import { AgentPanel } from '@/components/agent/AgentPanel';
-import { DEMO_EMPLOYEE_ID } from '@/lib/mock/ids';
 
 export function HrWorkforceAgentSection() {
   return (
@@ -17,7 +16,7 @@ export function HrWorkforceAgentSection() {
         agentId="skills-intelligence"
         title="Skills intelligence (HR)"
         description="Ask about org skill gaps, inferred skill ratios, and taxonomy suggestions."
-        context={{ employeeId: DEMO_EMPLOYEE_ID, contextType: 'hr-workforce-readiness' }}
+        context={{ contextType: 'hr-workforce-readiness' }}
       />
     </section>
   );
