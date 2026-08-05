@@ -7,11 +7,16 @@ import { PageHeader } from '@/components/layout/PageHeader';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { DEMO_MANAGER_EMPLOYEE_ID } from '@/lib/mock/ids';
+import { resolveActingManagerEmployeeId } from '@/lib/auth/acting-ids';
+import { getSessionContext } from '@/lib/auth/session-context';
 import { dataProvider } from '@/services/data-provider';
 
-export default function TeamSkillsPage() {
-  const matrix = dataProvider.getTeamSkillsMatrix(DEMO_MANAGER_EMPLOYEE_ID);
+export default async function TeamSkillsPage() {
+  const session = await getSessionContext();
+  const managerEmployeeId = resolveActingManagerEmployeeId(session);
+  const matrix = managerEmployeeId
+    ? dataProvider.getTeamSkillsMatrix(managerEmployeeId)
+    : undefined;
   if (!matrix) {
     return (
       <>

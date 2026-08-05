@@ -7,7 +7,8 @@ import { PageHeader } from '@/components/layout/PageHeader';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { DEMO_MANAGER_EMPLOYEE_ID } from '@/lib/mock/ids';
+import { resolveActingManagerEmployeeId } from '@/lib/auth/acting-ids';
+import { getSessionContext } from '@/lib/auth/session-context';
 import { dataProvider } from '@/services/data-provider';
 import type { CoachingPromptCategory } from '@/services/data-provider/types';
 
@@ -18,8 +19,10 @@ const CATEGORY_LABELS: Record<CoachingPromptCategory, string> = {
   project_fit: 'Project fit',
 };
 
-export default function ManagerCoachingPage() {
-  const prompts = dataProvider.getCoachingPrompts(DEMO_MANAGER_EMPLOYEE_ID);
+export default async function ManagerCoachingPage() {
+  const session = await getSessionContext();
+  const managerEmployeeId = resolveActingManagerEmployeeId(session);
+  const prompts = managerEmployeeId ? dataProvider.getCoachingPrompts(managerEmployeeId) : [];
 
   const byEmployee = prompts.reduce<
     Record<string, { name: string; prompts: typeof prompts }>

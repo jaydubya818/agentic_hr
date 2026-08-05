@@ -7,7 +7,8 @@ import { PageHeader } from '@/components/layout/PageHeader';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { DEMO_MANAGER_EMPLOYEE_ID } from '@/lib/mock/ids';
+import { resolveActingManagerEmployeeId } from '@/lib/auth/acting-ids';
+import { getSessionContext } from '@/lib/auth/session-context';
 import { dataProvider } from '@/services/data-provider';
 
 function KpiCard({ label, value, hint }: { label: string; value: string; hint?: string }) {
@@ -22,8 +23,12 @@ function KpiCard({ label, value, hint }: { label: string; value: string; hint?: 
   );
 }
 
-export default function ManagerHomePage() {
-  const dashboard = dataProvider.getManagerDashboard(DEMO_MANAGER_EMPLOYEE_ID);
+export default async function ManagerHomePage() {
+  const session = await getSessionContext();
+  const managerEmployeeId = resolveActingManagerEmployeeId(session);
+  const dashboard = managerEmployeeId
+    ? dataProvider.getManagerDashboard(managerEmployeeId)
+    : undefined;
   if (!dashboard) {
     return (
       <>
