@@ -81,7 +81,7 @@ flowchart TB
 
 | Layer | Technology | Version Guidance |
 |-------|------------|------------------|
-| Framework | **Next.js** (App Router) | 15.x |
+| Framework | **Next.js** (App Router) | 15.5.x backport channel (security-patched; 16.2.x migration planned — see SECURITY_AND_PRIVACY 16.7) |
 | Language | **TypeScript** | 5.x, `strict: true` |
 | UI Library | **React** | 19.x |
 | Styling | **Tailwind CSS** | 4.x |

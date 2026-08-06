@@ -442,6 +442,20 @@ USE_MOCK_AGENTS=true
 - [ ] HTTPS enforced (Vercel default)
 - [ ] Error pages show generic messages in production
 
+### 16.7 Framework security advisories (status 2026-08-06)
+
+- **RSC deserialization RCE (CVE-2025-55182 / CVE-2025-66478, Dec 2025):** the
+  vulnerable `react-server-dom-*` code ships bundled inside Next.js; the fix is
+  taken by upgrading `next`, not the `react`/`react-dom` entries in
+  `package.json`. Patched here via the 15.5 backport channel (currently
+  **15.5.22**).
+- **15.5 backport line:** 15.5.22 also covers the 2026 advisory batch fixed in
+  15.5.21 (Server Action SSRF/DoS, response-body cache confusion, middleware
+  bypass, image-optimization DoS).
+- **Ongoing rule:** Next.js security fixes land on 16.2.x first and are
+  backported to 15.5.x. Stay on the newest 15.5.x until the planned migration
+  to the 16.2.x line (16.2.11+); check advisories before each release.
+
 ---
 
 ## 17. Incident Response (Outline)
