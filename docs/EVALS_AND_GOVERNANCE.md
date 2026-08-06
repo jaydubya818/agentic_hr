@@ -450,6 +450,7 @@ Route: `/hr/governance` (Phase 10+)
 | agent.invocation.blocked / recommendation.blocked | 2 years | Pattern only |
 | recommendation.* | 2 years | IDs only |
 | role.switched | 1 year | Role names |
+| audit.exported | 2 years | Row count only |
 
 ### 14.2 Audit Search (HR)
 

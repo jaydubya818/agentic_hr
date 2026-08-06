@@ -3,7 +3,7 @@ import { NextResponse } from 'next/server';
 import { canReadAuditLogs } from '@/lib/auth/rbac';
 import { escapeCsvCell } from '@/lib/format/csv';
 import { getSessionContext } from '@/lib/auth/session-context';
-import { listAuditLogsForOrganization } from '@/services/audit-service';
+import { listAuditLogsForOrganization, logAuditEvent } from '@/services/audit-service';
 
 export async function GET() {
   const session = await getSessionContext();
@@ -32,6 +32,15 @@ export async function GET() {
   );
 
   const csv = [header.join(','), ...rows].join('\n');
+
+  // Bulk export of the audit trail is itself a sensitive read; record who
+  // pulled it and how much (BACKEND_STRUCTURE 11.1: audit.exported).
+  logAuditEvent({
+    session,
+    action: 'audit.exported',
+    entityType: 'audit_log',
+    details: { rowCount: logs.length },
+  });
 
   return new NextResponse(csv, {
     headers: {

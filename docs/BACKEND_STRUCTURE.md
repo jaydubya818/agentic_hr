@@ -857,6 +857,7 @@ const CreateRecommendationSchema = z.object({
 | `team_scenario.created` / `team_scenario.updated` | team_scenario | Scenario lifecycle |
 | `skill.inferred.*` | employee_skill | Inferred-skill review action |
 | `role.switched` | user | Demo role switch |
+| `audit.exported` | audit_log | HR exports the audit trail as CSV |
 
 Planned (not yet emitted): `growth_plan.created`, `growth_plan.activated`, `auth.login`.
 
