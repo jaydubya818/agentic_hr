@@ -44,6 +44,7 @@ export function TopBar({
   // The top bar lives in the persistent (app) layout, so an uncontrolled
   // sheet would stay open across client-side navigations.
   const [navOpen, setNavOpen] = useState(false);
+  const [switchError, setSwitchError] = useState<string | null>(null);
   const initials = userName
     .split(' ')
     .map((part) => part[0])
@@ -54,14 +55,21 @@ export function TopBar({
   async function handleRoleChange(value: DemoRole) {
     // Only navigate once the server has accepted the role; a rejected switch
     // (e.g. 403 in live mode) would otherwise land on a forbidden redirect.
+    setSwitchError(null);
     try {
       const response = await fetch('/api/auth/demo-role', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ role: value }),
       });
-      if (!response.ok) return;
+      if (!response.ok) {
+        // A silently ignored failure leaves the switcher looking interactive
+        // with no feedback (the Settings switcher already surfaces this).
+        setSwitchError('Could not switch roles. Your account may not have access to that view.');
+        return;
+      }
     } catch {
+      setSwitchError('Could not switch roles. Check your connection and try again.');
       return;
     }
     const home =
@@ -71,6 +79,7 @@ export function TopBar({
   }
 
   return (
+    <>
     <header className="sticky top-0 z-40 flex h-14 items-center justify-between border-b border-border bg-surface px-4 md:px-6">
       <div className="flex items-center gap-3">
         <Sheet open={navOpen} onOpenChange={setNavOpen}>
@@ -131,5 +140,14 @@ export function TopBar({
         </Avatar>
       </div>
     </header>
+    {switchError ? (
+      <div
+        role="alert"
+        className="border-b border-border bg-destructive/10 px-4 py-2 text-sm text-destructive md:px-6"
+      >
+        {switchError}
+      </div>
+    ) : null}
+    </>
   );
 }
