@@ -1,8 +1,10 @@
 import { redirect } from 'next/navigation';
-import { getMockSession } from '@/lib/auth/mock-session';
+import { getSessionContext } from '@/lib/auth/session-context';
 
 export default async function HomePage() {
-  const session = await getMockSession();
+  // Use the session context (not the raw mock cookie) so the live-mode
+  // redirect target reflects the activeRole clamped to database-backed roles.
+  const session = await getSessionContext();
 
   if (!session) {
     redirect('/login');
