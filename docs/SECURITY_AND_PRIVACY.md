@@ -381,6 +381,7 @@ USE_MOCK_AGENTS=true
 | Cross-organization reads via workforce-intelligence scenario pages | Low | High | Role-evolution scenario lookups and team-scenario comparisons filter by the session organization; foreign-organization ids render as 404 with empty comparison deltas |
 | Failed audit-log loads misread as an empty audit trail | Low | Medium | The HR audit page distinguishes load failures from an empty log and shows an explicit error instead of "no events" |
 | Pages grounded on demo fixtures in live mode | Medium | High | Employee, manager, and HR pages resolve the acting employee, manager, and organization from the session; demo-fixture identities apply only in mock mode, and a live session without a matching record renders an empty state or redirects instead of showing fixture-keyed data |
+| Forged active-role cookie reaching HR/manager pages | Medium | High | Beyond the cookie-based middleware guard, the HR and manager route-group layouts re-check the session's roles server-side (database-backed in live mode) and redirect to /forbidden when the role does not grant the subtree |
 | Dependency vulnerability | Medium | Medium | npm audit; Dependabot |
 
 ---
