@@ -55,6 +55,8 @@ When validating H0 against a live Supabase project:
 - [ ] `/manager/coaching` (Supermanager Agent panel)
 - [ ] `/manager/team-capability-plan`
 - [ ] `/manager/employee/33333333-3333-4333-8333-333333333331` (direct report — Alex Chen)
+- [ ] `/manager/decisions` and a decision detail page (evidence + outcome comparison)
+- [ ] `/manager/team-scenarios` and a scenario detail page
 - [ ] Non-direct-report employee ID → `/forbidden`
 
 ---
@@ -66,6 +68,10 @@ When validating H0 against a live Supabase project:
 - [ ] `/hr/mobility-insights`
 - [ ] `/hr/talent-density`
 - [ ] `/hr/workforce-readiness`
+- [ ] `/hr/decisions` and a decision detail page
+- [ ] `/hr/work-design` and a scenario detail page
+- [ ] `/hr/organizational-learning` (learning signals load; error state on failed fetch)
+- [ ] `/hr/audit` (events listed; CSV export downloads)
 
 ---
 
