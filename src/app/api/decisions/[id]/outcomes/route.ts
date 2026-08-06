@@ -14,6 +14,10 @@ import {
 } from '@/services/decision-outcome-service';
 import { persistDecisionOutcome } from '@/services/data-provider/workforce-intelligence-persistence';
 
+// recordedAt / recordedByEmployeeId are intentionally not accepted from the
+// client: the service stamps them server-side (from the clock and the session
+// employee), so accepting them here would only suggest callers can backdate
+// or re-attribute outcomes when they cannot.
 const createOutcomeRequestSchema = z.object({
   outcomeType: z.enum(['expected', 'actual']).optional().default('expected'),
   description: z.string().min(1),
@@ -23,8 +27,6 @@ const createOutcomeRequestSchema = z.object({
   metricLabel: z.string().nullable().optional(),
   metricValue: z.number().nullable().optional(),
   targetValue: z.number().nullable().optional(),
-  recordedAt: z.string().datetime().nullable().optional(),
-  recordedByEmployeeId: z.string().uuid().nullable().optional(),
 });
 
 interface RouteParams {
