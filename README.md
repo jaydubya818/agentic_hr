@@ -72,8 +72,8 @@ Open [http://localhost:3002/login](http://localhost:3002/login) — or port 3000
 | Journey | Key routes |
 |---------|------------|
 | Employee | `/employee/home`, `growth-profile`, `career-paths`, `growth-plan`, `manager-conversation` |
-| Manager | `/manager/home`, `coaching`, `team-skills`, `employee/33333333-3333-4333-8333-333333333331` |
-| HR/Admin | `/hr/home`, `skills-readiness`, `mobility-insights`, `talent-density`, `workforce-readiness` |
+| Manager | `/manager/home`, `coaching`, `team-skills`, `employee/33333333-3333-4333-8333-333333333331`, `decisions`, `team-scenarios` |
+| HR/Admin | `/hr/home`, `skills-readiness`, `mobility-insights`, `talent-density`, `workforce-readiness`, `decisions`, `work-design`, `organizational-learning`, `audit` |
 | Governance | `/employee/growth-profile` → starter **Demo: governance block** |
 | Guard (optional) | Employee opens `/hr/home` → `/forbidden` |
 
