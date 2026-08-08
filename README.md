@@ -59,9 +59,11 @@ Before contributing or using an AI coding assistant, read:
 
 ```bash
 cp .env.example .env.local
-npm install
+npm ci
 npm run dev
 ```
+
+`npm ci` installs the exact versions pinned in `package-lock.json` (use `npm install` only when intentionally changing dependencies — see `docs/SECURITY_AND_PRIVACY.md` §14.1).
 
 Open [http://localhost:3002/login](http://localhost:3002/login) — or port 3000 if available (Next.js uses the next free port when 3000 is in use).
 
