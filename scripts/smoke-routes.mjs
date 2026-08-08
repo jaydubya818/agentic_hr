@@ -97,6 +97,24 @@ async function main() {
     }
   }
 
+  {
+    const headers = {
+      Cookie: `${SESSION_COOKIE}=${SESSION_VALUE}; ${ROLE_COOKIE}=employee`,
+    };
+    const response = await fetch(`${BASE}/api/auth/logout`, { method: 'POST', headers });
+    const setCookies = response.headers.getSetCookie();
+    const clearsSession = setCookies.some(
+      (cookie) => cookie.startsWith(`${SESSION_COOKIE}=`) && /max-age=0/i.test(cookie),
+    );
+    if (response.status === 200 && clearsSession) {
+      console.log(`OK  POST /api/auth/logout clears ${SESSION_COOKIE} (200)`);
+    } else {
+      failures.push(
+        `POST /api/auth/logout expected 200 clearing ${SESSION_COOKIE}, got ${response.status}`,
+      );
+    }
+  }
+
   if (failures.length > 0) {
     console.error('\nSmoke test failures:');
     failures.forEach((f) => console.error(`  - ${f}`));
