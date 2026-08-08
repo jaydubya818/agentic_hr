@@ -21,12 +21,15 @@ export async function POST(request: Request) {
 
   const session = await getSessionContext();
 
+  // Role cookies are only issued to signed-in callers; an anonymous request
+  // must not receive one even in mock mode (deny on ambiguity).
+  if (!session) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
   if (!shouldUseMockData()) {
     // In live mode the role switcher may only select views the caller's
     // database-backed roles actually grant.
-    if (!session) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
     const allowed =
       role === 'employee' ||
       (role === 'manager' && userHasAnyRole(session.roles, ['manager', 'hr_admin', 'org_admin'])) ||
@@ -38,15 +41,13 @@ export async function POST(request: Request) {
 
   // Role switches are a documented audit event (BACKEND_STRUCTURE 11.1,
   // EVALS_AND_GOVERNANCE 14.1: role.switched).
-  if (session) {
-    logAuditEvent({
-      session,
-      action: 'role.switched',
-      entityType: 'user',
-      entityId: session.userId,
-      details: { fromRole: session.activeRole, toRole: role },
-    });
-  }
+  logAuditEvent({
+    session,
+    action: 'role.switched',
+    entityType: 'user',
+    entityId: session.userId,
+    details: { fromRole: session.activeRole, toRole: role },
+  });
 
   const response = NextResponse.json({ success: true, role });
   response.cookies.set(ACTIVE_ROLE_COOKIE, role, {
