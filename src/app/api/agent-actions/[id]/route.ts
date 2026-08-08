@@ -68,16 +68,21 @@ export async function PATCH(request: Request, { params }: RouteParams) {
   }
 
   if (applyToGrowthPlan && employeeId) {
+    // A targeted action always lands on its own target's growth plan; the
+    // caller-supplied employeeId only selects the employee for plan/team-level
+    // actions. Honoring a mismatched body employeeId would let a caller apply
+    // an action proposed for one employee to a different employee's plan.
+    const applyEmployeeId = existing.targetEmployeeId ?? employeeId;
     const canApplyForEmployee =
       canReadOrganizationWorkforceData(session.roles) ||
-      employeeId === session.employeeId ||
+      applyEmployeeId === session.employeeId ||
       (isManagerRole(session.roles) &&
         session.employeeId != null &&
-        isDirectReport(session.employeeId, employeeId));
+        isDirectReport(session.employeeId, applyEmployeeId));
     if (!canApplyForEmployee) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
-    applyActionToGrowthPlan(session.organizationId, id, employeeId);
+    applyActionToGrowthPlan(session.organizationId, id, applyEmployeeId);
   }
 
   const latestAction =
