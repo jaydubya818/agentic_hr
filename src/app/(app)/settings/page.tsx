@@ -1,4 +1,5 @@
 import { SettingsRoleSwitcher } from '@/components/shared/SettingsRoleSwitcher';
+import { SignOutButton } from '@/components/shared/SignOutButton';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { getMockSession } from '@/lib/auth/mock-session';
@@ -41,6 +42,9 @@ export default async function SettingsPage() {
               <span className="font-medium text-foreground">Organization:</span>{' '}
               {session?.organizationName}
             </p>
+            <div className="mt-4">
+              <SignOutButton />
+            </div>
           </CardContent>
         </Card>
       </div>
