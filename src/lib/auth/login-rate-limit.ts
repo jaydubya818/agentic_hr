@@ -27,12 +27,19 @@ export function checkLoginRateLimit(email: string): { allowed: boolean; retryAft
   if (attemptTimestamps.size >= MAX_TRACKED_KEYS) {
     pruneExpiredKeys(windowStart);
   }
-  const prior = attemptTimestamps.get(key) ?? [];
-  const inWindow = prior.filter((t) => t > windowStart);
+  const prior = attemptTimestamps.get(key);
+  const inWindow = (prior ?? []).filter((t) => t > windowStart);
 
   if (inWindow.length >= MAX_ATTEMPTS) {
     const oldest = inWindow[0]!;
     return { allowed: false, retryAfterMs: oldest + WINDOW_MS - now };
+  }
+
+  // Fail closed when the table stays saturated with in-window keys after
+  // pruning: admitting untracked keys past the cap would let a distributed
+  // attacker grow memory without bound or attempt untracked brute force.
+  if (prior === undefined && attemptTimestamps.size >= MAX_TRACKED_KEYS) {
+    return { allowed: false, retryAfterMs: WINDOW_MS };
   }
 
   inWindow.push(now);

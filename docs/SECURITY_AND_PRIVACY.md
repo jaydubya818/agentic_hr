@@ -383,6 +383,7 @@ USE_MOCK_AGENTS=true
 | Pages grounded on demo fixtures in live mode | Medium | High | Employee, manager, and HR pages resolve the acting employee, manager, and organization from the session; demo-fixture identities apply only in mock mode, and a live session without a matching record renders an empty state or redirects instead of showing fixture-keyed data |
 | Forged active-role cookie reaching HR/manager pages | Medium | High | Beyond the cookie-based middleware guard, the HR and manager route-group layouts re-check the session's roles server-side (database-backed in live mode) and redirect to /forbidden when the role does not grant the subtree |
 | Applying a proposed action to the wrong employee's growth plan | Low | Medium | Growth-plan application pins targeted actions to their recorded target employee; the request body's employeeId only selects the employee for plan-level actions, and the permission check runs against the effective target |
+| Rate-limit tracking table exhaustion | Low | Medium | Login and agent-invocation limiters bound their in-memory key tables (1000 keys) and fail closed (429) for new keys while the table is saturated with in-window activity, so distributed key floods cannot grow memory or bypass throttling |
 | Dependency vulnerability | Medium | Medium | npm audit; Dependabot |
 
 ---

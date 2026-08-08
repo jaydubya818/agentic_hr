@@ -20,12 +20,19 @@ export function checkAgentRateLimit(sessionKey: string): { allowed: boolean; ret
   if (invocationTimestamps.size >= MAX_TRACKED_SESSIONS) {
     pruneExpiredSessions(windowStart);
   }
-  const prior = invocationTimestamps.get(sessionKey) ?? [];
-  const inWindow = prior.filter((t) => t > windowStart);
+  const prior = invocationTimestamps.get(sessionKey);
+  const inWindow = (prior ?? []).filter((t) => t > windowStart);
 
   if (inWindow.length >= MAX_INVOCATIONS) {
     const oldest = inWindow[0]!;
     return { allowed: false, retryAfterMs: oldest + WINDOW_MS - now };
+  }
+
+  // Fail closed when the table stays saturated with in-window sessions after
+  // pruning: admitting untracked keys past the cap would grow memory without
+  // bound under a flood of distinct session keys.
+  if (prior === undefined && invocationTimestamps.size >= MAX_TRACKED_SESSIONS) {
+    return { allowed: false, retryAfterMs: WINDOW_MS };
   }
 
   inWindow.push(now);
