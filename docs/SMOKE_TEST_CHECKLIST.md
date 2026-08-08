@@ -33,6 +33,7 @@ When validating H0 against a live Supabase project:
 - [ ] Top-bar role switcher: Manager → `/manager/home`
 - [ ] Top-bar role switcher: HR / Admin → `/hr/home`
 - [ ] Settings role switcher matches top-bar behavior
+- [ ] Settings sign out returns to `/login`; protected routes redirect until signing in again
 - [ ] Employee role visiting `/hr/home` → `/forbidden`
 - [ ] Mobile nav sheet opens and links work (resize viewport)
 
