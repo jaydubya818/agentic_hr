@@ -385,6 +385,29 @@ USE_MOCK_AGENTS=true
 | Applying a proposed action to the wrong employee's growth plan | Low | Medium | Growth-plan application pins targeted actions to their recorded target employee; the request body's employeeId only selects the employee for plan-level actions, and the permission check runs against the effective target |
 | Rate-limit tracking table exhaustion | Low | Medium | Login and agent-invocation limiters bound their in-memory key tables (1000 keys) and fail closed (429) for new keys while the table is saturated with in-window activity, so distributed key floods cannot grow memory or bypass throttling |
 | Dependency vulnerability | Medium | Medium | npm audit; Dependabot |
+| npm supply-chain worm (Shai-Hulud, Aug 2026) | Low | Critical | Committed lockfile (lockfileVersion 3) pins every transitive version; install with `npm ci` so the lockfile is authoritative; audit below found no compromised versions in the tree |
+
+### 14.1 npm supply-chain audit (2026-08-08)
+
+Prompted by the Shai-Hulud npm worm disclosed 2026-08-04 (compromised
+`keyv` releases plus 400+ downstream packages, with payloads hidden in
+AI-agent/IDE config files and credential harvesting on install):
+
+- `keyv` appears in the tree only as a dev-only transitive dependency
+  (`eslint` → `flat-cache` → `keyv`), locked to 4.5.4 — a long-standing
+  release, not one of the recently published compromised versions.
+- No `cacheable-request` or `got` chains (the other known infection
+  paths) resolve anywhere in `package-lock.json`.
+- The lockfile is committed with exact resolved URLs, so `npm ci`
+  installs cannot silently pick up newly published versions.
+- Agent/IDE config directories were inspected: `.cursor/` contains only
+  inert JSON hook state (no scripts or obfuscated content), and no
+  `.claude/` executable configuration is present.
+
+Re-run this audit when bumping `eslint` or adding any dependency that
+pulls `keyv`, `cacheable-request`, or `got`. Prefer `npm ci` over
+`npm install` in every environment that does not intend to change
+dependencies.
 
 ---
 
