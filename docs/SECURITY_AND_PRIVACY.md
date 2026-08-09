@@ -385,7 +385,7 @@ USE_MOCK_AGENTS=true
 | Applying a proposed action to the wrong employee's growth plan | Low | Medium | Growth-plan application pins targeted actions to their recorded target employee; the request body's employeeId only selects the employee for plan-level actions, and the permission check runs against the effective target |
 | Rate-limit tracking table exhaustion | Low | Medium | Login and agent-invocation limiters bound their in-memory key tables (1000 keys) and fail closed (429) for new keys while the table is saturated with in-window activity, so distributed key floods cannot grow memory or bypass throttling |
 | Dependency vulnerability | Medium | Medium | npm audit; Dependabot |
-| npm supply-chain worm (Shai-Hulud, Aug 2026) | Low | Critical | Committed lockfile (lockfileVersion 3) pins every transitive version; install with `npm ci` so the lockfile is authoritative; audit below found no compromised versions in the tree |
+| npm supply-chain worm (Shai-Hulud, Aug 2026) | Low | Critical | Committed lockfile (lockfileVersion 3) pins every transitive version; install with `npm ci` so the lockfile is authoritative; audit below found no compromised versions in the tree; `.npmrc` disables npm install scripts, the worm's execution vector (see 14.2) |
 
 ### 14.1 npm supply-chain audit (2026-08-08)
 
@@ -408,6 +408,31 @@ Re-run this audit when bumping `eslint` or adding any dependency that
 pulls `keyv`, `cacheable-request`, or `got`. Prefer `npm ci` over
 `npm install` in every environment that does not intend to change
 dependencies.
+
+### 14.2 Install-script hardening (2026-08-09)
+
+The ChainDrop/Shai-Hulud campaign (Aug 4–5 2026 wave) executed through
+malicious `preinstall` scripts in compromised releases (`keyv@6.0.0`,
+`flat-cache@6.1.24`, `file-entry-cache@11.1.6`, `@cacheable/*`, and 400+
+downstream packages; the `axios` publisher account was also compromised).
+A re-audit of `package-lock.json` on 2026-08-09 confirms the tree is still
+clean: `keyv@4.5.4`, `flat-cache@4.0.1`, and `file-entry-cache@8.0.0` are
+the only packages from the affected families, all dev-only transitives of
+`eslint` that predate the compromised releases, and no `axios`,
+`cache-manager`, `cacheable`, or `@cacheable/*` package resolves at all.
+
+As defense in depth, `.npmrc` now sets `ignore-scripts=true`, so npm never
+runs dependency lifecycle scripts (`preinstall`/`install`/`postinstall`) —
+the execution vector for this class of worm.
+
+Tradeoff: a dependency that relies on an install script to build or fetch
+native binaries will not run it. None of the current dependencies need
+install scripts (Next.js SWC, Tailwind Oxide, and esbuild all ship prebuilt
+platform binaries as optional dependencies). If a future dependency breaks
+under this setting, review its script and run `npm rebuild <package>` to
+execute scripts for that one package. `npm run <script>` (dev, build, test)
+is unaffected; npm would skip `pre`/`post` hooks on our own scripts, but
+this package.json defines none.
 
 ---
 
