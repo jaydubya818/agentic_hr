@@ -20,11 +20,11 @@ import { persistDecisionOutcome } from '@/services/data-provider/workforce-intel
 // or re-attribute outcomes when they cannot.
 const createOutcomeRequestSchema = z.object({
   outcomeType: z.enum(['expected', 'actual']).optional().default('expected'),
-  description: z.string().min(1),
+  description: z.string().min(1).max(5000),
   status: z
     .enum(['pending', 'on_track', 'achieved', 'partially_achieved', 'missed', 'cancelled'])
     .optional(),
-  metricLabel: z.string().nullable().optional(),
+  metricLabel: z.string().max(300).nullable().optional(),
   metricValue: z.number().nullable().optional(),
   targetValue: z.number().nullable().optional(),
 });
