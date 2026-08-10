@@ -46,6 +46,9 @@ export async function GET() {
     headers: {
       'Content-Type': 'text/csv; charset=utf-8',
       'Content-Disposition': 'attachment; filename="growthos-audit-logs.csv"',
+      // The audit trail is sensitive; keep the download out of shared and
+      // browser caches.
+      'Cache-Control': 'no-store',
     },
   });
 }

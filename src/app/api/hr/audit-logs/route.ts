@@ -15,5 +15,6 @@ export async function GET() {
   }
 
   const logs = await listAuditLogsForOrganization(session.organizationId);
-  return NextResponse.json({ logs });
+  // The audit trail is sensitive; keep it out of shared and browser caches.
+  return NextResponse.json({ logs }, { headers: { 'Cache-Control': 'no-store' } });
 }
