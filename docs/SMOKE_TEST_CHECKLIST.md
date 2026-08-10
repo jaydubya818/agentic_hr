@@ -2,7 +2,7 @@
 
 Use before a pilot demo. Run with mock mode defaults unless testing optional integrations.
 
-**Setup:** `npm run dev` then open http://localhost:3002/login (or port 3000 if available).
+**Setup:** `npm run dev` then open http://localhost:3000/login (Next.js falls back to the next free port, e.g. 3001 or 3002, when 3000 is busy — check the dev-server output).
 
 **Automated HTTP smoke:** route checks across employee, manager, and HR roles plus `/forbidden` guard. Requires a running server:
 
