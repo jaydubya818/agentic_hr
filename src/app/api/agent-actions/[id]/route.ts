@@ -62,17 +62,18 @@ export async function PATCH(request: Request, { params }: RouteParams) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
   }
 
-  const action = updateProposedActionStatus(session.organizationId, id, updateInput);
-  if (!action) {
-    return NextResponse.json({ error: 'Not found' }, { status: 404 });
-  }
-
-  if (applyToGrowthPlan && employeeId) {
+  if (applyToGrowthPlan) {
     // A targeted action always lands on its own target's growth plan; the
     // caller-supplied employeeId only selects the employee for plan/team-level
     // actions. Honoring a mismatched body employeeId would let a caller apply
     // an action proposed for one employee to a different employee's plan.
     const applyEmployeeId = existing.targetEmployeeId ?? employeeId;
+    if (!applyEmployeeId) {
+      return NextResponse.json(
+        { error: 'employeeId is required to apply a plan-level action' },
+        { status: 400 },
+      );
+    }
     const canApplyForEmployee =
       canReadOrganizationWorkforceData(session.roles) ||
       applyEmployeeId === session.employeeId ||
@@ -82,7 +83,20 @@ export async function PATCH(request: Request, { params }: RouteParams) {
     if (!canApplyForEmployee) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
-    applyActionToGrowthPlan(session.organizationId, id, applyEmployeeId);
+    // Applying before the status update keeps the store untouched on failure,
+    // so a rejected apply cannot leave an action marked applied with no
+    // growth-plan item behind it.
+    if (!applyActionToGrowthPlan(session.organizationId, id, applyEmployeeId)) {
+      return NextResponse.json(
+        { error: 'No active or draft growth plan to apply the action to' },
+        { status: 409 },
+      );
+    }
+  }
+
+  const action = updateProposedActionStatus(session.organizationId, id, updateInput);
+  if (!action) {
+    return NextResponse.json({ error: 'Not found' }, { status: 404 });
   }
 
   const latestAction =
@@ -96,7 +110,7 @@ export async function PATCH(request: Request, { params }: RouteParams) {
     entityId: id,
     details: {
       status: latestAction.status,
-      appliedToGrowthPlan: Boolean(applyToGrowthPlan && employeeId),
+      appliedToGrowthPlan: Boolean(applyToGrowthPlan),
     },
   });
 
