@@ -6,6 +6,7 @@ import {
   organizationSchema,
   recommendationSchema,
 } from './entities';
+import { createWorkforceDecisionInputSchema } from './workforce-intelligence';
 
 const TS = '2026-01-15T10:00:00.000Z';
 
@@ -140,5 +141,45 @@ describe('employeeSchema', () => {
       updatedAt: TS,
     });
     expect(result.jobTitle).toContain('Engineer');
+  });
+});
+
+describe('createWorkforceDecisionInputSchema payload bounds', () => {
+  const base = {
+    title: 'Expand data engineering capability',
+    decisionType: 'skill_development' as const,
+  };
+
+  it('accepts a decision within the text and metadata bounds', () => {
+    const result = createWorkforceDecisionInputSchema.safeParse({
+      ...base,
+      description: 'Grow the team toward streaming skills.',
+      metadata: { source: 'unit-test' },
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it('rejects an oversized title', () => {
+    const result = createWorkforceDecisionInputSchema.safeParse({
+      ...base,
+      title: 'x'.repeat(301),
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it('rejects an oversized description', () => {
+    const result = createWorkforceDecisionInputSchema.safeParse({
+      ...base,
+      description: 'x'.repeat(5001),
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it('rejects metadata that serializes past the size cap', () => {
+    const result = createWorkforceDecisionInputSchema.safeParse({
+      ...base,
+      metadata: { blob: 'x'.repeat(17_000) },
+    });
+    expect(result.success).toBe(false);
   });
 });
