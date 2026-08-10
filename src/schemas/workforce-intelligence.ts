@@ -126,6 +126,15 @@ export const DISALLOWED_ACTION_TYPES = [
 const shortTextSchema = z.string().max(300);
 const longTextSchema = z.string().max(5000);
 
+// Metadata is schemaless by design, so bound its serialized size instead of
+// its shape; 16 KB is far above any legitimate use in the app.
+const MAX_METADATA_JSON_LENGTH = 16_384;
+const metadataSchema = z
+  .record(z.string().max(128), z.unknown())
+  .refine((value) => JSON.stringify(value).length <= MAX_METADATA_JSON_LENGTH, {
+    message: `metadata must serialize to at most ${MAX_METADATA_JSON_LENGTH} characters`,
+  });
+
 export const businessPrioritySchema = z.object({
   id: uuidSchema,
   organizationId: uuidSchema,
@@ -134,7 +143,7 @@ export const businessPrioritySchema = z.object({
   quarter: shortTextSchema.nullable().optional(),
   status: z.enum(['active', 'planned', 'completed', 'paused']).default('active'),
   ownerEmployeeId: uuidSchema.nullable().optional(),
-  metadata: z.record(z.string(), z.unknown()).default({}),
+  metadata: metadataSchema.default({}),
   createdAt: timestampSchema,
   updatedAt: timestampSchema,
 });
@@ -148,7 +157,7 @@ export const projectSchema = z.object({
   status: z.enum(['planning', 'active', 'on_hold', 'completed', 'cancelled']).default('active'),
   startDate: timestampSchema.nullable().optional(),
   endDate: timestampSchema.nullable().optional(),
-  metadata: z.record(z.string(), z.unknown()).default({}),
+  metadata: metadataSchema.default({}),
   createdAt: timestampSchema,
   updatedAt: timestampSchema,
 });
@@ -176,7 +185,7 @@ export const workforceContextEdgeSchema = z.object({
   strength: confidenceScoreSchema.nullable().optional(),
   label: shortTextSchema.nullable().optional(),
   explanation: longTextSchema.nullable().optional(),
-  metadata: z.record(z.string(), z.unknown()).default({}),
+  metadata: metadataSchema.default({}),
   createdAt: timestampSchema,
   updatedAt: timestampSchema,
 });
@@ -193,7 +202,7 @@ export const workforceDecisionSchema = z.object({
   ownerEmployeeId: uuidSchema.nullable().optional(),
   rationale: longTextSchema.nullable().optional(),
   confidence: confidenceScoreSchema.nullable().optional(),
-  metadata: z.record(z.string(), z.unknown()).default({}),
+  metadata: metadataSchema.default({}),
   createdAt: timestampSchema,
   updatedAt: timestampSchema,
 });
@@ -246,7 +255,7 @@ export const teamScenarioSchema = z.object({
   businessPriorityId: uuidSchema.nullable().optional(),
   rationale: longTextSchema.nullable().optional(),
   confidence: confidenceScoreSchema.nullable().optional(),
-  metadata: z.record(z.string(), z.unknown()).default({}),
+  metadata: metadataSchema.default({}),
   createdAt: timestampSchema,
   updatedAt: timestampSchema,
 });
@@ -284,7 +293,7 @@ export const roleEvolutionScenarioSchema = z.object({
   status: scenarioStatusSchema.default('draft'),
   rationale: longTextSchema.nullable().optional(),
   confidence: confidenceScoreSchema.nullable().optional(),
-  metadata: z.record(z.string(), z.unknown()).default({}),
+  metadata: metadataSchema.default({}),
   createdAt: timestampSchema,
   updatedAt: timestampSchema,
 });
@@ -310,7 +319,7 @@ export const agentActionPlanSchema = z.object({
   summary: longTextSchema.nullable().optional(),
   sourceDecisionId: uuidSchema.nullable().optional(),
   governanceStatus: z.enum(['passed', 'blocked', 'flagged']).default('passed'),
-  metadata: z.record(z.string(), z.unknown()).default({}),
+  metadata: metadataSchema.default({}),
   createdAt: timestampSchema,
   updatedAt: timestampSchema,
 });
@@ -327,7 +336,7 @@ export const agentProposedActionSchema = z.object({
   referenceId: uuidSchema.nullable().optional(),
   confidence: confidenceScoreSchema.nullable().optional(),
   explanation: longTextSchema.nullable().optional(),
-  metadata: z.record(z.string(), z.unknown()).default({}),
+  metadata: metadataSchema.default({}),
   createdAt: timestampSchema,
   updatedAt: timestampSchema,
 });
@@ -361,7 +370,7 @@ export const createAgentActionPlanInputSchema = agentActionPlanSchema
 
 export const updateAgentProposedActionInputSchema = z.object({
   status: proposedActionStatusSchema.optional(),
-  metadata: z.record(z.string(), z.unknown()).optional(),
+  metadata: metadataSchema.optional(),
 });
 
 // ---------------------------------------------------------------------------
