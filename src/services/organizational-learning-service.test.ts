@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 import { MOCK_IDS } from '@/lib/mock/ids';
+import { getMockStore } from '@/services/data-provider/mock-provider';
 import {
   getDecisionPatterns,
   getLearningSignalsForAgent,
@@ -29,6 +30,54 @@ describe('organizational-learning-service', () => {
     for (const item of getRecommendationEffectiveness(MOCK_IDS.organization)) {
       expect(item.acceptanceRate).toBeGreaterThanOrEqual(0);
       expect(item.acceptanceRate).toBeLessThanOrEqual(1);
+    }
+  });
+
+  it('averages confidence only over decisions that record one', () => {
+    const store = getMockStore();
+    const timestamp = new Date().toISOString();
+    const base = {
+      organizationId: MOCK_IDS.organization,
+      decisionType: 'internal_mobility_exploration' as const,
+      status: 'draft' as const,
+      teamId: null,
+      businessPriorityId: null,
+      ownerEmployeeId: null,
+      description: null,
+      rationale: null,
+      metadata: {},
+      createdAt: timestamp,
+      updatedAt: timestamp,
+    };
+    const scored = {
+      ...base,
+      id: 'dddddddd-dddd-4ddd-8ddd-ddddddddddd1',
+      title: 'Scored decision',
+      confidence: 0.8,
+    };
+    const unscored = {
+      ...base,
+      id: 'dddddddd-dddd-4ddd-8ddd-ddddddddddd2',
+      title: 'Unscored decision',
+      confidence: null,
+    };
+    store.workforceDecisions.push(scored, unscored);
+    try {
+      const pattern = getDecisionPatterns(MOCK_IDS.organization).find(
+        (p) => p.decisionType === 'internal_mobility_exploration',
+      );
+      expect(pattern?.count).toBe(2);
+      // The unscored decision must not drag the average toward zero.
+      expect(pattern?.avgConfidence).toBeCloseTo(0.8);
+    } finally {
+      store.workforceDecisions.splice(
+        store.workforceDecisions.findIndex((d) => d.id === scored.id),
+        1,
+      );
+      store.workforceDecisions.splice(
+        store.workforceDecisions.findIndex((d) => d.id === unscored.id),
+        1,
+      );
     }
   });
 
