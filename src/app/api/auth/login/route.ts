@@ -20,6 +20,14 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Email required' }, { status: 400 });
   }
 
+  // Bound credential sizes up front: the email becomes an in-memory
+  // rate-limit key (multi-kilobyte keys would bloat the tracking table) and
+  // no real credential approaches these limits (RFC 5321 caps addresses at
+  // 254 characters).
+  if (body.email.length > 254 || (typeof body.password === 'string' && body.password.length > 512)) {
+    return NextResponse.json({ error: 'Invalid email or password' }, { status: 400 });
+  }
+
   const response = NextResponse.json({ redirectTo: '/employee/home' });
 
   if (!shouldUseMockData()) {
