@@ -106,6 +106,11 @@ export async function persistAuditLogEntry(entry: AuditLogEntry): Promise<void> 
   });
 }
 
+// Mirrors MAX_IN_MEMORY_AUDIT_ENTRIES in audit-service: the HR audit page and
+// CSV export read this list whole, so an unbounded select would load every row
+// ever written once a live audit table grows.
+const MAX_AUDIT_LOG_ROWS = 5000;
+
 export async function fetchAuditLogsFromDb(organizationId: string): Promise<AuditLogEntry[]> {
   if (!shouldPersistWrites()) return [];
 
@@ -116,7 +121,8 @@ export async function fetchAuditLogsFromDb(organizationId: string): Promise<Audi
     .select()
     .from(auditLogs)
     .where(eq(auditLogs.organizationId, organizationId))
-    .orderBy(desc(auditLogs.createdAt));
+    .orderBy(desc(auditLogs.createdAt))
+    .limit(MAX_AUDIT_LOG_ROWS);
 
   return rows.map((row) => ({
     id: row.id,
