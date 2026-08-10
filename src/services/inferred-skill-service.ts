@@ -42,6 +42,16 @@ export async function reviewInferredSkill(params: {
     return { ok: false, reason: 'Only inferred skills can be reviewed' };
   }
 
+  // Mirror the write into the shared mock store so the review survives a
+  // reload in demo mode; previously only the optional database branch below
+  // recorded it, leaving the row inferred again on the next request.
+  if (params.action === 'confirm') {
+    skillRow.source = 'confirmed';
+    skillRow.updatedAt = new Date().toISOString();
+  } else {
+    store.employeeSkills.splice(store.employeeSkills.indexOf(skillRow), 1);
+  }
+
   if (shouldPersistWrites()) {
     const db = getDb();
     if (db) {
