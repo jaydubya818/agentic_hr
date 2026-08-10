@@ -28,9 +28,11 @@ vi.mock('@/services/audit-service', () => ({
       createdAt: '2026-06-08T00:00:00.000Z',
     },
   ]),
+  logAuditEvent: vi.fn(),
 }));
 
 import { getSessionContext } from '@/lib/auth/session-context';
+import { logAuditEvent } from '@/services/audit-service';
 
 describe('HR audit log API', () => {
   beforeEach(() => {
@@ -74,5 +76,8 @@ describe('HR audit log API', () => {
     expect(response.headers.get('Content-Type')).toContain('text/csv');
     const text = await response.text();
     expect(text).toContain('agent.invocation');
+    expect(vi.mocked(logAuditEvent)).toHaveBeenCalledWith(
+      expect.objectContaining({ action: 'audit.exported' }),
+    );
   });
 });
