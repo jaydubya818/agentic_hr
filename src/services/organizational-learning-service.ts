@@ -5,6 +5,7 @@ import { compareExpectedToActual } from '@/services/decision-outcome-service';
 export interface DecisionPattern {
   decisionType: DecisionType;
   count: number;
+  /** Mean over decisions that carry a confidence score; 0 when none do. */
   avgConfidence: number;
   commonStatuses: string[];
 }
@@ -36,6 +37,9 @@ export function getDecisionPatterns(organizationId: string): DecisionPattern[] {
   const store = getMockStore();
   const decisions = store.workforceDecisions.filter((d) => d.organizationId === organizationId);
   const byType = new Map<DecisionType, DecisionPattern>();
+  // Average only over decisions that record a confidence; counting missing
+  // scores as zero would deflate the reported average.
+  const confidenceCounts = new Map<DecisionType, number>();
 
   for (const decision of decisions) {
     const existing = byType.get(decision.decisionType) ?? {
@@ -45,17 +49,26 @@ export function getDecisionPatterns(organizationId: string): DecisionPattern[] {
       commonStatuses: [],
     };
     existing.count += 1;
-    existing.avgConfidence += decision.confidence ?? 0;
+    if (decision.confidence != null) {
+      existing.avgConfidence += decision.confidence;
+      confidenceCounts.set(
+        decision.decisionType,
+        (confidenceCounts.get(decision.decisionType) ?? 0) + 1,
+      );
+    }
     if (!existing.commonStatuses.includes(decision.status)) {
       existing.commonStatuses.push(decision.status);
     }
     byType.set(decision.decisionType, existing);
   }
 
-  return [...byType.values()].map((pattern) => ({
-    ...pattern,
-    avgConfidence: pattern.count > 0 ? pattern.avgConfidence / pattern.count : 0,
-  }));
+  return [...byType.values()].map((pattern) => {
+    const scored = confidenceCounts.get(pattern.decisionType) ?? 0;
+    return {
+      ...pattern,
+      avgConfidence: scored > 0 ? pattern.avgConfidence / scored : 0,
+    };
+  });
 }
 
 export function getOutcomePatternsByActionType(organizationId: string): OutcomePatternByAction[] {
@@ -73,15 +86,19 @@ export function getOutcomePatternsByActionType(organizationId: string): OutcomeP
     if (action.status === 'applied') {
       existing.appliedCount += 1;
     }
-    existing.avgConfidence += action.confidence ?? 0;
+    if (action.confidence != null) {
+      existing.avgConfidence += action.confidence;
+    }
     byType.set(action.actionType, existing);
   }
 
   return [...byType.values()].map((pattern) => {
-    const total = actions.filter((a) => a.actionType === pattern.actionType).length;
+    const typed = actions.filter((a) => a.actionType === pattern.actionType);
+    const total = typed.length;
+    const scored = typed.filter((a) => a.confidence != null).length;
     return {
       ...pattern,
-      avgConfidence: total > 0 ? pattern.avgConfidence / total : 0,
+      avgConfidence: scored > 0 ? pattern.avgConfidence / scored : 0,
       successRate: total > 0 ? pattern.appliedCount / total : 0,
     };
   });
