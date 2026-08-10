@@ -507,6 +507,23 @@ this package.json defines none.
   backported to 15.5.x. Stay on the newest 15.5.x until the planned migration
   to the 16.2.x line (16.2.11+); check advisories before each release.
 
+### 16.8 HTTP response headers (`next.config.ts`)
+
+All routes send this baseline via the `headers()` config:
+
+| Header | Value | Purpose |
+|--------|-------|---------|
+| `Content-Security-Policy` | `frame-ancestors 'none'; object-src 'none'; base-uri 'self'` | Blocks embedding, plugin content, and `<base>` hijacking. Deliberately omits `script-src`/`style-src`, which need nonce plumbing and a verified build |
+| `X-Content-Type-Options` | `nosniff` | Disables MIME sniffing |
+| `X-Frame-Options` | `DENY` | Clickjacking fallback for agents without CSP `frame-ancestors` |
+| `Referrer-Policy` | `strict-origin-when-cross-origin` | Limits referrer leakage |
+| `Strict-Transport-Security` | `max-age=31536000` | Pins HTTPS after first visit |
+| `Permissions-Policy` | `camera=(), microphone=(), geolocation=()` | Denies unused sensor APIs |
+
+When a full CSP (with `script-src` nonces) is introduced, verify it against a
+production build before shipping — inline bootstrapping in Next.js breaks
+under a naive policy.
+
 ---
 
 ## 17. Incident Response (Outline)
