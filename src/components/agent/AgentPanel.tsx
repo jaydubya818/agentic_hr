@@ -157,12 +157,15 @@ export function AgentPanel({
         if (result.actionPlan) {
           setActionPlan(result.actionPlan);
         }
-        setInput('');
+        // Clear the box only when it held the sent message: a starter-prompt
+        // send must not wipe a draft the user was still typing.
+        setInput((current) => (current === message ? '' : current));
       } catch (err) {
-        // Roll back the optimistic user bubble and restore the draft so a
-        // failed message can be corrected and resent instead of being lost.
+        // Roll back the optimistic user bubble and surface the failed message
+        // in the box so it can be corrected and resent -- unless a typed
+        // draft is already there, which takes priority over a starter prompt.
         setMessages((prev) => prev.slice(0, -1));
-        setInput(message.trim());
+        setInput((current) => (current.trim() === '' ? message.trim() : current));
         setError(err instanceof Error ? err.message : 'Something went wrong');
       } finally {
         setLoading(false);
