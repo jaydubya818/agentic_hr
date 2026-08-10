@@ -14,6 +14,13 @@ const nextConfig: NextConfig = {
       {
         source: '/(.*)',
         headers: [
+          // Baseline CSP limited to directives that cannot break rendering:
+          // no script-src/style-src (Next.js needs inline bootstrapping), but
+          // block embedding, plugin content, and <base> hijacking outright.
+          {
+            key: 'Content-Security-Policy',
+            value: "frame-ancestors 'none'; object-src 'none'; base-uri 'self'",
+          },
           { key: 'X-Content-Type-Options', value: 'nosniff' },
           { key: 'X-Frame-Options', value: 'DENY' },
           { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
