@@ -6,6 +6,23 @@ import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 
+/**
+ * Return the middleware-provided ?next= path when it is safe to follow: a
+ * same-origin absolute path reachable in the default employee view. Anything
+ * else -- external URLs, protocol-relative //host forms, API routes, and the
+ * role-gated /hr and /manager subtrees the fresh employee-role cookie cannot
+ * open -- is ignored in favor of the server's default destination.
+ */
+function getPostLoginDestination(): string | null {
+  const next = new URLSearchParams(window.location.search).get('next');
+  if (!next) return null;
+  if (!next.startsWith('/') || next.startsWith('//') || next.startsWith('/\\')) return null;
+  if (next === '/login' || next.startsWith('/login/')) return null;
+  if (next.startsWith('/api')) return null;
+  if (next.startsWith('/hr') || next.startsWith('/manager')) return null;
+  return next;
+}
+
 export default function LoginPage() {
   const router = useRouter();
   const [email, setEmail] = useState('alex.chen@techforward.io');
@@ -47,7 +64,7 @@ export default function LoginPage() {
     }
 
     const data = (await response.json()) as { redirectTo?: string };
-    router.push(data.redirectTo ?? '/employee/home');
+    router.push(getPostLoginDestination() ?? data.redirectTo ?? '/employee/home');
     router.refresh();
   }
 

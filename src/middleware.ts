@@ -38,6 +38,12 @@ export function middleware(request: NextRequest) {
   if (!authenticated && !isPublicPath(pathname)) {
     const loginUrl = request.nextUrl.clone();
     loginUrl.pathname = '/login';
+    // Carry the requested path so the login page can return the user there
+    // after sign-in instead of always landing on the employee home.
+    loginUrl.search = '';
+    if (pathname !== '/') {
+      loginUrl.searchParams.set('next', pathname);
+    }
     return NextResponse.redirect(loginUrl);
   }
 
