@@ -278,6 +278,7 @@ export function AgentPanel({
           <ActionPlanPanel
             actionPlan={actionPlan}
             onAddToGrowthPlan={(actionId) => {
+              setError(null);
               void fetch(`/api/agent-actions/${actionId}`, {
                 method: 'PATCH',
                 headers: { 'Content-Type': 'application/json' },
@@ -288,7 +289,22 @@ export function AgentPanel({
                 }),
               })
                 .then((res) => {
-                  if (!res.ok) setError('Could not add the action to the growth plan.');
+                  if (!res.ok) {
+                    setError('Could not add the action to the growth plan.');
+                    return;
+                  }
+                  // Mirror the server-side status flip so the add button
+                  // hides instead of inviting a second (now rejected) apply.
+                  setActionPlan((prev) =>
+                    prev
+                      ? {
+                          ...prev,
+                          actions: prev.actions.map((a) =>
+                            a.id === actionId ? { ...a, status: 'applied' as const } : a,
+                          ),
+                        }
+                      : prev,
+                  );
                 })
                 .catch(() => setError('Could not add the action to the growth plan.'));
             }}
