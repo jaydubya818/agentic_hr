@@ -3,7 +3,9 @@ import { beforeEach, describe, expect, it } from 'vitest';
 import {
   clearAuditLogs,
   getAuditLogs,
+  listAuditLogsForOrganization,
   logAgentResponse,
+  logAuditEvent,
   logRecommendationBlocked,
 } from './audit-service';
 import type { SessionContext } from '@/types/session';
@@ -44,5 +46,12 @@ describe('audit-service', () => {
     const entry = getAuditLogs()[0];
     expect(entry?.action).toBe('recommendation.blocked');
     expect(entry?.details.matchedPatterns).toEqual(['termination']);
+  });
+
+  it('lists organization logs newest-first, matching the database read', async () => {
+    logAuditEvent({ session: SESSION, action: 'first.event', entityType: 'user' });
+    logAuditEvent({ session: SESSION, action: 'second.event', entityType: 'user' });
+    const logs = await listAuditLogsForOrganization(SESSION.organizationId);
+    expect(logs.map((l) => l.action)).toEqual(['second.event', 'first.event']);
   });
 });

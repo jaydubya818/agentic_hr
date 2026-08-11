@@ -136,7 +136,11 @@ export async function listAuditLogsForOrganization(
     const persisted = await fetchAuditLogsFromDb(organizationId);
     if (persisted.length > 0) return persisted;
   }
-  return auditStore.filter((entry) => entry.organizationId === organizationId);
+  // Match the database read, which orders newest-first: the HR audit page and
+  // CSV export render this list as returned, so the two persistence modes must
+  // not disagree on direction. The store appends chronologically, so a reverse
+  // of the filtered copy is newest-first.
+  return auditStore.filter((entry) => entry.organizationId === organizationId).reverse();
 }
 
 export function clearAuditLogs(): void {
