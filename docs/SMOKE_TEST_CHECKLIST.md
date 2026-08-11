@@ -28,7 +28,8 @@ When validating H0 against a live Supabase project:
 ## Authentication & roles
 
 - [ ] `/login` renders; demo credentials sign in successfully (`alex.chen@techforward.io` / any password)
-- [ ] Unauthenticated visit to `/employee/home` redirects to `/login`
+- [ ] Unauthenticated visit to `/employee/home` redirects to `/login`, and signing in returns to `/employee/home` (not the default home)
+- [ ] `/login?next=//evil.example` signs in to `/employee/home` (unsafe `next` values are ignored)
 - [ ] Top-bar role switcher: Employee → `/employee/home`
 - [ ] Top-bar role switcher: Manager → `/manager/home`
 - [ ] Top-bar role switcher: HR / Admin → `/hr/home`
