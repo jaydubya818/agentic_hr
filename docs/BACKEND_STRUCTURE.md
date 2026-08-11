@@ -858,9 +858,10 @@ const CreateRecommendationSchema = z.object({
 | `skill.inferred.*` | employee_skill | Inferred-skill review action |
 | `role.switched` | user | Demo role switch |
 | `audit.exported` | audit_log | HR exports the audit trail as CSV |
+| `auth.login` | user | User signs in |
 | `auth.logout` | user | User signs out |
 
-Planned (not yet emitted): `growth_plan.created`, `growth_plan.activated`, `auth.login`.
+Planned (not yet emitted): `growth_plan.created`, `growth_plan.activated`.
 
 ### 11.2 Audit Service
 

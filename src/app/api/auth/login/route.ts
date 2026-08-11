@@ -1,9 +1,14 @@
 import { NextResponse } from 'next/server';
+import { eq } from 'drizzle-orm';
 
 import { ACTIVE_ROLE_COOKIE, SESSION_COOKIE } from '@/lib/auth/constants';
 import { checkLoginRateLimit, clearLoginRateLimit } from '@/lib/auth/login-rate-limit';
 import { createMockSessionCookie } from '@/lib/auth/mock-session';
+import { DEMO_USER_ID, MOCK_IDS } from '@/lib/mock/ids';
+import { getDb } from '@/lib/db';
+import { users } from '@/lib/db/schema';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
+import { logAuditEvent } from '@/services/audit-service';
 import { shouldUseMockData } from '@/services/data-provider/provider-config';
 
 export async function POST(request: Request) {
@@ -59,6 +64,31 @@ export async function POST(request: Request) {
 
     if (!error && data.user) {
       clearLoginRateLimit(body.email);
+      // auth.login is a documented audit event (BACKEND_STRUCTURE 11.1). The
+      // entry is attributed to the database user linked to this auth
+      // identity; an identity without a linked user row is skipped rather
+      // than logged against a guessed organization.
+      const db = getDb();
+      if (db) {
+        const [userRow] = await db
+          .select({ id: users.id, organizationId: users.organizationId })
+          .from(users)
+          .where(eq(users.authUserId, data.user.id))
+          .limit(1);
+        if (userRow) {
+          logAuditEvent({
+            session: {
+              userId: userRow.id,
+              organizationId: userRow.organizationId,
+              roles: ['employee'],
+              activeRole: 'employee',
+            },
+            action: 'auth.login',
+            entityType: 'user',
+            entityId: userRow.id,
+          });
+        }
+      }
       response.cookies.set(SESSION_COOKIE, JSON.stringify({ authenticated: true, userId: data.user.id }), {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
@@ -92,6 +122,20 @@ export async function POST(request: Request) {
     sameSite: 'lax',
     path: '/',
     maxAge: 60 * 60 * 24 * 7,
+  });
+
+  // auth.login is a documented audit event (BACKEND_STRUCTURE 11.1); the mock
+  // session always signs in the demo user in the demo organization.
+  logAuditEvent({
+    session: {
+      userId: DEMO_USER_ID,
+      organizationId: MOCK_IDS.organization,
+      roles: ['employee'],
+      activeRole: 'employee',
+    },
+    action: 'auth.login',
+    entityType: 'user',
+    entityId: DEMO_USER_ID,
   });
 
   return response;
