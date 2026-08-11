@@ -325,8 +325,14 @@ export function AgentPanel({
                 .catch(() => setError('Could not save the plan as a decision.'));
             }}
             onSendForReview={() => {
+              setError(null);
+              // Only draft actions move to review: re-sending everything
+              // would silently reset actions a reviewer already approved,
+              // rejected, applied, or dismissed.
+              const drafts = actionPlan.actions.filter((a) => a.status === 'draft');
+              if (drafts.length === 0) return;
               void Promise.all(
-                actionPlan.actions.map((action) =>
+                drafts.map((action) =>
                   fetch(`/api/agent-actions/${action.id}`, {
                     method: 'PATCH',
                     headers: { 'Content-Type': 'application/json' },
@@ -337,7 +343,21 @@ export function AgentPanel({
                 .then((responses) => {
                   if (responses.some((res) => !res.ok)) {
                     setError('Could not send every action for review.');
+                    return;
                   }
+                  const sentIds = new Set(drafts.map((a) => a.id));
+                  setActionPlan((prev) =>
+                    prev
+                      ? {
+                          ...prev,
+                          actions: prev.actions.map((a) =>
+                            sentIds.has(a.id)
+                              ? { ...a, status: 'pending_review' as const }
+                              : a,
+                          ),
+                        }
+                      : prev,
+                  );
                 })
                 .catch(() => setError('Could not send every action for review.'));
             }}
