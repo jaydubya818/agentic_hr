@@ -69,5 +69,19 @@ export async function POST(request: Request) {
   }
 
   await persistAgentActionPlan(plan);
+  // Every other successful write in the API surface leaves an audit entry
+  // (BACKEND_STRUCTURE 11.1); accepted plans must be as traceable as blocked
+  // ones, which already log action_plan_blocked above.
+  logAuditEvent({
+    session,
+    action: 'action_plan.created',
+    entityType: 'agent_action_plan',
+    entityId: plan.id,
+    details: {
+      agentId: plan.agentId,
+      actionCount: plan.actions.length,
+      governanceStatus: plan.governanceStatus,
+    },
+  });
   return NextResponse.json({ plan }, { status: 201 });
 }

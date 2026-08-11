@@ -851,6 +851,7 @@ const CreateRecommendationSchema = z.object({
 | `agent.invocation.blocked` | agent | Invocation blocked by governance |
 | `agent.response` | agent | Agent response returned |
 | `agent_action.updated` | agent_proposed_action | Proposed action status change |
+| `action_plan.created` | agent_action_plan | Agent action plan accepted and stored |
 | `action_plan_blocked` | agent_action_plan | Action plan blocked by governance |
 | `decision.created` / `decision.updated` | workforce_decision | Decision lifecycle |
 | `decision.outcome_recorded` | decision_outcome | Expected/actual outcome recorded |
