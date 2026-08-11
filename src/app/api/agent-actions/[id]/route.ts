@@ -63,6 +63,15 @@ export async function PATCH(request: Request, { params }: RouteParams) {
   }
 
   if (applyToGrowthPlan) {
+    // The first successful apply flips the action to 'applied'; honoring a
+    // repeat request would push a duplicate growth-plan item for the same
+    // action (the UI button stays clickable until the status refreshes).
+    if (existing.status === 'applied') {
+      return NextResponse.json(
+        { error: 'Action has already been applied to a growth plan' },
+        { status: 409 },
+      );
+    }
     // A targeted action always lands on its own target's growth plan; the
     // caller-supplied employeeId only selects the employee for plan/team-level
     // actions. Honoring a mismatched body employeeId would let a caller apply

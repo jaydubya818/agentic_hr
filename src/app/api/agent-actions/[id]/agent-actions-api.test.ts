@@ -101,6 +101,29 @@ describe('agent-action status API scoping', () => {
     expect(response.status).toBe(200);
   });
 
+  it('rejects re-applying an already-applied action instead of duplicating plan items', async () => {
+    vi.mocked(getSessionContext).mockResolvedValue(
+      buildSession(MOCK_IDS.employees.alex, ['employee']),
+    );
+    const makeRequest = () =>
+      updateAction(
+        new Request(`http://localhost/api/agent-actions/${ALEX_ACTION_ID}`, {
+          method: 'PATCH',
+          body: JSON.stringify({ status: 'applied', applyToGrowthPlan: true }),
+        }),
+        { params: Promise.resolve({ id: ALEX_ACTION_ID }) },
+      );
+
+    const first = await makeRequest();
+    expect(first.status).toBe(200);
+    const { getMockStore } = await import('@/services/data-provider/mock-provider');
+    const itemCountAfterFirst = getMockStore().growthPlanItems.length;
+
+    const second = await makeRequest();
+    expect(second.status).toBe(409);
+    expect(getMockStore().growthPlanItems.length).toBe(itemCountAfterFirst);
+  });
+
   it('returns 404 for an action in another organization', async () => {
     vi.mocked(getSessionContext).mockResolvedValue({
       ...buildSession(MOCK_IDS.employees.alex, ['hr_admin']),
