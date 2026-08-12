@@ -1,7 +1,11 @@
 import { describe, expect, it } from 'vitest';
 
 import { MOCK_IDS } from '@/lib/mock/ids';
-import { createExpectedOutcome, recordActualOutcome } from '@/services/decision-outcome-service';
+import {
+  compareExpectedToActual,
+  createExpectedOutcome,
+  recordActualOutcome,
+} from '@/services/decision-outcome-service';
 import { createWorkforceDecision } from '@/services/workforce-decision-service';
 import type { SessionContext } from '@/types/session';
 
@@ -15,6 +19,35 @@ function makeSession(overrides: Partial<SessionContext>): SessionContext {
     ...overrides,
   };
 }
+
+describe('decision-outcome-service comparison scoping', () => {
+  it('excludes outcome rows from other organizations for the same decision id', () => {
+    const morgan = makeSession({
+      userId: MOCK_IDS.users.morgan,
+      employeeId: MOCK_IDS.employees.morgan,
+    });
+    const decision = createWorkforceDecision(morgan, {
+      title: 'Comparison scoping test',
+      decisionType: 'skill_development',
+      teamId: MOCK_IDS.teams.product,
+    });
+    const expected = createExpectedOutcome(morgan, decision.id, {
+      description: 'Expected in-org outcome',
+    });
+    expect(expected).not.toBeNull();
+    const actual = recordActualOutcome(morgan, decision.id, {
+      description: 'Actual outcome',
+    });
+    expect(actual).not.toBeNull();
+    // Simulate a foreign-org row carrying the same decision id.
+    actual!.organizationId = '99999999-9999-4999-8999-999999999999';
+
+    const comparisons = compareExpectedToActual(morgan.organizationId, decision.id);
+    expect(comparisons).toHaveLength(1);
+    // The foreign actual row must not pair with the in-org expected row.
+    expect(comparisons[0]!.actual).toBeNull();
+  });
+});
 
 describe('decision-outcome-service write scoping', () => {
   it('returns null for decisions outside the caller read scope', () => {
