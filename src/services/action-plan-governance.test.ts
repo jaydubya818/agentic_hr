@@ -46,6 +46,47 @@ describe('action-plan-governance', () => {
     expect(result.valid).toBe(false);
   });
 
+  it('allows development text that merely contains prohibited substrings', () => {
+    const result = validateActionPlan([
+      {
+        actionType: 'learning_assignment',
+        title: 'Complete firewall security training',
+        description: 'Network security fundamentals course',
+        explanation: 'Closes the security skill gap',
+      },
+      {
+        actionType: 'conversation_prep',
+        title: 'Host a fireside chat with senior engineers',
+        description: 'Informal knowledge sharing session',
+        explanation: 'Builds cross-team promotional materials awareness',
+      },
+    ]);
+    expect(result.valid).toBe(true);
+    expect(result.errors).toHaveLength(0);
+  });
+
+  it('blocks inflected employment-decision language in action text', () => {
+    const fired = validateActionPlan([
+      {
+        actionType: 'coaching_prompt',
+        title: 'Discuss why the contractor was fired',
+        description: null,
+        explanation: null,
+      },
+    ]);
+    expect(fired.valid).toBe(false);
+
+    const layoffs = validateActionPlan([
+      {
+        actionType: 'coaching_prompt',
+        title: 'Prepare the team for layoffs',
+        description: null,
+        explanation: null,
+      },
+    ]);
+    expect(layoffs.valid).toBe(false);
+  });
+
   it('filters disallowed actions from plan', () => {
     const filtered = filterDisallowedActions([
       {
