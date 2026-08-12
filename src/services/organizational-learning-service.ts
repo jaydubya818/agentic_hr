@@ -161,7 +161,7 @@ export function getLearningSignalsForAgent(organizationId: string): LearningSign
   }
 
   for (const decision of store.workforceDecisions.filter((d) => d.organizationId === organizationId)) {
-    const comparisons = compareExpectedToActual(decision.id);
+    const comparisons = compareExpectedToActual(organizationId, decision.id);
     const partial = comparisons.filter((c) => c.actual?.status === 'partially_achieved');
     if (partial.length > 0) {
       signals.push({

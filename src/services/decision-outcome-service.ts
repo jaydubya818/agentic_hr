@@ -100,9 +100,16 @@ export interface OutcomeComparison {
   summary: string;
 }
 
-export function compareExpectedToActual(decisionId: string): OutcomeComparison[] {
+export function compareExpectedToActual(
+  organizationId: string,
+  decisionId: string,
+): OutcomeComparison[] {
   const store = getMockStore();
-  const outcomes = store.decisionOutcomes.filter((o) => o.decisionId === decisionId);
+  // Filter on organization as well as decision id so a comparison can never
+  // surface another organization's outcome rows for the same identifier.
+  const outcomes = store.decisionOutcomes.filter(
+    (o) => o.decisionId === decisionId && o.organizationId === organizationId,
+  );
   const expectedList = outcomes.filter((o) => o.outcomeType === 'expected');
   const actualList = outcomes.filter((o) => o.outcomeType === 'actual');
 

@@ -24,7 +24,7 @@ export default async function HrDecisionDetailPage({ params }: PageProps) {
     notFound();
   }
 
-  const comparisons = compareExpectedToActual(decision.id);
+  const comparisons = compareExpectedToActual(decision.organizationId, decision.id);
 
   return (
     <>
