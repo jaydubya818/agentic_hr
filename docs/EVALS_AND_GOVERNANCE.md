@@ -305,8 +305,8 @@ Maintain in `src/lib/governance/prohibited-patterns.ts`:
 
 ```typescript
 const PROHIBITED_PATTERNS = [
-  /\b(terminat(e|ion)|fire|let go|dismiss)\b/i,
-  /\b(layoff|rif|reduction in force)\b/i,
+  /\b(terminat(e|ed|es|ing|ion)|fir(e|ed|ing)|let(ting)? go|dismiss(ed|es|ing|al)?)\b/i,
+  /\b(layoffs?|lay(s|ing)? off|laid off|rif|reduction in force)\b/i,
   /\b(promot(e|ion)\s+(decision|ready|not ready))\b/i,
   /\b(salary|compensation|raise|bonus)\s+(should|recommend)/i,
   /\b(low performer|not promotable|low potential|underperformer)\b/i,
