@@ -3,45 +3,40 @@ import { z } from 'zod';
 
 import { writeErrorResponse } from './write-error-response';
 
-function captureZodError(): unknown {
-  try {
-    z.object({ title: z.string().min(1, 'Title is required') }).parse({ title: '' });
-  } catch (error) {
-    return error;
-  }
-  throw new Error('expected parse to fail');
-}
-
 describe('writeErrorResponse', () => {
-  it('maps zod failures to 400 with the first issue message only', async () => {
-    const response = writeErrorResponse(captureZodError());
+  it('maps Zod validation failures to 400 with the first issue message', async () => {
+    const result = z.object({ title: z.string().min(1, 'Title is required') }).safeParse({ title: '' });
+    expect(result.success).toBe(false);
+    const response = writeErrorResponse(result.success ? null : result.error);
     expect(response.status).toBe(400);
-    const body = (await response.json()) as { error: string };
-    expect(body.error).toBe('Title is required');
+    expect(await response.json()).toEqual({ error: 'Title is required' });
   });
 
-  it('maps malformed JSON bodies to a generic 400', async () => {
-    const response = writeErrorResponse(
-      new SyntaxError('Unexpected token < in JSON at position 0'),
-    );
+  it('maps malformed JSON (SyntaxError) to 400 without echoing details', async () => {
+    let caught: unknown;
+    try {
+      JSON.parse('{nope');
+    } catch (error) {
+      caught = error;
+    }
+    const response = writeErrorResponse(caught);
     expect(response.status).toBe(400);
-    const body = (await response.json()) as { error: string };
-    expect(body.error).toBe('Invalid JSON body');
+    expect(await response.json()).toEqual({ error: 'Invalid JSON body' });
   });
 
-  it('maps service scope denials to 403', async () => {
+  it('maps service Forbidden errors to 403', async () => {
     const response = writeErrorResponse(new Error('Forbidden'));
     expect(response.status).toBe(403);
+    expect(await response.json()).toEqual({ error: 'Forbidden' });
   });
 
-  it('passes through known scope-validation messages as 400', async () => {
+  it('maps known scope-validation messages to 400', async () => {
     const response = writeErrorResponse(new Error('Unknown team for this organization'));
     expect(response.status).toBe(400);
-    const body = (await response.json()) as { error: string };
-    expect(body.error).toBe('Unknown team for this organization');
+    expect(await response.json()).toEqual({ error: 'Unknown team for this organization' });
   });
 
-  it('rethrows unexpected errors instead of echoing them to the client', () => {
+  it('re-throws unexpected errors so internal text never reaches the client', () => {
     const internal = new Error('connect ECONNREFUSED 127.0.0.1:5432');
     expect(() => writeErrorResponse(internal)).toThrow(internal);
   });
