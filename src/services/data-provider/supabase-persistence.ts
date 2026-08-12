@@ -27,8 +27,10 @@ export async function persistAgentRecommendations(
   const db = getDb();
   if (!db) return;
 
-  for (const rec of results) {
-    await db.insert(recommendations).values({
+  // Batch the writes: one round trip for recommendations and one for their
+  // evidence rows instead of up to two per recommendation.
+  await db.insert(recommendations).values(
+    results.map((rec) => ({
       id: rec.id,
       organizationId: rec.organizationId,
       employeeId: rec.employeeId,
@@ -41,22 +43,23 @@ export async function persistAgentRecommendations(
       status: rec.status,
       governanceStatus: rec.governanceStatus,
       metadata: (rec as { metadata?: Record<string, unknown> }).metadata ?? {},
-    });
+    })),
+  );
 
-    if (rec.evidence?.length) {
-      await db.insert(recommendationEvidence).values(
-        rec.evidence.map((ev, index) => ({
-          id: randomUUID(),
-          organizationId: rec.organizationId,
-          recommendationId: rec.id,
-          evidenceType: ev.evidenceType,
-          referenceId: ev.referenceId ?? null,
-          label: ev.label,
-          detail: ev.detail ?? null,
-          sortOrder: index,
-        })),
-      );
-    }
+  const evidenceRows = results.flatMap((rec) =>
+    (rec.evidence ?? []).map((ev, index) => ({
+      id: randomUUID(),
+      organizationId: rec.organizationId,
+      recommendationId: rec.id,
+      evidenceType: ev.evidenceType,
+      referenceId: ev.referenceId ?? null,
+      label: ev.label,
+      detail: ev.detail ?? null,
+      sortOrder: index,
+    })),
+  );
+  if (evidenceRows.length > 0) {
+    await db.insert(recommendationEvidence).values(evidenceRows);
   }
 
   clearSupabaseStoreCache();
