@@ -19,7 +19,10 @@ export class OpenAiLlmProvider implements LlmProvider {
     const body = {
       model,
       temperature: params.temperature ?? 0.4,
-      max_tokens: params.maxTokens ?? 900,
+      // max_tokens is deprecated on Chat Completions and rejected outright by
+      // reasoning models; max_completion_tokens is accepted across current
+      // models, so OPENAI_MODEL overrides do not break on the cap parameter.
+      max_completion_tokens: params.maxTokens ?? 900,
       messages: [
         { role: 'system', content: params.systemPrompt },
         ...params.messages,
