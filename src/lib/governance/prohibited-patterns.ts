@@ -10,8 +10,18 @@ export interface ProhibitedPattern {
 }
 
 export const PROHIBITED_PATTERNS: ProhibitedPattern[] = [
-  { id: 'termination', pattern: /\b(terminat(e|ion)|fire|let go|dismiss)\b/i, category: 'termination' },
-  { id: 'layoff', pattern: /\b(layoff|rif|reduction in force)\b/i, category: 'layoff' },
+  // Inflected forms are matched explicitly: \b(terminate)\b alone would let
+  // "terminated", "firing", or "laid off" through the filter.
+  {
+    id: 'termination',
+    pattern: /\b(terminat(e|ed|es|ing|ion)|fir(e|ed|ing)|let(ting)? go|dismiss(ed|es|ing|al)?)\b/i,
+    category: 'termination',
+  },
+  {
+    id: 'layoff',
+    pattern: /\b(layoffs?|lay(s|ing)? off|laid off|rif|reduction in force)\b/i,
+    category: 'layoff',
+  },
   { id: 'demotion', pattern: /\b(demot(e|ed|ion)|downgrade role|reduce level)\b/i, category: 'demotion' },
   {
     id: 'promotion_decision',
