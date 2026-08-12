@@ -22,24 +22,24 @@ type ActionInput = Pick<
 /**
  * Employment-decision language that must never appear in a proposed action.
  * Shared by validation and filtering so both paths block the same terms
- * (EVALS_AND_GOVERNANCE.md prohibited outputs).
+ * (EVALS_AND_GOVERNANCE.md prohibited outputs). Word-boundary patterns
+ * cover inflections (fired, layoffs) without substring false positives
+ * ('fire' in 'firewall', 'promotion' in 'promotional').
  */
-const PROHIBITED_ACTION_TERMS = [
-  'terminate',
-  'layoff',
-  'fire',
-  'promote',
-  'promotion',
-  'compensation',
-  'performance rating',
-  'not promotable',
-  'low performer',
-] as const;
+const PROHIBITED_ACTION_PATTERNS: RegExp[] = [
+  /\bterminat(e|ed|es|ing|ion)\b/i,
+  /\b(layoffs?|lay(s|ing)? off|laid off)\b/i,
+  /\bfir(e|ed|ing)\b/i,
+  /\bpromot(e|ed|es|ing|ions?)\b/i,
+  /\bcompensation\b/i,
+  /\bperformance ratings?\b/i,
+  /\bnot promotable\b/i,
+  /\blow performers?\b/i,
+];
 
 function containsProhibitedTerm(action: ActionInput): boolean {
-  const combined =
-    `${action.title} ${action.description ?? ''} ${action.explanation ?? ''}`.toLowerCase();
-  return PROHIBITED_ACTION_TERMS.some((term) => combined.includes(term));
+  const combined = `${action.title} ${action.description ?? ''} ${action.explanation ?? ''}`;
+  return PROHIBITED_ACTION_PATTERNS.some((pattern) => pattern.test(combined));
 }
 
 function isDisallowedActionType(value: string): boolean {
