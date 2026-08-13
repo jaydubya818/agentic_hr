@@ -93,6 +93,16 @@ describe('agent-action status API scoping', () => {
     expect(response.status).toBe(403);
   });
 
+  it('forbids a manager of another team from updating a plan-level action', async () => {
+    // Morgan manages Product Engineering; the plan-level fixture action
+    // belongs to a Platform Engineering plan (managed by Jordan).
+    vi.mocked(getSessionContext).mockResolvedValue(
+      buildSession(MOCK_IDS.employees.morgan, ['employee', 'manager']),
+    );
+    const response = await patchRequest(PLAN_LEVEL_ACTION_ID);
+    expect(response.status).toBe(403);
+  });
+
   it('allows a manager to update a plan-level action', async () => {
     vi.mocked(getSessionContext).mockResolvedValue(
       buildSession(MOCK_IDS.employees.jordan, ['employee', 'manager']),
