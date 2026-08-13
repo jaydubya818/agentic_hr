@@ -75,6 +75,26 @@ describe('recommendation status API scoping', () => {
     expect(response.status).toBe(200);
   });
 
+  it('mirrors the status update into the mock store so it survives a reload', async () => {
+    vi.mocked(getSessionContext).mockResolvedValue(
+      buildSession(MOCK_IDS.employees.alex, ['employee']),
+    );
+    const { getMockStore } = await import('@/services/data-provider/mock-provider');
+    const stored = getMockStore().recommendations.find(
+      (rec) => rec.id === ALEX_RECOMMENDATION_ID,
+    );
+    expect(stored).toBeDefined();
+    const originalStatus = stored!.status;
+    try {
+      const response = await patchRequest(ALEX_RECOMMENDATION_ID, 'accepted');
+      expect(response.status).toBe(200);
+      // Without the store mirror the fixture status reappears on the next read.
+      expect(stored!.status).toBe('accepted');
+    } finally {
+      stored!.status = originalStatus;
+    }
+  });
+
   it('allows the direct manager to update a report recommendation', async () => {
     vi.mocked(getSessionContext).mockResolvedValue(
       buildSession(MOCK_IDS.employees.jordan, ['employee', 'manager']),
