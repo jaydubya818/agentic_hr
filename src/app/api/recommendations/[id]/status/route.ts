@@ -36,6 +36,21 @@ export async function PATCH(
   const status = body.status as 'accepted' | 'dismissed';
   const persisted = await updateRecommendationStatusInDb(id, status, session.organizationId);
 
+  // Mirror the write into the shared mock store so the decision survives a
+  // reload in demo mode (matching the inferred-skill review behavior);
+  // previously only the optional database write above recorded it, so a
+  // dismissed card returned on the next request. In live mode the database
+  // row is authoritative and this only refreshes the cached copy.
+  const stored = dataProvider
+    .getMockStore()
+    .recommendations.find(
+      (rec) => rec.id === id && rec.organizationId === session.organizationId,
+    );
+  if (stored) {
+    stored.status = status;
+    stored.updatedAt = new Date().toISOString();
+  }
+
   logAuditEvent({
     session,
     action: `recommendation.${status}`,
