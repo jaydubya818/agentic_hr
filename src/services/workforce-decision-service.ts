@@ -97,11 +97,20 @@ export function getWorkforceDecision(
   if (!decision) return null;
 
   const store = getMockStore();
+  // Join detail rows on organization as well as decision id (matching the
+  // outcome-comparison scoping) so another organization's rows for the same
+  // identifier can never surface in a decision detail.
   return {
     ...decision,
-    evidence: store.decisionEvidence.filter((e) => e.decisionId === decisionId),
-    outcomes: store.decisionOutcomes.filter((o) => o.decisionId === decisionId),
-    participants: store.decisionParticipants.filter((p) => p.decisionId === decisionId),
+    evidence: store.decisionEvidence.filter(
+      (e) => e.decisionId === decisionId && e.organizationId === decision.organizationId,
+    ),
+    outcomes: store.decisionOutcomes.filter(
+      (o) => o.decisionId === decisionId && o.organizationId === decision.organizationId,
+    ),
+    participants: store.decisionParticipants.filter(
+      (p) => p.decisionId === decisionId && p.organizationId === decision.organizationId,
+    ),
   };
 }
 
