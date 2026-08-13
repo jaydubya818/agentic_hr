@@ -11,6 +11,7 @@ import {
 } from '@/services/agent-action-service';
 import { getMockStore, isDirectReport } from '@/services/data-provider/mock-provider';
 import { updateAgentProposedActionInDb } from '@/services/data-provider/workforce-intelligence-persistence';
+import type { SessionContext } from '@/types/session';
 import { z } from 'zod';
 
 interface RouteParams {
@@ -48,7 +49,9 @@ export async function PATCH(request: Request, { params }: RouteParams) {
 
   // A proposed action may only be updated by its target employee, that
   // employee's direct manager, or an org-wide role. Actions without a target
-  // employee (plan/team level) require a manager or org-wide role.
+  // employee (plan/team level) require an org-wide role or a manager within
+  // the plan's scope; any-manager access would let a manager approve or
+  // apply another team's plan actions.
   const isOrgWide = canReadOrganizationWorkforceData(session.roles);
   const isSelfTarget =
     existing.targetEmployeeId != null && existing.targetEmployeeId === session.employeeId;
@@ -57,7 +60,8 @@ export async function PATCH(request: Request, { params }: RouteParams) {
     session.employeeId != null &&
     existing.targetEmployeeId != null &&
     isDirectReport(session.employeeId, existing.targetEmployeeId);
-  const isManagerForPlanAction = existing.targetEmployeeId == null && isManagerRole(session.roles);
+  const isManagerForPlanAction =
+    existing.targetEmployeeId == null && managerScopeCoversPlan(session, existing.actionPlanId);
   if (!isOrgWide && !isSelfTarget && !isManagerOfTarget && !isManagerForPlanAction) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
   }
@@ -133,4 +137,29 @@ export async function PATCH(request: Request, { params }: RouteParams) {
   });
 
   return NextResponse.json({ action: latestAction });
+}
+
+/**
+ * Write scope for a plan-level action (no target employee): the caller must
+ * manage the plan's team, or the plan's employee must be the caller or one of
+ * their direct reports. Plans carrying neither a team nor an employee are
+ * reserved for org-wide roles (deny on ambiguity).
+ */
+function managerScopeCoversPlan(session: SessionContext, actionPlanId: string): boolean {
+  if (!isManagerRole(session.roles) || session.employeeId == null) return false;
+  const store = getMockStore();
+  const plan = store.agentActionPlans.find((p) => p.id === actionPlanId);
+  if (!plan) return false;
+  if (plan.teamId != null) {
+    return store.teams.some(
+      (t) => t.id === plan.teamId && t.managerEmployeeId === session.employeeId,
+    );
+  }
+  if (plan.employeeId != null) {
+    return (
+      plan.employeeId === session.employeeId ||
+      isDirectReport(session.employeeId, plan.employeeId)
+    );
+  }
+  return false;
 }
