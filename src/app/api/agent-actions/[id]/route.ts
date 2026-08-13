@@ -63,6 +63,15 @@ export async function PATCH(request: Request, { params }: RouteParams) {
   }
 
   if (applyToGrowthPlan) {
+    // Applying is what flips the action to 'applied'; accepting a different
+    // status in the same request would immediately overwrite that flip and
+    // reopen the already-applied guard below for a duplicate apply.
+    if (updateInput.status !== undefined && updateInput.status !== 'applied') {
+      return NextResponse.json(
+        { error: "status must be 'applied' when applying to a growth plan" },
+        { status: 400 },
+      );
+    }
     // The first successful apply flips the action to 'applied'; honoring a
     // repeat request would push a duplicate growth-plan item for the same
     // action (the UI button stays clickable until the status refreshes).
