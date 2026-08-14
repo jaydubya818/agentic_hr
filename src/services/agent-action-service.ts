@@ -126,9 +126,14 @@ export function createActionPlanFromInput(
  */
 export function listActionPlansForSession(session: SessionContext): AgentActionPlanDetail[] {
   const store = getMockStore();
+  // Join actions on organization as well as plan id (matching the
+  // decision-detail scoping) so another organization's rows recorded against
+  // the same identifier can never surface in a plan detail.
   const withActions = (plan: AgentActionPlan): AgentActionPlanDetail => ({
     ...plan,
-    actions: store.agentProposedActions.filter((a) => a.actionPlanId === plan.id),
+    actions: store.agentProposedActions.filter(
+      (a) => a.actionPlanId === plan.id && a.organizationId === plan.organizationId,
+    ),
   });
 
   const orgPlans = store.agentActionPlans
@@ -166,7 +171,9 @@ export function getActionPlan(planId: string): AgentActionPlanDetail | null {
 
   return {
     ...plan,
-    actions: store.agentProposedActions.filter((a) => a.actionPlanId === planId),
+    actions: store.agentProposedActions.filter(
+      (a) => a.actionPlanId === planId && a.organizationId === plan.organizationId,
+    ),
   };
 }
 
@@ -240,6 +247,8 @@ export function listActionPlansForOrganization(organizationId: string): AgentAct
     .filter((p) => p.organizationId === organizationId)
     .map((plan) => ({
       ...plan,
-      actions: store.agentProposedActions.filter((a) => a.actionPlanId === plan.id),
+      actions: store.agentProposedActions.filter(
+        (a) => a.actionPlanId === plan.id && a.organizationId === plan.organizationId,
+      ),
     }));
 }
