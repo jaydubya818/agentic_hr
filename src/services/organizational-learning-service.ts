@@ -104,7 +104,9 @@ export function getOutcomePatternsByActionType(organizationId: string): OutcomeP
   });
 }
 
-export function getRecommendationEffectiveness(organizationId: string): RecommendationEffectiveness[] {
+export function getRecommendationEffectiveness(
+  organizationId: string,
+): RecommendationEffectiveness[] {
   const store = getMockStore();
   const recommendations = store.recommendations.filter((r) => r.organizationId === organizationId);
   const byType = new Map<string, RecommendationEffectiveness>();
@@ -122,9 +124,12 @@ export function getRecommendationEffectiveness(organizationId: string): Recommen
     byType.set(rec.type, existing);
   }
 
-  const decisionCount = store.workforceDecisions.filter((d) => d.organizationId === organizationId).length;
+  const decisionCount = store.workforceDecisions.filter(
+    (d) => d.organizationId === organizationId,
+  ).length;
   const achievedOutcomes = store.decisionOutcomes.filter(
-    (o) => o.organizationId === organizationId && o.outcomeType === 'actual' && o.status === 'achieved',
+    (o) =>
+      o.organizationId === organizationId && o.outcomeType === 'actual' && o.status === 'achieved',
   ).length;
   const totalActual = store.decisionOutcomes.filter(
     (o) => o.organizationId === organizationId && o.outcomeType === 'actual',
@@ -160,7 +165,9 @@ export function getLearningSignalsForAgent(organizationId: string): LearningSign
     });
   }
 
-  for (const decision of store.workforceDecisions.filter((d) => d.organizationId === organizationId)) {
+  for (const decision of store.workforceDecisions.filter(
+    (d) => d.organizationId === organizationId,
+  )) {
     const comparisons = compareExpectedToActual(organizationId, decision.id);
     const partial = comparisons.filter((c) => c.actual?.status === 'partially_achieved');
     if (partial.length > 0) {
@@ -186,7 +193,12 @@ export function getLearningSignalsForAgent(organizationId: string): LearningSign
       insight:
         'Future-state team scenarios with closed skill gaps correlate with approved work redesign decisions.',
       confidence: teamScenario.confidence ?? 0.7,
-      evidenceCount: store.teamScenarioSkills.filter((s) => s.scenarioId === teamScenario.id).length,
+      // Count skill rows on organization as well as scenario id (matching the
+      // scenario-detail scoping) so another organization's rows cannot
+      // inflate the evidence count.
+      evidenceCount: store.teamScenarioSkills.filter(
+        (s) => s.scenarioId === teamScenario.id && s.organizationId === organizationId,
+      ).length,
     });
   }
 
