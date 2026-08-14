@@ -300,6 +300,7 @@ export function AgentPanel({ agentId, title, description, context, className }: 
                 .catch(() => setError('Could not add the action to the growth plan.'));
             }}
             onSaveAsDecision={() => {
+              setError(null);
               void fetch('/api/decisions', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
