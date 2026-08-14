@@ -88,13 +88,7 @@ function toRecommendationCardProps(
   };
 }
 
-export function AgentPanel({
-  agentId,
-  title,
-  description,
-  context,
-  className,
-}: AgentPanelProps) {
+export function AgentPanel({ agentId, title, description, context, className }: AgentPanelProps) {
   const [messages, setMessages] = useState<AgentMessage[]>([]);
   const [recommendations, setRecommendations] = useState<AgentRecommendationResult[]>([]);
   const [input, setInput] = useState('');
@@ -265,10 +259,7 @@ export function AgentPanel({
             <p className="text-sm font-medium text-foreground">Agent recommendations</p>
             <div className="grid gap-3">
               {recommendations.map((rec) => (
-                <RecommendationCard
-                  key={rec.id}
-                  recommendation={toRecommendationCardProps(rec)}
-                />
+                <RecommendationCard key={rec.id} recommendation={toRecommendationCardProps(rec)} />
               ))}
             </div>
           </div>
@@ -351,9 +342,7 @@ export function AgentPanel({
                       ? {
                           ...prev,
                           actions: prev.actions.map((a) =>
-                            sentIds.has(a.id)
-                              ? { ...a, status: 'pending_review' as const }
-                              : a,
+                            sentIds.has(a.id) ? { ...a, status: 'pending_review' as const } : a,
                           ),
                         }
                       : prev,
@@ -383,13 +372,16 @@ export function AgentPanel({
             aria-label="Message to agent"
           />
           <Button type="submit" size="icon" disabled={loading || !input.trim()} aria-label="Send">
-            {loading ? (
-              <Loader2 className="size-4 animate-spin" />
-            ) : (
-              <Send className="size-4" />
-            )}
+            {loading ? <Loader2 className="size-4 animate-spin" /> : <Send className="size-4" />}
           </Button>
         </form>
+
+        {/* AI-interaction disclosure (SECURITY_AND_PRIVACY 5.4: EU AI Act
+            Article 50 transparency). */}
+        <p className="text-xs text-muted-foreground">
+          You are chatting with an AI assistant. Responses are AI-generated and may be inaccurate;
+          GrowthOS agents never make employment decisions.
+        </p>
       </CardContent>
     </Card>
   );
