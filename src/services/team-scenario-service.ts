@@ -77,10 +77,17 @@ export function getTeamScenario(
   if (!scenario) return null;
 
   const store = getMockStore();
+  // Join detail rows on organization as well as scenario id (matching the
+  // decision-detail scoping) so another organization's rows recorded against
+  // the same identifier can never surface in a scenario detail.
   return {
     ...scenario,
-    roles: store.teamScenarioRoles.filter((r) => r.scenarioId === scenarioId),
-    skills: store.teamScenarioSkills.filter((s) => s.scenarioId === scenarioId),
+    roles: store.teamScenarioRoles.filter(
+      (r) => r.scenarioId === scenarioId && r.organizationId === scenario.organizationId,
+    ),
+    skills: store.teamScenarioSkills.filter(
+      (s) => s.scenarioId === scenarioId && s.organizationId === scenario.organizationId,
+    ),
   };
 }
 
@@ -154,7 +161,9 @@ export function getRoleEvolutionScenario(
 
   return {
     ...scenario,
-    taskChanges: store.roleTaskChanges.filter((t) => t.roleEvolutionScenarioId === scenarioId),
+    taskChanges: store.roleTaskChanges.filter(
+      (t) => t.roleEvolutionScenarioId === scenarioId && t.organizationId === organizationId,
+    ),
   };
 }
 
@@ -187,10 +196,14 @@ export function compareTeamScenarios(
   );
 
   const currentSkills = current
-    ? store.teamScenarioSkills.filter((s) => s.scenarioId === currentScenarioId)
+    ? store.teamScenarioSkills.filter(
+        (s) => s.scenarioId === currentScenarioId && s.organizationId === organizationId,
+      )
     : [];
   const futureSkills = future
-    ? store.teamScenarioSkills.filter((s) => s.scenarioId === futureScenarioId)
+    ? store.teamScenarioSkills.filter(
+        (s) => s.scenarioId === futureScenarioId && s.organizationId === organizationId,
+      )
     : [];
   const skillIds = new Set([
     ...currentSkills.map((s) => s.skillId),
@@ -211,10 +224,14 @@ export function compareTeamScenarios(
   });
 
   const currentRoles = current
-    ? store.teamScenarioRoles.filter((r) => r.scenarioId === currentScenarioId)
+    ? store.teamScenarioRoles.filter(
+        (r) => r.scenarioId === currentScenarioId && r.organizationId === organizationId,
+      )
     : [];
   const futureRoles = future
-    ? store.teamScenarioRoles.filter((r) => r.scenarioId === futureScenarioId)
+    ? store.teamScenarioRoles.filter(
+        (r) => r.scenarioId === futureScenarioId && r.organizationId === organizationId,
+      )
     : [];
   const roleIds = new Set([
     ...currentRoles.map((r) => r.roleId),
