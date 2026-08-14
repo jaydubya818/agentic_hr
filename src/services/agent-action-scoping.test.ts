@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest';
 import { MOCK_IDS } from '@/lib/mock/ids';
 import {
   applyActionToGrowthPlan,
+  getActionPlan,
   updateProposedActionStatus,
 } from '@/services/agent-action-service';
 import { getMockStore } from '@/services/data-provider/mock-provider';
@@ -11,6 +12,40 @@ const ORG_ID = MOCK_IDS.organization;
 const OTHER_ORG_ID = 'ffffffff-ffff-4fff-8fff-ffffffffffff';
 
 describe('agent-action-service organization scoping', () => {
+  it("excludes another organization's action rows recorded against the same plan id", () => {
+    const store = getMockStore();
+    const planId = MOCK_IDS.actionPlans.employeeGrowth;
+    const timestamp = new Date().toISOString();
+    const foreignAction = {
+      id: 'eeeeeeee-eeee-4eee-8eee-eeeeeeeeeee4',
+      organizationId: OTHER_ORG_ID,
+      actionPlanId: planId,
+      actionType: 'learning_assignment' as const,
+      title: 'Foreign-organization action for the same plan id',
+      description: null,
+      status: 'draft' as const,
+      targetEmployeeId: null,
+      referenceId: null,
+      confidence: null,
+      explanation: null,
+      metadata: {},
+      createdAt: timestamp,
+      updatedAt: timestamp,
+    };
+    store.agentProposedActions.push(foreignAction);
+    try {
+      const detail = getActionPlan(planId);
+      expect(detail).not.toBeNull();
+      expect(detail!.actions.some((a) => a.id === foreignAction.id)).toBe(false);
+      expect(detail!.actions.every((a) => a.organizationId === ORG_ID)).toBe(true);
+    } finally {
+      store.agentProposedActions.splice(
+        store.agentProposedActions.findIndex((a) => a.id === foreignAction.id),
+        1,
+      );
+    }
+  });
+
   it('does not update actions belonging to another organization', () => {
     const action = getMockStore().agentProposedActions[0]!;
     const before = action.status;
