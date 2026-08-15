@@ -98,7 +98,7 @@ GrowthOS handles sensitive employment-related data including skills profiles, ca
 - Send only scoped grounding data per agent (see [EVALS_AND_GOVERNANCE.md](./EVALS_AND_GOVERNANCE.md))
 - Truncate conversation history to last N messages
 - Use `employee_id` references, not full names in prompts where possible
-- Log prompt hashes, not full prompts, in production audit (configurable)
+- Log prompt hashes, not full prompts, in production audit (configurable — see §8.2)
 
 ### 5.4 AI Interaction Transparency
 
@@ -270,6 +270,17 @@ When `false`:
 - Full LLM prompt/response text in production (configurable; hashes only)
 - Passwords or tokens
 - Unnecessary PII in `details` JSON
+
+`agent.invocation` and `agent.response` are the only events that ever carry
+agent chat text. `src/lib/audit/agent-content.ts` enforces the rule above: the
+200-character preview is stored outside production, and in production the
+value becomes a stable `sha256:<hex>` digest instead. `AUDIT_LOG_AGENT_CONTENT`
+(`true`/`false`) overrides the default in either direction — set it to `true`
+only for a demo environment seeded with fictional employees.
+
+This matters because agent chat is the employee's own words (career doubts,
+manager friction, mobility interest) and every `hr_admin` can read and
+CSV-export the whole audit trail.
 
 ### 8.3 Audit Access
 

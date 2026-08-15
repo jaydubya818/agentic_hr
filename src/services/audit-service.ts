@@ -1,6 +1,7 @@
 import { randomUUID } from 'crypto';
 import type { SessionContext } from '@/types/session';
 import type { AgentId } from '@/types/agent';
+import { agentContentForAudit } from '@/lib/audit/agent-content';
 import { fetchAuditLogsFromDb, persistAuditLogEntry } from './data-provider/supabase-persistence';
 import { shouldPersistWrites } from './data-provider/persistence-config';
 
@@ -61,7 +62,7 @@ export function logAgentInvocation(params: {
     entityType: 'agent',
     entityId: params.agentId,
     details: {
-      messagePreview: params.message.slice(0, 200),
+      messagePreview: agentContentForAudit(params.message),
       governanceStatus: params.governanceStatus,
       matchedPatterns: params.matchedPatterns ?? [],
     },
@@ -100,7 +101,7 @@ export function logAgentResponse(params: {
       responseMode: params.responseMode,
       governanceStatus: params.governanceStatus,
       provider: params.provider,
-      responsePreview: params.responsePreview?.slice(0, 200),
+      responsePreview: agentContentForAudit(params.responsePreview),
       activeRole: params.session.activeRole,
     },
   });

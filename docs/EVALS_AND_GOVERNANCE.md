@@ -445,8 +445,8 @@ Route: `/hr/governance` (Phase 10+)
 
 | Event | Retention | PII in details |
 |-------|-----------|----------------|
-| agent.invocation | 2 years | Message preview only (200 chars) |
-| agent.response | 90 days | Truncated content |
+| agent.invocation | 2 years | Message preview only (200 chars) outside production; `sha256:` digest in production |
+| agent.response | 90 days | Truncated content outside production; `sha256:` digest in production |
 | agent.invocation.blocked / recommendation.blocked | 2 years | Pattern only |
 | recommendation.* | 2 years | IDs only |
 | role.switched | 1 year | Role names |
