@@ -460,6 +460,42 @@ execute scripts for that one package. `npm run <script>` (dev, build, test)
 is unaffected; npm would skip `pre`/`post` hooks on our own scripts, but
 this package.json defines none.
 
+### 14.3 Supply-chain re-audit (2026-08-15)
+
+Re-ran the 14.1/14.2 checks against the committed lockfile
+(`lockfileVersion: 3`, 864 resolved packages). Result: unchanged and clean.
+
+| Package            | Resolved | Compromised release | Reachable? |
+| ------------------ | -------- | ------------------- | ---------- |
+| `keyv`             | 4.5.4    | 6.0.0               | No         |
+| `flat-cache`       | 4.0.1    | 6.1.24              | No         |
+| `file-entry-cache` | 8.0.0    | 11.1.6              | No         |
+
+New this pass: the declared semver ranges, not just the pinned versions,
+sit below the compromised majors — `eslint` asks for
+`file-entry-cache: ^8.0.0`, which asks for `flat-cache: ^4.0.0`, which asks
+for `keyv: ^4.5.4`. A plain `npm install` therefore cannot resolve into the
+compromised releases either; `npm ci` remains the rule regardless.
+
+Also absent from the tree: `cacheable`, `@cacheable/*`, `cacheable-request`,
+`got`, `axios`, `cache-manager`. `chalk` resolves to 4.1.2 / 5.6.2 and `debug`
+to 4.4.3 / 3.2.7 — all after the 2025 publisher-compromise republish, none on
+a compromised version.
+
+All three affected packages remain **dev-only transitives of `eslint`**; none
+ship in the deployed bundle.
+
+### 14.4 Framework patch status (2026-08-15)
+
+`next` is pinned at **15.5.22**. The July 2026 scheduled release patched nine
+CVEs in **16.2.11** and, on the maintenance line, **15.5.21** — so this repo is
+already above the patched 15.5 release and is not exposed to CVE-2026-64645
+(SSRF via request-controlled rewrite destinations), the Server Actions DoS, or
+the internal Server Function endpoint disclosure. CVE-2026-64642
+(middleware/proxy bypass) requires the 16.x line with App Router + Turbopack +
+a single `config.i18n.locales` entry; this repo is on 15.5 and configures no
+`i18n` block, so it is doubly out of scope.
+
 ---
 
 ## 15. Privacy Risks
