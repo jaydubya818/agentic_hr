@@ -97,6 +97,11 @@ export function AgentPanel({ agentId, title, description, context, className }: 
   const [responseMode, setResponseMode] = useState<'mock' | 'live' | 'fallback' | null>(null);
   const [governanceStatus, setGovernanceStatus] = useState<string | null>(null);
   const [actionPlan, setActionPlan] = useState<AgentResult['actionPlan'] | null>(null);
+  // POST /api/decisions has no idempotency key, so every click of "Save as
+  // decision" would create another decision row for the same plan.
+  const [saveAsDecisionState, setSaveAsDecisionState] = useState<'idle' | 'saving' | 'saved'>(
+    'idle',
+  );
 
   const invoke = useCallback(
     async (message: string) => {
@@ -150,6 +155,9 @@ export function AgentPanel({ agentId, title, description, context, className }: 
         }
         if (result.actionPlan) {
           setActionPlan(result.actionPlan);
+          // A newly generated plan has not been saved yet, even if the
+          // previous one was.
+          setSaveAsDecisionState('idle');
         }
         // Clear the box only when it held the sent message: a starter-prompt
         // send must not wipe a draft the user was still typing.
@@ -299,8 +307,11 @@ export function AgentPanel({ agentId, title, description, context, className }: 
                 })
                 .catch(() => setError('Could not add the action to the growth plan.'));
             }}
+            saveAsDecisionState={saveAsDecisionState}
             onSaveAsDecision={() => {
+              if (saveAsDecisionState !== 'idle') return;
               setError(null);
+              setSaveAsDecisionState('saving');
               void fetch('/api/decisions', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -312,9 +323,17 @@ export function AgentPanel({ agentId, title, description, context, className }: 
                 }),
               })
                 .then((res) => {
-                  if (!res.ok) setError('Could not save the plan as a decision.');
+                  if (!res.ok) {
+                    setError('Could not save the plan as a decision.');
+                    setSaveAsDecisionState('idle');
+                    return;
+                  }
+                  setSaveAsDecisionState('saved');
                 })
-                .catch(() => setError('Could not save the plan as a decision.'));
+                .catch(() => {
+                  setError('Could not save the plan as a decision.');
+                  setSaveAsDecisionState('idle');
+                });
             }}
             onSendForReview={() => {
               setError(null);
@@ -351,7 +370,10 @@ export function AgentPanel({ agentId, title, description, context, className }: 
                 })
                 .catch(() => setError('Could not send every action for review.'));
             }}
-            onDismiss={() => setActionPlan(null)}
+            onDismiss={() => {
+              setActionPlan(null);
+              setSaveAsDecisionState('idle');
+            }}
           />
         )}
 

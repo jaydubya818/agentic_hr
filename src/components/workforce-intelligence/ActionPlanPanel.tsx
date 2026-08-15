@@ -9,6 +9,8 @@ interface ActionPlanPanelProps {
   actionPlan: AgentActionPlanDetail;
   onAddToGrowthPlan?: (actionId: string) => void;
   onSaveAsDecision?: () => void;
+  /** Blocks a repeat save while one is in flight or already recorded. */
+  saveAsDecisionState?: 'idle' | 'saving' | 'saved';
   onSendForReview?: () => void;
   onDismiss?: () => void;
 }
@@ -17,6 +19,7 @@ export function ActionPlanPanel({
   actionPlan,
   onAddToGrowthPlan,
   onSaveAsDecision,
+  saveAsDecisionState = 'idle',
   onSendForReview,
   onDismiss,
 }: ActionPlanPanelProps) {
@@ -47,10 +50,15 @@ export function ActionPlanPanel({
           {onSaveAsDecision && (
             <button
               type="button"
-              className="rounded-md border px-3 py-1.5 text-sm hover:bg-muted"
+              className="rounded-md border px-3 py-1.5 text-sm hover:bg-muted disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-transparent"
+              disabled={saveAsDecisionState !== 'idle'}
               onClick={onSaveAsDecision}
             >
-              Save as decision
+              {saveAsDecisionState === 'saved'
+                ? 'Saved as decision'
+                : saveAsDecisionState === 'saving'
+                  ? 'Saving…'
+                  : 'Save as decision'}
             </button>
           )}
           {onSendForReview && (
