@@ -327,6 +327,24 @@ CSV-export the whole audit trail.
 
 MVP: Manual deletion; automated retention jobs in post-MVP.
 
+**Implementation status (2026-08-15): this table is policy, not an implemented
+control.** Nothing in `src/` enforces a retention period today:
+
+- No deletion or erasure endpoint exists for employee profiles, growth plans,
+  recommendations, or agent conversations. The only delete path in the codebase
+  removes a single rejected inferred skill
+  (`src/services/inferred-skill-service.ts`).
+- Audit entries are never expired. The in-memory fallback store caps itself at
+  5000 entries (`MAX_IN_MEMORY_AUDIT_ENTRIES`) purely to bound demo-server
+  memory; the Postgres table grows without limit, and the 2-year / 90-day rows
+  above are not differentiated in code.
+- "Manual deletion" therefore means direct database work by an operator, which
+  should be assumed for any pilot that ingests real employee records.
+
+Closing this gap needs a retention job plus an erasure path per data type;
+until then, do not represent retention limits as an implemented control in
+pilot or procurement conversations.
+
 ---
 
 ## 12. Environment Variable Handling
@@ -505,7 +523,7 @@ a single `config.i18n.locales` entry; this repo is on 15.5 and configures no
 | Inferred skills harm employee   | Medium     | High     | Labeling; visibility toggle; empowering copy |
 | Manager surveillance perception | Medium     | Medium   | Growth-focused UI; no monitoring language    |
 | Biased AI recommendations       | Medium     | High     | Fairness evals; governance                   |
-| Data retention beyond need      | Low        | Medium   | Retention policy                             |
+| Data retention beyond need      | Medium     | Medium   | Retention policy is documented in Section 11 but **not implemented**: no retention job and no erasure endpoint exist, so records persist until an operator deletes them by hand. Treat as an open gap for any pilot handling real employee data |
 | Cross-org data leak             | Low        | Critical | organization_id on all queries; RLS          |
 
 ---
