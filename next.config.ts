@@ -6,6 +6,11 @@ const projectRoot = path.dirname(fileURLToPath(import.meta.url));
 
 const nextConfig: NextConfig = {
   outputFileTracingRoot: projectRoot,
+  // Next.js advertises itself with `X-Powered-By: Next.js` on every response.
+  // The framework and its patch level drive most of the advisories tracked in
+  // docs/SECURITY_AND_PRIVACY.md 16.7, so do not hand attackers the stack for
+  // free (docs 16.8).
+  poweredByHeader: false,
   turbopack: {
     root: projectRoot,
   },

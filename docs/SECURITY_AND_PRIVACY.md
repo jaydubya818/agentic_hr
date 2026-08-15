@@ -546,6 +546,10 @@ All routes send this baseline via the `headers()` config:
 | `Strict-Transport-Security` | `max-age=31536000`                                           | Pins HTTPS after first visit                                                                                                                          |
 | `Permissions-Policy`        | `camera=(), microphone=(), geolocation=()`                   | Denies unused sensor APIs                                                                                                                             |
 
+`poweredByHeader: false` additionally suppresses the default
+`X-Powered-By: Next.js` response header, so the framework is not advertised on
+every response.
+
 When a full CSP (with `script-src` nonces) is introduced, verify it against a
 production build before shipping — inline bootstrapping in Next.js breaks
 under a naive policy.
