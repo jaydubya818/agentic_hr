@@ -29,8 +29,14 @@ export const PROHIBITED_PATTERNS: ProhibitedPattern[] = [
     category: 'promotion',
   },
   {
+    // The docs' seed pattern only caught "<term> should/recommend", so the
+    // far more natural "recommend a raise" and "compensation increase"
+    // phrasings walked straight through a filter whose stated bias is safety
+    // over recall. A bare mention still passes: the block copy itself tells
+    // employees to contact HR about employment questions.
     id: 'compensation',
-    pattern: /\b(salary|compensation|raise|bonus)\s+(should|recommend)/i,
+    pattern:
+      /\b(salary|compensation|raise|bonus|pay)\s+(should|recommend|increase|adjustment|bump)|\b(recommend|suggest|propose)\w*\s+(a|an|the)?\s*(salary|compensation|raise|bonus|pay)\b/i,
     category: 'compensation',
   },
   {

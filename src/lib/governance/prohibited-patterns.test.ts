@@ -29,3 +29,25 @@ describe('prohibited-patterns inflections', () => {
     expect(matchedIds('Strengthen system design through mentoring.')).toHaveLength(0);
   });
 });
+
+describe('compensation patterns', () => {
+  it.each([
+    'I recommend a raise for this employee',
+    'Suggest a bonus at the next cycle',
+    'A compensation increase is warranted here',
+    'Propose a salary adjustment',
+    'Their pay should be reviewed upward',
+  ])('blocks compensation recommendations: %s', (text) => {
+    expect(findProhibitedMatches(text).map((m) => m.category)).toContain('compensation');
+  });
+
+  it.each([
+    'Contact your HR team for compensation questions',
+    'Promotion and compensation review is owned by HR',
+    'Raise a question with your manager in your next 1:1',
+    'I recommend you pay attention to system design fundamentals',
+    'Discuss promotion, compensation, and career goals with HR',
+  ])('does not block a bare mention: %s', (text) => {
+    expect(findProhibitedMatches(text).map((m) => m.category)).not.toContain('compensation');
+  });
+});

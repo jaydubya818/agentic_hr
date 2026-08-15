@@ -308,7 +308,8 @@ const PROHIBITED_PATTERNS = [
   /\b(terminat(e|ed|es|ing|ion)|fir(e|ed|ing)|let(ting)? go|dismiss(ed|es|ing|al)?)\b/i,
   /\b(layoffs?|lay(s|ing)? off|laid off|rif|reduction in force)\b/i,
   /\b(promot(e|ion)\s+(decision|ready|not ready))\b/i,
-  /\b(salary|compensation|raise|bonus)\s+(should|recommend)/i,
+  // Both word orders: "compensation increase" and "recommend a raise".
+  /\b(salary|compensation|raise|bonus|pay)\s+(should|recommend|increase|adjustment|bump)|\b(recommend|suggest|propose)\w*\s+(a|an|the)?\s*(salary|compensation|raise|bonus|pay)\b/i,
   /\b(low performer|not promotable|low potential|underperformer)\b/i,
   /\b(hire|reject)\s+(this\s+)?candidate\b/i,
   // ... extended list in implementation
