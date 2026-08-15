@@ -42,16 +42,10 @@ export async function reviewInferredSkill(params: {
     return { ok: false, reason: 'Only inferred skills can be reviewed' };
   }
 
-  // Mirror the write into the shared mock store so the review survives a
-  // reload in demo mode; previously only the optional database branch below
-  // recorded it, leaving the row inferred again on the next request.
-  if (params.action === 'confirm') {
-    skillRow.source = 'confirmed';
-    skillRow.updatedAt = new Date().toISOString();
-  } else {
-    store.employeeSkills.splice(store.employeeSkills.indexOf(skillRow), 1);
-  }
-
+  // Persist first, then mirror. A failed database write used to leave the
+  // in-memory store already mutated -- and a rejected skill spliced out of it
+  // for good -- while the caller saw a 500, so the two views of the same row
+  // disagreed until the process restarted.
   if (shouldPersistWrites()) {
     const db = getDb();
     if (db) {
@@ -65,6 +59,15 @@ export async function reviewInferredSkill(params: {
       }
       clearSupabaseStoreCache();
     }
+  }
+
+  // Mirror the write into the shared mock store so the review survives a
+  // reload in demo mode, where the database branch above does not run.
+  if (params.action === 'confirm') {
+    skillRow.source = 'confirmed';
+    skillRow.updatedAt = new Date().toISOString();
+  } else {
+    store.employeeSkills.splice(store.employeeSkills.indexOf(skillRow), 1);
   }
 
   logAuditEvent({
