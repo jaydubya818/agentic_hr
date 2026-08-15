@@ -71,6 +71,15 @@ export async function generateLiveAgentResponse(
   );
 
   const provider = resolveLlmProvider();
+
+  // Fallback mode (USE_MOCK_AGENTS=false with no OPENAI_API_KEY) resolves to
+  // the mock provider, whose completion is a debug echo of the user's own
+  // message. Returning null hands the turn back to the caller's curated mock
+  // response, which is what "falling back to mock agent responses" means.
+  if (provider.name === 'mock') {
+    return null;
+  }
+
   const systemPrompt = getAgentSystemPrompt(request.agentId);
 
   try {
@@ -100,7 +109,7 @@ export async function generateLiveAgentResponse(
       responseText: parsed.response,
       confidence: parsed.confidence,
       evidence: parsed.evidence,
-      mode: provider.name === 'mock' ? 'fallback' : 'live',
+      mode: 'live',
       provider: result.provider,
     };
   } catch (error) {
