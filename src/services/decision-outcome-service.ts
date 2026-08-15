@@ -116,9 +116,19 @@ export function compareExpectedToActual(
   const comparisons: OutcomeComparison[] = [];
 
   for (const expected of expectedList) {
-    const actual = actualList.find(
-      (a) => a.metricLabel === expected.metricLabel || a.description === expected.description,
-    ) ?? actualList[0] ?? null;
+    // Pair only on real evidence. Matching `metricLabel === metricLabel` used
+    // to succeed whenever both were null -- which is the common case, since
+    // the field is optional -- so any unlabelled actual outcome was paired
+    // with any unlabelled expected one. The `?? actualList[0]` fallback then
+    // invented a pairing even when nothing matched, and the summary below
+    // reported an unrelated metric as having met the target.
+    const actual =
+      actualList.find(
+        (a) => expected.metricLabel != null && a.metricLabel === expected.metricLabel,
+      ) ??
+      actualList.find((a) => a.description === expected.description) ??
+      // Positional pairing is only safe when there is nothing to disambiguate.
+      (expectedList.length === 1 && actualList.length === 1 ? actualList[0]! : null);
 
     const metricDelta =
       expected.targetValue != null && actual?.metricValue != null
