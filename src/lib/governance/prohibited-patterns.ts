@@ -28,8 +28,13 @@ export const PROHIBITED_PATTERNS: ProhibitedPattern[] = [
     category: 'termination',
   },
   {
+    // Beyond the docs' seed list: a workforce reduction is rarely announced
+    // with the word "layoff". "Downsizing", "severance" and "headcount
+    // reduction" are the terms that actually appear, and all three were
+    // passing the filter.
     id: 'layoff',
-    pattern: /\b(layoffs?|lay(s|ing)? off|laid off|rif|reduction in force)\b/i,
+    pattern:
+      /\b(layoffs?|lay(s|ing)? off|laid off|rif|reduction in force|downsiz(e|ed|es|ing)|severance|(headcount|workforce|staff)\s+reduction|reduc(e|ing)\s+(headcount|the\s+workforce))\b/i,
     category: 'layoff',
   },
   { id: 'demotion', pattern: /\b(demot(e|ed|ion)|downgrade role|reduce level)\b/i, category: 'demotion' },
@@ -63,6 +68,16 @@ export const PROHIBITED_PATTERNS: ProhibitedPattern[] = [
     id: 'performance_rating',
     pattern: /\b(rating:\s*\d|meets expectations|below expectations|performance rating)\b/i,
     category: 'performance_rating',
+  },
+  {
+    // Formal performance management is an employment action, not development
+    // guidance, so it belongs behind the same block as termination. "PIP" is
+    // context-guarded rather than matched bare: this product discusses
+    // technical skills, and a bare \bpip\b would block "pip install".
+    id: 'performance_management',
+    pattern:
+      /\bperformance improvement plan\b|\b(on|onto|start(ing)?|begin|open|initiat(e|ing))\s+an?\s+pip\b|\bpip\s+(process|plan|conversation)\b|\bmanaged out\b|\bmanag(e|ing)\s+(him|her|them|someone|(this|that|the)\s+(person|employee))\s+out\b/i,
+    category: 'performance_management',
   },
   {
     id: 'succession',

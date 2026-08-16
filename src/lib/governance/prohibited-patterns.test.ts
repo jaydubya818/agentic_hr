@@ -39,6 +39,27 @@ describe('prohibited-patterns inflections', () => {
     expect(matchedIds('Management lays off underutilized roles.')).toContain('layoff');
   });
 
+  it('blocks workforce-reduction language that never says "layoff"', () => {
+    expect(matchedIds('The team is downsizing next quarter.')).toContain('layoff');
+    expect(matchedIds('Offer a severance package to close this out.')).toContain('layoff');
+    expect(matchedIds('Consider a headcount reduction on this team.')).toContain('layoff');
+    expect(matchedIds('We are reducing headcount in support.')).toContain('layoff');
+  });
+
+  it('blocks formal performance management', () => {
+    expect(matchedIds('Put her on a performance improvement plan.')).toContain(
+      'performance_management',
+    );
+    expect(matchedIds('Start a PIP for this employee.')).toContain('performance_management');
+    expect(matchedIds('This employee should be managed out.')).toContain('performance_management');
+    expect(matchedIds('We are managing this person out.')).toContain('performance_management');
+  });
+
+  it('does not read a bare "pip" as performance management', () => {
+    // The product discusses technical skills; "pip" is a Python tool.
+    expect(matchedIds('Run pip install to set up the toolchain.')).toHaveLength(0);
+  });
+
   it('still allows development-framed text', () => {
     expect(matchedIds('Focus on a growth path to promotion-ready skills.')).toHaveLength(0);
     expect(matchedIds('Strengthen system design through mentoring.')).toHaveLength(0);
