@@ -42,6 +42,17 @@ describe('agent invocation employee-context scoping', () => {
     ).rejects.toBeInstanceOf(AgentAccessError);
   });
 
+  it('rejects an executive_readonly session targeting another employee', async () => {
+    // SECURITY_AND_PRIVACY 6.1: aggregates only, no individual PII.
+    await expect(
+      invokeAgent('employee-growth', {
+        session: buildSession(MOCK_IDS.employees.alex, ['executive_readonly'], 'employee'),
+        message: 'What should this employee focus on next?',
+        context: { employeeId: MOCK_IDS.employees.morgan, contextType: 'growth-profile' },
+      }),
+    ).rejects.toBeInstanceOf(AgentAccessError);
+  });
+
   it('rejects an HR session targeting an employee in another organization', async () => {
     const session = buildSession(MOCK_IDS.employees.jordan, ['employee', 'hr_admin'], 'hr');
     await expect(

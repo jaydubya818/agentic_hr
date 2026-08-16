@@ -1,5 +1,5 @@
 import { DEMO_EMPLOYEE_ID, DEMO_MANAGER_EMPLOYEE_ID, MOCK_IDS } from '@/lib/mock/ids';
-import { canReadOrganizationWorkforceData, isManagerRole } from '@/lib/auth/rbac';
+import { canReadIndividualEmployeeData, isManagerRole } from '@/lib/auth/rbac';
 import { DEMO_GOVERNANCE_BLOCK_TRIGGER } from '@/lib/governance/demo-triggers';
 import { GOVERNANCE_BLOCK_MESSAGE } from '@/lib/governance/prohibited-patterns';
 import { dataProvider } from '@/services/data-provider';
@@ -440,8 +440,13 @@ function assertAgentAccess(agentId: AgentId, params: AgentInvokeParams): void {
   }
 
   if (context?.employeeId && context.employeeId !== session.employeeId) {
+    // Pulling an agent answer about a named colleague is an individual-PII
+    // read, so the org-wide bypass is the individual-read role set:
+    // BACKEND_STRUCTURE 6.1 grants executive_readonly no invoke_agents
+    // permission at all, and SECURITY_AND_PRIVACY 6.1 limits it to
+    // aggregates with no individual PII.
     const canAccessOtherEmployee =
-      canReadOrganizationWorkforceData(session.roles) ||
+      canReadIndividualEmployeeData(session.roles) ||
       (isManagerRole(session.roles) &&
         session.employeeId != null &&
         dataProvider.isDirectReport(session.employeeId, context.employeeId));
