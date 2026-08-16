@@ -5,6 +5,7 @@ import { userRoleSchema } from '@/schemas/enums';
 import {
   canManageUserRoles,
   canReadAuditLogs,
+  canReadIndividualEmployeeData,
   canReadOrganizationWorkforceData,
   canReadTeamScopedEmployeeData,
   isEmployeeRole,
@@ -27,6 +28,7 @@ describe('RBAC role matrix (PILOT_PERSISTENCE_RELEASE)', () => {
     expect(canReadAuditLogs(roles)).toBe(false);
     expect(canReadOrganizationWorkforceData(roles)).toBe(false);
     expect(canReadTeamScopedEmployeeData(roles)).toBe(false);
+    expect(canReadIndividualEmployeeData(roles)).toBe(false);
     expect(canManageUserRoles(roles)).toBe(false);
   });
 
@@ -44,6 +46,7 @@ describe('RBAC role matrix (PILOT_PERSISTENCE_RELEASE)', () => {
     expect(isHrAdminRole(roles)).toBe(true);
     expect(canReadAuditLogs(roles)).toBe(true);
     expect(canReadOrganizationWorkforceData(roles)).toBe(true);
+    expect(canReadIndividualEmployeeData(roles)).toBe(true);
     expect(canManageUserRoles(roles)).toBe(false);
   });
 
@@ -52,6 +55,7 @@ describe('RBAC role matrix (PILOT_PERSISTENCE_RELEASE)', () => {
     expect(isOrgAdminRole(roles)).toBe(true);
     expect(canReadAuditLogs(roles)).toBe(true);
     expect(canReadOrganizationWorkforceData(roles)).toBe(true);
+    expect(canReadIndividualEmployeeData(roles)).toBe(true);
     expect(canManageUserRoles(roles)).toBe(true);
   });
 
@@ -61,5 +65,8 @@ describe('RBAC role matrix (PILOT_PERSISTENCE_RELEASE)', () => {
     expect(canReadOrganizationWorkforceData(roles)).toBe(true);
     expect(canReadAuditLogs(roles)).toBe(false);
     expect(canManageUserRoles(roles)).toBe(false);
+    // SECURITY_AND_PRIVACY 6.2 Example 6: an executive asking for one named
+    // employee's record is a 403, even though the aggregate read is allowed.
+    expect(canReadIndividualEmployeeData(roles)).toBe(false);
   });
 });

@@ -56,6 +56,18 @@ export function canReadOrganizationWorkforceData(roles: UserRole[]): boolean {
   return userHasAnyRole(roles, ['hr_admin', 'org_admin', 'executive_readonly']);
 }
 
+/**
+ * Org-wide read of an *identified individual's* record, as opposed to the
+ * aggregates covered by `canReadOrganizationWorkforceData`.
+ *
+ * `executive_readonly` is deliberately excluded: SECURITY_AND_PRIVACY.md 6.1
+ * grants that role "aggregated dashboards only; no individual PII", and 6.2
+ * Example 6 requires a 403 when an executive requests one employee's summary.
+ */
+export function canReadIndividualEmployeeData(roles: UserRole[]): boolean {
+  return userHasAnyRole(roles, ['hr_admin', 'org_admin']);
+}
+
 export function highestRole(roles: UserRole[]): UserRole | null {
   if (roles.length === 0) return null;
   return roles.reduce((best, role) => (ROLE_RANK[role] > ROLE_RANK[best] ? role : best), roles[0]!);

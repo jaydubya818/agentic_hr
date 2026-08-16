@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 
 import {
-  canReadOrganizationWorkforceData,
+  canReadIndividualEmployeeData,
   canReadTeamScopedEmployeeData,
 } from '@/lib/auth/rbac';
 import { getSessionContext } from '@/lib/auth/session-context';
@@ -21,7 +21,10 @@ export async function GET(_request: Request, { params }: RouteParams) {
   }
 
   const { id } = await params;
-  const isHr = canReadOrganizationWorkforceData(session.roles);
+  // One employee's context graph is individual PII (it is labelled with the
+  // employee's full name), so the org-wide bypass here is the individual-read
+  // role set, not the aggregate one that also covers executive_readonly.
+  const isHr = canReadIndividualEmployeeData(session.roles);
   const isManager = canReadTeamScopedEmployeeData(session.roles);
 
   if (!isHr && !isManager && session.employeeId !== id) {
