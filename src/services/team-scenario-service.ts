@@ -13,7 +13,11 @@ import {
 } from '@/schemas/workforce-intelligence';
 import { getMockStore } from '@/services/data-provider/mock-provider';
 import type { SessionContext } from '@/types/session';
-import { canReadOrganizationWorkforceData, isManagerRole } from '@/lib/auth/rbac';
+import {
+  canReadOrganizationWorkforceData,
+  canWriteOrganizationWorkforceData,
+  isManagerRole,
+} from '@/lib/auth/rbac';
 
 type CreateInput = z.infer<typeof createTeamScenarioInputSchema>;
 type UpdateInput = z.infer<typeof updateTeamScenarioInputSchema>;
@@ -58,7 +62,7 @@ function assertTeamWriteScope(session: SessionContext, teamId: string): void {
     throw new Error('Unknown team for this organization');
   }
   if (
-    !canReadOrganizationWorkforceData(session.roles) &&
+    !canWriteOrganizationWorkforceData(session.roles) &&
     team.managerEmployeeId !== session.employeeId
   ) {
     throw new Error('Forbidden');
@@ -92,7 +96,7 @@ export function getTeamScenario(
 }
 
 export function createTeamScenario(session: SessionContext, input: CreateInput): TeamScenario {
-  if (!canReadOrganizationWorkforceData(session.roles) && !isManagerRole(session.roles)) {
+  if (!canWriteOrganizationWorkforceData(session.roles) && !isManagerRole(session.roles)) {
     throw new Error('Forbidden');
   }
 

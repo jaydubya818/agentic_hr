@@ -8,6 +8,7 @@ import {
   canReadIndividualEmployeeData,
   canReadOrganizationWorkforceData,
   canReadTeamScopedEmployeeData,
+  canWriteOrganizationWorkforceData,
   isEmployeeRole,
   isExecutiveReadonlyRole,
   isHrAdminRole,
@@ -48,6 +49,7 @@ describe('RBAC role matrix (PILOT_PERSISTENCE_RELEASE)', () => {
     expect(canReadOrganizationWorkforceData(roles)).toBe(true);
     expect(canReadIndividualEmployeeData(roles)).toBe(true);
     expect(canManageUserRoles(roles)).toBe(false);
+    expect(canWriteOrganizationWorkforceData(roles)).toBe(true);
   });
 
   it('org_admin: audit + workforce + role management', () => {
@@ -57,6 +59,7 @@ describe('RBAC role matrix (PILOT_PERSISTENCE_RELEASE)', () => {
     expect(canReadOrganizationWorkforceData(roles)).toBe(true);
     expect(canReadIndividualEmployeeData(roles)).toBe(true);
     expect(canManageUserRoles(roles)).toBe(true);
+    expect(canWriteOrganizationWorkforceData(roles)).toBe(true);
   });
 
   it('executive_readonly: aggregate workforce read-only, no audit or PII management', () => {
@@ -68,5 +71,6 @@ describe('RBAC role matrix (PILOT_PERSISTENCE_RELEASE)', () => {
     // SECURITY_AND_PRIVACY 6.2 Example 6: an executive asking for one named
     // employee's record is a 403, even though the aggregate read is allowed.
     expect(canReadIndividualEmployeeData(roles)).toBe(false);
+    expect(canWriteOrganizationWorkforceData(roles)).toBe(false);
   });
 });

@@ -47,6 +47,18 @@ describe('team-scenario-service write scoping', () => {
     ).toThrow('Unknown team');
   });
 
+  it('rejects executive_readonly creation: the role is read-only', () => {
+    // PILOT_PERSISTENCE_RELEASE 6: "Read-only, aggregate-first access".
+    // executive_readonly shares the aggregate read predicate with HR, so a
+    // write gate built on that predicate handed it create access.
+    expect(() =>
+      createTeamScenario(
+        makeSession({ roles: ['executive_readonly'], employeeId: undefined }),
+        baseInput(MOCK_IDS.teams.platform),
+      ),
+    ).toThrow('Forbidden');
+  });
+
   it('allows a manager to create a scenario for a managed team', () => {
     const scenario = createTeamScenario(makeSession({}), baseInput(MOCK_IDS.teams.platform));
     expect(scenario.teamId).toBe(MOCK_IDS.teams.platform);

@@ -2,7 +2,7 @@ import { eq } from 'drizzle-orm';
 
 import { getDb } from '@/lib/db';
 import { employeeSkills } from '@/lib/db/schema';
-import { canReadOrganizationWorkforceData, isManagerRole } from '@/lib/auth/rbac';
+import { canWriteOrganizationWorkforceData, isManagerRole } from '@/lib/auth/rbac';
 import { logAuditEvent } from '@/services/audit-service';
 import type { SessionContext } from '@/types/session';
 import { clearSupabaseStoreCache } from './data-provider/store-runtime';
@@ -34,7 +34,7 @@ export async function reviewInferredSkill(params: {
     isManagerRole(session.roles) &&
     session.employeeId != null &&
     dataProvider.isDirectReport(session.employeeId, skillRow.employeeId);
-  if (!isSelf && !isManagerOfEmployee && !canReadOrganizationWorkforceData(session.roles)) {
+  if (!isSelf && !isManagerOfEmployee && !canWriteOrganizationWorkforceData(session.roles)) {
     return { ok: false, reason: 'Forbidden', status: 403 };
   }
 

@@ -68,6 +68,20 @@ export function canReadIndividualEmployeeData(roles: UserRole[]): boolean {
   return userHasAnyRole(roles, ['hr_admin', 'org_admin']);
 }
 
+/**
+ * Org-wide *write* of workforce records (decisions, scenarios, proposed
+ * actions, recommendation statuses, skill reviews) without a team
+ * relationship to the subject.
+ *
+ * `executive_readonly` is excluded because the role is read-only by
+ * definition: PILOT_PERSISTENCE_RELEASE.md 6 describes it as "Read-only,
+ * aggregate-first access", and BACKEND_STRUCTURE.md 6.1 grants it no
+ * write permission in any column of the matrix.
+ */
+export function canWriteOrganizationWorkforceData(roles: UserRole[]): boolean {
+  return userHasAnyRole(roles, ['hr_admin', 'org_admin']);
+}
+
 export function highestRole(roles: UserRole[]): UserRole | null {
   if (roles.length === 0) return null;
   return roles.reduce((best, role) => (ROLE_RANK[role] > ROLE_RANK[best] ? role : best), roles[0]!);

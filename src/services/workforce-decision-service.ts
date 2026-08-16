@@ -13,7 +13,11 @@ import {
 import { getMockStore } from '@/services/data-provider/mock-provider';
 import { isDirectReport } from '@/services/data-provider/mock-provider';
 import type { SessionContext } from '@/types/session';
-import { canReadOrganizationWorkforceData, isManagerRole } from '@/lib/auth/rbac';
+import {
+  canReadOrganizationWorkforceData,
+  canWriteOrganizationWorkforceData,
+  isManagerRole,
+} from '@/lib/auth/rbac';
 
 type CreateInput = z.infer<typeof createWorkforceDecisionInputSchema>;
 type UpdateInput = z.infer<typeof updateWorkforceDecisionInputSchema>;
@@ -68,7 +72,7 @@ function assertDecisionWriteScope(
       throw new Error('Unknown team for this organization');
     }
     if (
-      !canReadOrganizationWorkforceData(session.roles) &&
+      !canWriteOrganizationWorkforceData(session.roles) &&
       team.managerEmployeeId !== session.employeeId
     ) {
       throw new Error('Forbidden');
@@ -118,7 +122,7 @@ export function createWorkforceDecision(
   session: SessionContext,
   input: CreateInput,
 ): WorkforceDecision {
-  if (!canReadOrganizationWorkforceData(session.roles) && !isManagerRole(session.roles)) {
+  if (!canWriteOrganizationWorkforceData(session.roles) && !isManagerRole(session.roles)) {
     throw new Error('Forbidden');
   }
 
@@ -157,7 +161,7 @@ export function canWriteWorkforceDecision(
   decision: WorkforceDecision,
 ): boolean {
   if (decision.organizationId !== session.organizationId) return false;
-  if (canReadOrganizationWorkforceData(session.roles)) return true;
+  if (canWriteOrganizationWorkforceData(session.roles)) return true;
   if (!isManagerRole(session.roles) || !session.employeeId) return false;
   if (decision.ownerEmployeeId === session.employeeId) return true;
   if (decision.teamId) {

@@ -8,7 +8,11 @@ import {
   type AgentActionPlan,
   type AgentProposedAction,
 } from '@/schemas/workforce-intelligence';
-import { canReadOrganizationWorkforceData, isManagerRole } from '@/lib/auth/rbac';
+import {
+  canReadOrganizationWorkforceData,
+  canWriteOrganizationWorkforceData,
+  isManagerRole,
+} from '@/lib/auth/rbac';
 import { getEmployee, getMockStore, isDirectReport } from '@/services/data-provider/mock-provider';
 import type { SessionContext } from '@/types/session';
 import { validateActionPlan, filterDisallowedActions } from '@/services/action-plan-governance';
@@ -35,7 +39,7 @@ function assertActionPlanWriteScope(
   input: CreatePlanInput,
   proposedActions: Pick<AgentProposedAction, 'targetEmployeeId'>[],
 ): void {
-  const isOrgWide = canReadOrganizationWorkforceData(session.roles);
+  const isOrgWide = canWriteOrganizationWorkforceData(session.roles);
 
   if (input.teamId != null) {
     const team = getMockStore().teams.find((t) => t.id === input.teamId);

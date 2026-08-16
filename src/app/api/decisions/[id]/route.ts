@@ -4,6 +4,7 @@ import { writeErrorResponse } from '@/lib/api/write-error-response';
 import {
   canReadOrganizationWorkforceData,
   canReadTeamScopedEmployeeData,
+  canWriteOrganizationWorkforceData,
   isManagerRole,
 } from '@/lib/auth/rbac';
 import { getSessionContext } from '@/lib/auth/session-context';
@@ -47,7 +48,7 @@ export async function PATCH(request: Request, { params }: RouteParams) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  if (!isManagerRole(session.roles) && !canReadOrganizationWorkforceData(session.roles)) {
+  if (!isManagerRole(session.roles) && !canWriteOrganizationWorkforceData(session.roles)) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
   }
 

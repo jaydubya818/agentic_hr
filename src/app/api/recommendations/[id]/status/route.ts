@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 
-import { canReadOrganizationWorkforceData, isManagerRole } from '@/lib/auth/rbac';
+import { canWriteOrganizationWorkforceData, isManagerRole } from '@/lib/auth/rbac';
 import { getSessionContext } from '@/lib/auth/session-context';
 import { logAuditEvent } from '@/services/audit-service';
 import { dataProvider } from '@/services/data-provider';
@@ -84,7 +84,7 @@ function checkRecommendationAccess(session: SessionContext, id: string): NextRes
     isManagerRole(session.roles) &&
     session.employeeId != null &&
     dataProvider.isDirectReport(session.employeeId, recommendation.employeeId);
-  if (!isSelf && !isManagerOfEmployee && !canReadOrganizationWorkforceData(session.roles)) {
+  if (!isSelf && !isManagerOfEmployee && !canWriteOrganizationWorkforceData(session.roles)) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
   }
 

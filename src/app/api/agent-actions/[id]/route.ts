@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 
 import { writeErrorResponse } from '@/lib/api/write-error-response';
-import { canReadOrganizationWorkforceData, isManagerRole } from '@/lib/auth/rbac';
+import { canWriteOrganizationWorkforceData, isManagerRole } from '@/lib/auth/rbac';
 import { getSessionContext } from '@/lib/auth/session-context';
 import { logAuditEvent } from '@/services/audit-service';
 import { updateAgentProposedActionInputSchema } from '@/schemas/workforce-intelligence';
@@ -52,7 +52,7 @@ export async function PATCH(request: Request, { params }: RouteParams) {
   // employee (plan/team level) require an org-wide role or a manager within
   // the plan's scope; any-manager access would let a manager approve or
   // apply another team's plan actions.
-  const isOrgWide = canReadOrganizationWorkforceData(session.roles);
+  const isOrgWide = canWriteOrganizationWorkforceData(session.roles);
   const isSelfTarget =
     existing.targetEmployeeId != null && existing.targetEmployeeId === session.employeeId;
   const isManagerOfTarget =
@@ -97,7 +97,7 @@ export async function PATCH(request: Request, { params }: RouteParams) {
       );
     }
     const canApplyForEmployee =
-      canReadOrganizationWorkforceData(session.roles) ||
+      canWriteOrganizationWorkforceData(session.roles) ||
       applyEmployeeId === session.employeeId ||
       (isManagerRole(session.roles) &&
         session.employeeId != null &&
