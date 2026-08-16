@@ -106,6 +106,27 @@ describe('action-plan-governance', () => {
     expect(filtered[0]!.title).toBe('Valid action');
   });
 
+  it.each([
+    ['We should let her go at the end of the quarter.', 'let <someone> go'],
+    ['Prepare a severance package for this role.', 'severance'],
+    ['Put her on a performance improvement plan.', 'PIP'],
+    ['This employee has been managed out.', 'managed out'],
+    ['Alex is an underperformer on this team.', 'punitive label'],
+    ['Recommend a raise at the next cycle.', 'compensation'],
+  ])('blocks shared-governance vocabulary in action text (%s)', (explanation) => {
+    // This module used to carry its own copy of the prohibited vocabulary,
+    // and the copy had drifted below the shared list -- so text blocked in an
+    // agent response was written straight into a growth plan.
+    const action = {
+      actionType: 'skill_development' as const,
+      title: 'Next step for Alex',
+      description: null,
+      explanation,
+    };
+    expect(validateActionPlan([action]).valid).toBe(false);
+    expect(filterDisallowedActions([action])).toHaveLength(0);
+  });
+
   it('exports allowed and disallowed constants', () => {
     expect(ALLOWED_ACTION_TYPES).toContain('skill_development');
     expect(DISALLOWED_ACTION_TYPES).toContain('termination');

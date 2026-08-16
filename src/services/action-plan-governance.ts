@@ -1,3 +1,4 @@
+import { findProhibitedMatches } from '@/lib/governance/prohibited-patterns';
 import {
   ALLOWED_ACTION_TYPES,
   DISALLOWED_ACTION_TYPES,
@@ -20,11 +21,16 @@ type ActionInput = Pick<
 >;
 
 /**
- * Employment-decision language that must never appear in a proposed action.
- * Shared by validation and filtering so both paths block the same terms
- * (EVALS_AND_GOVERNANCE.md prohibited outputs). Word-boundary patterns
- * cover inflections (fired, layoffs) without substring false positives
- * ('fire' in 'firewall', 'promotion' in 'promotional').
+ * Action-plan-specific employment-decision language.
+ *
+ * These are *stricter* than the shared governance list on purpose: any
+ * mention of promotion or compensation disqualifies a proposed action, where
+ * an agent's prose is allowed to say "contact HR about compensation". Word
+ * boundaries cover inflections (fired, layoffs) without substring false
+ * positives ('fire' in 'firewall', 'promotion' in 'promotional').
+ *
+ * They are not a replacement for the shared list -- see
+ * `containsProhibitedTerm`.
  */
 const PROHIBITED_ACTION_PATTERNS: RegExp[] = [
   /\bterminat(e|ed|es|ing|ion)\b/i,
@@ -39,7 +45,16 @@ const PROHIBITED_ACTION_PATTERNS: RegExp[] = [
 
 function containsProhibitedTerm(action: ActionInput): boolean {
   const combined = `${action.title} ${action.description ?? ''} ${action.explanation ?? ''}`;
-  return PROHIBITED_ACTION_PATTERNS.some((pattern) => pattern.test(combined));
+  // Also run the shared governance list. This module carried its own copy of
+  // the prohibited vocabulary, and the copy had drifted: "let her go",
+  // "dismissal", "severance", "downsizing", "put her on a PIP", "managed out",
+  // "underperformer" and "recommend a raise" were all blocked in an agent
+  // response and allowed in a proposed action written to an employee's growth
+  // plan. Two governance filters must not disagree about what is prohibited.
+  return (
+    PROHIBITED_ACTION_PATTERNS.some((pattern) => pattern.test(combined)) ||
+    findProhibitedMatches(combined).length > 0
+  );
 }
 
 function isDisallowedActionType(value: string): boolean {
