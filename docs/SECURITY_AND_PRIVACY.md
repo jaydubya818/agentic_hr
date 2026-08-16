@@ -514,6 +514,40 @@ the internal Server Function endpoint disclosure. CVE-2026-64642
 a single `config.i18n.locales` entry; this repo is on 15.5 and configures no
 `i18n` block, so it is doubly out of scope.
 
+### 14.5 Known-vulnerability audit (2026-08-16)
+
+`next` and `eslint-config-next` moved 15.5.22 → **15.5.23**, the current
+release on the 15.5 maintenance line (npm dist-tag `backport`). 14.4 otherwise
+still holds.
+
+`npm audit` reports 7 findings on the resulting lockfile — 3 high, 4 moderate.
+None are fixable without a breaking change, and none are reachable here:
+
+| Advisory                                 | Sev      | Resolved path                            |
+| ---------------------------------------- | -------- | ---------------------------------------- |
+| `postcss` <=8.5.22 (4 advisories)        | high     | `next/node_modules/postcss` @ 8.4.31     |
+| `sharp` <0.35.0 (libvips CVEs)           | high     | `sharp` @ 0.34.5, optional dep of `next` |
+| `esbuild` <=0.24.2 (GHSA-67mh-4wv8-2f99) | moderate | `drizzle-kit` → `@esbuild-kit/*`         |
+
+- **postcss** — `next` pins this copy exactly, so it cannot be bumped from
+  here. All four advisories need attacker-controlled CSS (`sourceMappingURL`
+  path traversal and arbitrary `.map` disclosure, XSS via an unescaped
+  `</style>`); our CSS is first-party and processed only at build time. The
+  separate **top-level** `postcss` that Tailwind uses resolves to 8.5.26,
+  which is patched.
+- **sharp** — `next/image` is not used anywhere in `src/`, and
+  `next.config.ts` declares no `images.remotePatterns`, so the image optimizer
+  never runs. `next` declares `^0.34.3`; an override past that range is
+  unsupported by the framework.
+- **esbuild** — dev-only. The advisory concerns the esbuild **dev server**
+  accepting requests from any origin; `drizzle-kit` uses esbuild to bundle
+  `drizzle.config.ts` and starts no server. It never ships in the bundle.
+
+`npm audit fix --force` would install `next@16.3.1` and downgrade
+`drizzle-kit` to `0.18.1`; both are breaking and neither is justified by the
+reachability analysis above. Re-check when the repo next moves to the 16.x
+line.
+
 ---
 
 ## 15. Privacy Risks
