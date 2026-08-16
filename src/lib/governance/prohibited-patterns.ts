@@ -12,9 +12,19 @@ export interface ProhibitedPattern {
 export const PROHIBITED_PATTERNS: ProhibitedPattern[] = [
   // Inflected forms are matched explicitly: \b(terminate)\b alone would let
   // "terminated", "firing", or "laid off" through the filter.
+  //
+  // "let ... go" needs the object spelled out. The docs' seed pattern is
+  // literally `let(ting)? go`, which requires the two words to be adjacent --
+  // so it caught the harmless metaphor ("let go of the assumption that senior
+  // means manager") while every natural termination phrasing walked through:
+  // "we should let her go", "it may be time to let them go", "consider letting
+  // this person go". Named objects ("let Alex go") are still a known miss; a
+  // bare \w+ there would block ordinary coaching copy like "let me go through
+  // your growth plan".
   {
     id: 'termination',
-    pattern: /\b(terminat(e|ed|es|ing|ion)|fir(e|ed|ing)|let(ting)? go|dismiss(ed|es|ing|al)?)\b/i,
+    pattern:
+      /\b(terminat(e|ed|es|ing|ion)|fir(e|ed|ing)|let(ting)? go|lett?(ing)?\s+(him|her|them|someone|anyone|people|staff|(this|that|the)\s+(person|employee|individual|report|hire))\s+go|dismiss(ed|es|ing|al)?)\b/i,
     category: 'termination',
   },
   {

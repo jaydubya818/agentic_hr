@@ -17,6 +17,21 @@ describe('prohibited-patterns inflections', () => {
     expect(matchedIds('We are letting go two engineers.')).toContain('termination');
   });
 
+  it('blocks "let <someone> go" with the object spelled out', () => {
+    // The docs' seed pattern needs "let" and "go" adjacent, so these -- the
+    // most natural way to say it -- were passing the filter entirely.
+    expect(matchedIds('We should let her go at the end of the quarter.')).toContain('termination');
+    expect(matchedIds('We should let him go.')).toContain('termination');
+    expect(matchedIds('It may be time to let them go.')).toContain('termination');
+    expect(matchedIds('Consider letting this person go.')).toContain('termination');
+    expect(matchedIds('HR wants to let the employee go.')).toContain('termination');
+  });
+
+  it('does not block coaching copy that merely contains let/go', () => {
+    expect(matchedIds('Let me walk through your growth plan.')).toHaveLength(0);
+    expect(matchedIds('Let this goal guide your next quarter.')).toHaveLength(0);
+  });
+
   it('blocks inflected layoff language', () => {
     expect(matchedIds('Plan for layoffs in Q3.')).toContain('layoff');
     expect(matchedIds('They laid off the platform team.')).toContain('layoff');
