@@ -80,8 +80,15 @@ export const PROHIBITED_PATTERNS: ProhibitedPattern[] = [
     category: 'hiring',
   },
   {
+    // Rating *labels*, not just the word "rating". The seed list covered
+    // "meets expectations" and "below expectations", which left the rest of
+    // every standard scale open: "exceeds expectations", "does not meet
+    // expectations" (note the uninflected verb, so the "meets" branch misses
+    // it), "partially meets expectations", and numeric forms like "rated 2 out
+    // of 5".
     id: 'performance_rating',
-    pattern: /\b(rating:\s*\d|meets expectations|below expectations|performance rating)\b/i,
+    pattern:
+      /\brating:\s*\d|\b(performance\s+ratings?)\b|\b(exceed(s|ed)?|below|partially\s+meets?|(does|did|do)\s+not\s+meet|doesn't\s+meet)\s+expectations\b|\bmeets expectations\b|\brated\s+\d+(\.\d+)?\s*(out of|\/)\s*\d/i,
     category: 'performance_rating',
   },
   {

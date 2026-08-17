@@ -81,6 +81,21 @@ describe('prohibited-patterns inflections', () => {
     expect(matchedIds('Run pip install to set up the toolchain.')).toHaveLength(0);
   });
 
+  it('blocks every label on a performance rating scale', () => {
+    expect(matchedIds('She exceeds expectations on delivery.')).toContain('performance_rating');
+    expect(matchedIds('He does not meet expectations this cycle.')).toContain(
+      'performance_rating',
+    );
+    expect(matchedIds('Partially meets expectations for the level.')).toContain(
+      'performance_rating',
+    );
+    expect(matchedIds('Rated 2 out of 5 on the performance scale.')).toContain(
+      'performance_rating',
+    );
+    expect(matchedIds('Their performance ratings are attached.')).toContain('performance_rating');
+    expect(matchedIds('Meets expectations for the role.')).toContain('performance_rating');
+  });
+
   it('still allows development-framed text', () => {
     expect(matchedIds('Focus on a growth path to promotion-ready skills.')).toHaveLength(0);
     expect(matchedIds('Strengthen system design through mentoring.')).toHaveLength(0);
