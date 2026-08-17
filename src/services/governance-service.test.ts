@@ -72,6 +72,27 @@ describe('governance-service', () => {
     expect(result.warnings.length).toBeGreaterThan(0);
   });
 
+  it('GV-05 flags the whole low-confidence band, not just below 0.4', () => {
+    // EVALS_AND_GOVERNANCE 7.2 puts the low band at 0.00-0.49 and 8.1 asks
+    // for human review under 0.5, so 0.45 must not pass unflagged while the
+    // UI renders it as low confidence.
+    const result = validateAgentOutput({
+      responseText: 'Consider optional learning resources for API design practice.',
+      responseConfidence: 0.45,
+    });
+    expect(result.flagged).toBe(true);
+    expect(result.humanReviewRequired).toBe(true);
+  });
+
+  it('GV-05 leaves the medium band unflagged', () => {
+    const result = validateAgentOutput({
+      responseText: 'Consider optional learning resources for API design practice.',
+      responseConfidence: 0.5,
+    });
+    expect(result.flagged).toBe(false);
+    expect(result.humanReviewRequired).toBe(false);
+  });
+
   it('GV-06 blocks demotion language', () => {
     const result = validateAgentOutput({
       responseText: 'This employee should be demoted to a junior role.',

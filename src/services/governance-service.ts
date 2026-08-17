@@ -6,7 +6,17 @@ import {
 import type { CreateRecommendationInput } from '@/types/agent';
 import type { GovernanceStatus } from '@/types/agent';
 
-export const LOW_CONFIDENCE_THRESHOLD = 0.4;
+/**
+ * Below this, an output carries the human-in-the-loop reminder.
+ *
+ * EVALS_AND_GOVERNANCE 7.2 puts the "Low / Exploratory" confidence band at
+ * 0.00-0.49 and 8.1 requires human review for anything under 0.5, and
+ * `getConfidenceLevel` already renders < 0.5 as the red "low" band. The
+ * threshold here was 0.4, so a 0.45-confidence recommendation was drawn as
+ * low-confidence in the UI and still shipped without the review reminder --
+ * and the live system prompt (`HUMAN_IN_THE_LOOP`) told the model 0.5.
+ */
+export const LOW_CONFIDENCE_THRESHOLD = 0.5;
 
 export const HUMAN_IN_THE_LOOP_MESSAGE =
   'This suggestion has lower confidence or may need review. Discuss with your manager or HR before taking action.';
