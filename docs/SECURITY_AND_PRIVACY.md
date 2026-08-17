@@ -548,6 +548,32 @@ None are fixable without a breaking change, and none are reachable here:
 reachability analysis above. Re-check when the repo next moves to the 16.x
 line.
 
+### 14.6 Known-vulnerability audit (2026-08-17)
+
+`npm audit --package-lock-only` now reports **6** findings (2 high, 4
+moderate), down from 7. The change is the four `postcss` advisories, which
+14.5 recorded as unfixable.
+
+- **postcss — fixed.** 14.5 said `next` "pins this copy exactly, so it cannot
+  be bumped from here". That is true of `next`'s own dependency range, but an
+  npm `overrides` entry (`"postcss": "^8.5.26"` in `package.json`) collapses
+  the nested copy onto the same 8.5.26 the Tailwind pipeline already resolves,
+  and the lockfile no longer contains `next/node_modules/postcss`. Regenerated
+  with `npm install --package-lock-only`.
+- **sharp — still open, still unreachable.** `sharp` 0.34.5 is an optional dep
+  of `next` declared as `^0.34.3`; 0.35.x is a breaking minor for a `0.x`
+  package and the framework does not support it. The reachability argument in
+  14.5 is unchanged: `next/image` is unused and `next.config.ts` declares no
+  `images.remotePatterns`, so the optimizer never runs.
+- **esbuild / drizzle-kit — still open, still dev-only.** Unchanged from 14.5.
+
+**Supply-chain re-check (Shai-Hulud / ChainDrop).** No `preinstall` or
+`postinstall` hook appears anywhere in `package.json` or the lockfile, and no
+`setup.mjs` or `Math_Symbol.js` file exists in the tree. The named-package
+check still passes: `keyv` 4.5.4, `flat-cache` 4.0.1 and `file-entry-cache`
+8.0.0 all predate the compromised version ranges. `ignore-scripts=true`
+(14.2) remains in `.npmrc`.
+
 ---
 
 ## 15. Privacy Risks
