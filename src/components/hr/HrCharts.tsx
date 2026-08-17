@@ -44,6 +44,22 @@ function ChartFallback({ title, description, rows }: ChartFallbackProps) {
   );
 }
 
+/**
+ * Screen-reader alternative for a recharts panel.
+ *
+ * FRONTEND_GUIDELINES 14 wants an `aria-label` on the chart container and
+ * 15.2 wants a summary text alternative below the chart. recharts renders an
+ * unlabelled SVG of `<path>` elements, so without this the whole HR dashboard
+ * reads as an empty card: the numbers exist only as chart geometry.
+ */
+function ChartTextAlternative({ title, rows }: Omit<ChartFallbackProps, 'description'>) {
+  return (
+    <p className="sr-only">
+      {title}. {rows.map((row) => `${row.label}: ${row.value}`).join('. ')}.
+    </p>
+  );
+}
+
 class ChartErrorBoundary extends Component<
   { fallback: ReactNode; children: ReactNode },
   { hasError: boolean }
@@ -78,13 +94,8 @@ export function HrBarChartPanel({
   data,
   valueSuffix = '',
 }: HrBarChartPanelProps) {
-  const fallback = (
-    <ChartFallback
-      title={title}
-      description={description}
-      rows={data.map((d) => ({ label: d.name, value: `${d.value}${valueSuffix}` }))}
-    />
-  );
+  const rows = data.map((d) => ({ label: d.name, value: `${d.value}${valueSuffix}` }));
+  const fallback = <ChartFallback title={title} description={description} rows={rows} />;
 
   return (
     <ChartErrorBoundary fallback={fallback}>
@@ -94,7 +105,8 @@ export function HrBarChartPanel({
           {description && <CardDescription>{description}</CardDescription>}
         </CardHeader>
         <CardContent className="h-72">
-          <ResponsiveContainer width="100%" height="100%">
+          <ChartTextAlternative title={title} rows={rows} />
+          <ResponsiveContainer width="100%" height="100%" aria-label={title}>
             <BarChart data={data} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
               <CartesianGrid strokeDasharray="3 3" className="stroke-border" />
               <XAxis dataKey="name" tick={{ fontSize: 12 }} />
@@ -128,13 +140,8 @@ export function HrLineChartPanel({ title, description, data }: HrLineChartPanelP
     label: new Date(d.date).toLocaleDateString('en-US', { month: 'short', year: '2-digit' }),
   }));
 
-  const fallback = (
-    <ChartFallback
-      title={title}
-      description={description}
-      rows={formatted.map((d) => ({ label: d.label, value: d.score }))}
-    />
-  );
+  const rows = formatted.map((d) => ({ label: d.label, value: d.score }));
+  const fallback = <ChartFallback title={title} description={description} rows={rows} />;
 
   return (
     <ChartErrorBoundary fallback={fallback}>
@@ -144,7 +151,8 @@ export function HrLineChartPanel({ title, description, data }: HrLineChartPanelP
           {description && <CardDescription>{description}</CardDescription>}
         </CardHeader>
         <CardContent className="h-72">
-          <ResponsiveContainer width="100%" height="100%">
+          <ChartTextAlternative title={title} rows={rows} />
+          <ResponsiveContainer width="100%" height="100%" aria-label={title}>
             <LineChart data={formatted} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
               <CartesianGrid strokeDasharray="3 3" className="stroke-border" />
               <XAxis dataKey="label" tick={{ fontSize: 12 }} />
