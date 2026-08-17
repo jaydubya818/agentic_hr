@@ -234,7 +234,16 @@ export function AgentPanel({ agentId, title, description, context, className }: 
         )}
 
         {messages.length > 0 && (
-          <div className="max-h-64 space-y-3 overflow-y-auto rounded-lg border bg-muted/30 p-3">
+          // FRONTEND_GUIDELINES 15.2 requires role="log" + aria-live="polite"
+          // on this list: the agent reply arrives asynchronously and replaces
+          // nothing on screen, so without it a screen-reader user gets no
+          // announcement that an answer appeared.
+          <div
+            role="log"
+            aria-live="polite"
+            aria-label="Agent conversation"
+            className="max-h-64 space-y-3 overflow-y-auto rounded-lg border bg-muted/30 p-3"
+          >
             {messages.map((msg, index) => (
               <div
                 key={`${msg.role}-${index}`}
