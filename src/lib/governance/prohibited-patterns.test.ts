@@ -32,6 +32,27 @@ describe('prohibited-patterns inflections', () => {
     expect(matchedIds('Let this goal guide your next quarter.')).toHaveLength(0);
   });
 
+  it('blocks the euphemisms used instead of "terminate"', () => {
+    expect(matchedIds('We should exit this employee at the end of the quarter.')).toContain(
+      'termination_euphemism',
+    );
+    expect(matchedIds('It may be time to part ways with Jordan.')).toContain(
+      'termination_euphemism',
+    );
+    expect(matchedIds('Begin the involuntary separation process.')).toContain(
+      'termination_euphemism',
+    );
+    expect(matchedIds('Start offboarding him next week.')).toContain('termination_euphemism');
+    expect(matchedIds('Recommend we off-board this report.')).toContain('termination_euphemism');
+    expect(matchedIds('Schedule her exit interview.')).toContain('termination_euphemism');
+  });
+
+  it('does not read engineering vocabulary as a termination euphemism', () => {
+    expect(matchedIds('Practise separation of concerns in your service design.')).toHaveLength(0);
+    expect(matchedIds('Define exit criteria for the migration project.')).toHaveLength(0);
+    expect(matchedIds('Ship the release and then exit the feature flag.')).toHaveLength(0);
+  });
+
   it('blocks inflected layoff language', () => {
     expect(matchedIds('Plan for layoffs in Q3.')).toContain('layoff');
     expect(matchedIds('They laid off the platform team.')).toContain('layoff');

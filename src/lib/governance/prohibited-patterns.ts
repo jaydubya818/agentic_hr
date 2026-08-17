@@ -28,6 +28,21 @@ export const PROHIBITED_PATTERNS: ProhibitedPattern[] = [
     category: 'termination',
   },
   {
+    // The euphemisms HR actually writes. A model asked to be tactful reaches
+    // for these long before it says "terminate", and every one of them was
+    // walking through the filter: "exit this employee", "part ways with
+    // Jordan", "begin the involuntary separation process", "start offboarding
+    // him".
+    //
+    // "exit" and "separation" are context-guarded rather than matched bare --
+    // this product discusses engineering skills, where "exit criteria" and
+    // "separation of concerns" are ordinary vocabulary.
+    id: 'termination_euphemism',
+    pattern:
+      /\bpart(ing|ed|s)?\s+ways\b|\boff-?board(ing|ed|s)?\b|\b(involuntary|voluntary)\s+separation\b|\bseparation\s+(agreement|package|date|process)\b|\bexit\s+(interview|package)\b|\bmanaged\s+exit\b|\bexit(ing)?\s+(him|her|them|someone|(this|that|the)\s+(person|employee|individual|report|hire))\b/i,
+    category: 'termination',
+  },
+  {
     // Beyond the docs' seed list: a workforce reduction is rarely announced
     // with the word "layoff". "Downsizing", "severance" and "headcount
     // reduction" are the terms that actually appear, and all three were
