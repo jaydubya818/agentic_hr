@@ -132,6 +132,14 @@ export function updateTeamScenario(
   const existing = getTeamScenario(session, scenarioId);
   if (!existing) return null;
 
+  // Read scope is wider than write scope, so reaching a scenario is not
+  // permission to change it: `filterScenariosForSession` hands
+  // executive_readonly every scenario in the organization through the
+  // aggregate-read predicate, and that role is read-only by definition
+  // (see `canWriteOrganizationWorkforceData`). Checking here rather than
+  // relying on the route mirrors `canWriteWorkforceDecision`.
+  assertTeamWriteScope(session, existing.teamId);
+
   if (input.teamId != null) {
     assertTeamWriteScope(session, input.teamId);
   }

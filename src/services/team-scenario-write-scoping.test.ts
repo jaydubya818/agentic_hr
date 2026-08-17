@@ -73,6 +73,25 @@ describe('team-scenario-service write scoping', () => {
     ).toThrow('Forbidden');
   });
 
+  it('rejects executive_readonly updates: reaching a scenario is not permission to change it', () => {
+    const scenario = createTeamScenario(makeSession({}), baseInput(MOCK_IDS.teams.platform));
+    expect(() =>
+      updateTeamScenario(
+        makeSession({ roles: ['executive_readonly'], employeeId: undefined }),
+        scenario.id,
+        { title: 'renamed by an executive' },
+      ),
+    ).toThrow('Forbidden');
+  });
+
+  it('allows the managing manager to update a scenario without retargeting it', () => {
+    const session = makeSession({});
+    const scenario = createTeamScenario(session, baseInput(MOCK_IDS.teams.platform));
+    expect(updateTeamScenario(session, scenario.id, { title: 'refined title' })?.title).toBe(
+      'refined title',
+    );
+  });
+
   it('allows HR to create a scenario for any organization team', () => {
     const scenario = createTeamScenario(
       makeSession({ roles: ['hr_admin'], activeRole: 'hr' }),
