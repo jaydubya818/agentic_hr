@@ -98,12 +98,17 @@ export const PROHIBITED_PATTERNS: ProhibitedPattern[] = [
     // technical skills, and a bare \bpip\b would block "pip install".
     id: 'performance_management',
     pattern:
-      /\bperformance improvement plan\b|\b(on|onto|start(ing)?|begin|open|initiat(e|ing))\s+an?\s+pip\b|\bpip\s+(process|plan|conversation)\b|\bmanaged out\b|\bmanag(e|ing)\s+(him|her|them|someone|(this|that|the)\s+(person|employee))\s+out\b/i,
+      /\bperformance improvement plan\b|\b(on|onto|start(ing)?|begin|open|initiat(e|ing))\s+an?\s+pip\b|\bpip\s+(process|plan|conversation)\b|\bmanaged out\b|\bmanag(e|ing)\s+(him|her|them|someone|(this|that|the)\s+(person|employee))\s+out\b|\b(final\s+)?(written|verbal)\s+warning\b|\bcorrective\s+action\s+plan\b|\bdisciplinary\s+(action|process|meeting)\b|\blast\s+chance\s+agreement\b/i,
     category: 'performance_management',
   },
   {
+    // Succession planning is an explicit MVP non-goal, but only two exact
+    // phrasings were matched. Naming a successor is the whole prohibited act,
+    // however it is worded: "designate a successor for the VP role", "add her
+    // to the succession plan", "she is his successor".
     id: 'succession',
-    pattern: /\b(next ceo should be|successor designation)\b/i,
+    pattern:
+      /\bnext ceo should be\b|\bsuccessor\s+(designation|for|to)\b|\b(designate|name|identify|pick|choose)\s+(a|the|her|his|their)?\s*successor\b|\b(her|his|their|my|the)\s+successor\b|\bsuccession\s+(plan(ning|s)?|candidate|slate|pool|list)\b/i,
     category: 'succession',
   },
 ];

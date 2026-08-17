@@ -76,6 +76,20 @@ describe('prohibited-patterns inflections', () => {
     expect(matchedIds('We are managing this person out.')).toContain('performance_management');
   });
 
+  it('blocks formal disciplinary steps', () => {
+    // Written warnings and corrective action plans are employment actions,
+    // not development guidance, so they belong behind the same block as a PIP.
+    expect(matchedIds('He should be put on a final written warning.')).toContain(
+      'performance_management',
+    );
+    expect(matchedIds('Place him on a corrective action plan.')).toContain(
+      'performance_management',
+    );
+    expect(matchedIds('Open a disciplinary process with HR.')).toContain(
+      'performance_management',
+    );
+  });
+
   it('does not read a bare "pip" as performance management', () => {
     // The product discusses technical skills; "pip" is a Python tool.
     expect(matchedIds('Run pip install to set up the toolchain.')).toHaveLength(0);
@@ -94,6 +108,13 @@ describe('prohibited-patterns inflections', () => {
     );
     expect(matchedIds('Their performance ratings are attached.')).toContain('performance_rating');
     expect(matchedIds('Meets expectations for the role.')).toContain('performance_rating');
+  });
+
+  it('blocks naming a successor however it is worded', () => {
+    expect(matchedIds('Designate a successor for the VP role.')).toContain('succession');
+    expect(matchedIds('Add her to the succession plan for director.')).toContain('succession');
+    expect(matchedIds('She is his successor.')).toContain('succession');
+    expect(matchedIds('Identify a successor before the reorg.')).toContain('succession');
   });
 
   it('still allows development-framed text', () => {
