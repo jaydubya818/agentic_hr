@@ -129,6 +129,46 @@ describe('agent-action-plan write scoping', () => {
     ).toThrow('Unknown employee');
   });
 
+  it('rejects an unscoped plan from a caller without org-wide write access', () => {
+    // No team, no employee and no targeted action: nothing in the plan ties
+    // it to a scope the caller holds, so only an org-wide role may create it.
+    expect(() => createActionPlanFromInput(makeSession({}), makePlanInput(), [])).toThrow(
+      'Forbidden',
+    );
+    expect(() =>
+      createActionPlanFromInput(
+        makeSession({
+          userId: MOCK_IDS.users.jordan,
+          employeeId: MOCK_IDS.employees.jordan,
+          roles: ['employee', 'manager'],
+          activeRole: 'manager',
+        }),
+        makePlanInput(),
+        [],
+      ),
+    ).toThrow('Forbidden');
+  });
+
+  it('rejects an unscoped plan from the read-only executive role', () => {
+    expect(() =>
+      createActionPlanFromInput(
+        makeSession({ roles: ['executive_readonly'], activeRole: 'employee', employeeId: undefined }),
+        makePlanInput(),
+        [makeAction(null)],
+      ),
+    ).toThrow('Forbidden');
+  });
+
+  it('allows an org-wide role to create an unscoped plan', () => {
+    const plan = createActionPlanFromInput(
+      makeSession({ roles: ['hr_admin'], activeRole: 'hr' }),
+      makePlanInput(),
+      [],
+    );
+    expect(plan.employeeId).toBeNull();
+    expect(plan.teamId).toBeNull();
+  });
+
   it('allows an org-wide role to create plans across teams and employees', () => {
     const plan = createActionPlanFromInput(
       makeSession({ roles: ['hr_admin'], activeRole: 'hr' }),

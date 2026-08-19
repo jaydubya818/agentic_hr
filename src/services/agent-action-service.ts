@@ -57,6 +57,17 @@ function assertActionPlanWriteScope(
     if (action.targetEmployeeId != null) employeeIds.add(action.targetEmployeeId);
   }
 
+  // A plan with no team, no employee and no targeted action names nobody, so
+  // neither the team check above nor the reporting check below can authorize
+  // it -- both loops simply do not run. That let any signed-in caller seed
+  // the organization's plan list, including `executive_readonly`, which the
+  // matrix in BACKEND_STRUCTURE 6.1 grants no write permission at all. The
+  // PATCH route already reserves unscoped plans for org-wide roles
+  // (`managerScopeCoversPlan`, "deny on ambiguity"); creation must agree.
+  if (!isOrgWide && input.teamId == null && employeeIds.size === 0) {
+    throw new Error('Forbidden');
+  }
+
   for (const employeeId of employeeIds) {
     const employee = getEmployee(employeeId);
     if (!employee || employee.organizationId !== session.organizationId) {
