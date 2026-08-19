@@ -3,6 +3,7 @@ import { randomUUID } from 'crypto';
 import { and, desc, eq } from 'drizzle-orm';
 
 import { getDb } from '@/lib/db';
+import { getConfidenceLevel } from '@/lib/format/confidence';
 import {
   auditLogs,
   recommendationEvidence,
@@ -12,12 +13,6 @@ import type { AgentRecommendationResult } from '@/types/agent';
 import type { AuditLogEntry } from '@/services/audit-service';
 import { clearSupabaseStoreCache } from './store-runtime';
 import { shouldPersistWrites } from './persistence-config';
-
-function confidenceEnumFromScore(score: number): 'high' | 'medium' | 'low' {
-  if (score >= 0.75) return 'high';
-  if (score >= 0.5) return 'medium';
-  return 'low';
-}
 
 export async function persistAgentRecommendations(
   results: AgentRecommendationResult[],
@@ -38,7 +33,7 @@ export async function persistAgentRecommendations(
       type: rec.type,
       title: rec.title,
       explanation: rec.explanation,
-      confidence: confidenceEnumFromScore(rec.confidence),
+      confidence: getConfidenceLevel(rec.confidence),
       confidenceScore: rec.confidence,
       status: rec.status,
       governanceStatus: rec.governanceStatus,
