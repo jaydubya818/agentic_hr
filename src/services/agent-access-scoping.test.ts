@@ -53,6 +53,26 @@ describe('agent invocation employee-context scoping', () => {
     ).rejects.toBeInstanceOf(AgentAccessError);
   });
 
+  it('rejects an executive_readonly session with no employee context at all', async () => {
+    // BACKEND_STRUCTURE 6.1 leaves `invoke_agents` empty for this role, so a
+    // context-free turn -- which grounds on the caller's own record -- is a
+    // denial too, not just a turn that names someone else.
+    await expect(
+      invokeAgent('employee-growth', {
+        session: buildSession(MOCK_IDS.employees.alex, ['executive_readonly'], 'employee'),
+        message: 'What should I focus on next?',
+      }),
+    ).rejects.toBeInstanceOf(AgentAccessError);
+  });
+
+  it('allows an executive who also holds a granting role: roles are additive', async () => {
+    const result = await invokeAgent('employee-growth', {
+      session: buildSession(MOCK_IDS.employees.alex, ['employee', 'executive_readonly'], 'employee'),
+      message: 'What should I focus on next?',
+    });
+    expect(result.agentId).toBe('employee-growth');
+  });
+
   it('rejects an HR session targeting an employee in another organization', async () => {
     const session = buildSession(MOCK_IDS.employees.jordan, ['employee', 'hr_admin'], 'hr');
     await expect(

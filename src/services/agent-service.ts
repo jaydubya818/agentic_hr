@@ -1,5 +1,5 @@
 import { DEMO_EMPLOYEE_ID, DEMO_MANAGER_EMPLOYEE_ID, MOCK_IDS } from '@/lib/mock/ids';
-import { canReadIndividualEmployeeData, isManagerRole } from '@/lib/auth/rbac';
+import { canInvokeAgents, canReadIndividualEmployeeData, isManagerRole } from '@/lib/auth/rbac';
 import { DEMO_GOVERNANCE_BLOCK_TRIGGER } from '@/lib/governance/demo-triggers';
 import { GOVERNANCE_BLOCK_MESSAGE } from '@/lib/governance/prohibited-patterns';
 import { dataProvider } from '@/services/data-provider';
@@ -414,6 +414,16 @@ function buildRecommendationsForAgent(
 
 function assertAgentAccess(agentId: AgentId, params: AgentInvokeParams): void {
   const { session, context } = params;
+
+  // BACKEND_STRUCTURE 6.1 leaves the `invoke_agents` cell empty for
+  // executive_readonly. The check below only caught an executive naming
+  // *another* employee, so an executive-only session could still open a turn
+  // with no context at all -- which grounds the prompt on their own employee
+  // record (`resolveEmployeeId`) and writes recommendations against it, even
+  // though the same table denies that role `view_own_profile`.
+  if (!canInvokeAgents(session.roles)) {
+    throw new AgentAccessError('Agent invocation is not available for this role');
+  }
 
   if (context?.employeeId) {
     // Role checks below never span organizations: a known employee context in

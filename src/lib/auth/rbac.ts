@@ -57,6 +57,21 @@ export function canReadOrganizationWorkforceData(roles: UserRole[]): boolean {
 }
 
 /**
+ * Agent invocation.
+ *
+ * BACKEND_STRUCTURE.md 6.1 grants `invoke_agents` to employee (own), manager
+ * (team), hr_admin and org_admin, and grants it to `executive_readonly` not
+ * at all -- that role gets aggregate dashboards, and an agent turn is a
+ * grounded, individual-level read plus an audited write of recommendations.
+ *
+ * Roles are additive, so an executive who also holds one of the granting
+ * roles keeps that grant; only an executive-only session is denied.
+ */
+export function canInvokeAgents(roles: UserRole[]): boolean {
+  return userHasAnyRole(roles, ['employee', 'manager', 'hr_admin', 'org_admin']);
+}
+
+/**
  * Org-wide read of an *identified individual's* record, as opposed to the
  * aggregates covered by `canReadOrganizationWorkforceData`.
  *
