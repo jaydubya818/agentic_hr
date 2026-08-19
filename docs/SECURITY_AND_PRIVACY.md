@@ -574,6 +574,40 @@ check still passes: `keyv` 4.5.4, `flat-cache` 4.0.1 and `file-entry-cache`
 8.0.0 all predate the compromised version ranges. `ignore-scripts=true`
 (14.2) remains in `.npmrc`.
 
+### 14.7 Known-vulnerability audit (2026-08-19)
+
+`npm audit` now reports **4** findings, all moderate, down from 6. The change
+is the two `sharp` advisories, which 14.6 recorded as unfixable.
+
+- **sharp — fixed.** 14.6 argued that `next` declares `^0.34.3`, so 0.35.x is
+  "unsupported by the framework". That range governs npm's own resolution, not
+  what the project may pin: an `overrides` entry (`"sharp": "^0.35.3"`)
+  collapses the tree onto 0.35.3, which carries the libvips fixes for
+  CVE-2026-33327, CVE-2026-33328, CVE-2026-35590 and CVE-2026-35591. The
+  advisory also propagated up to `next` itself, so both high-severity findings
+  clear at once. `next build` and the full test suite pass on the overridden
+  tree, and the reachability argument from 14.5 is unchanged — `next/image` is
+  still unused and `next.config.ts` still declares no `images.remotePatterns`,
+  so this removes advisory noise rather than closing a live path.
+- **esbuild / drizzle-kit — still open, still dev-only.** Unchanged from 14.5.
+  `drizzle-kit` 0.31.10 is the current release and still depends on the
+  archived `@esbuild-kit/*` packages, which pin esbuild 0.18.20. An override
+  past 0.24.2 is not attempted: the advisory needs the esbuild **dev server**,
+  which `drizzle-kit` never starts, and the loader is the only consumer.
+
+**Supply-chain re-check (Shai-Hulud / ChainDrop).** Re-ran the named-package
+check against the regenerated lockfile: `keyv` 4.5.4, `flat-cache` 4.0.1 and
+`file-entry-cache` 8.0.0 — all below the compromised versions (6.0.0, 6.1.24,
+11.1.6). None of `cacheable`, `cacheable-request`, `cache-manager`,
+`@cacheable/utils` or `@cacheable/memory` appears in the tree at all. No
+`preinstall`/`postinstall` hook anywhere in `package.json` or the lockfile,
+and `ignore-scripts=true` (14.2) remains in `.npmrc`.
+
+**Next.js version.** Still 15.5.23, the newest release on the 15.5 backport
+line, so the CVE-2025-55182 / CVE-2025-66478 RSC deserialization fix and the
+2026 advisory batch are both present (16.7). The 16.x line has since reached
+16.3.1; the migration remains the open item.
+
 ---
 
 ## 15. Privacy Risks
