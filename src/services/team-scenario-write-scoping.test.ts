@@ -1,10 +1,12 @@
 import { describe, expect, it } from 'vitest';
 
 import { MOCK_IDS } from '@/lib/mock/ids';
+import { getMockStore } from '@/services/data-provider/mock-provider';
 import { createTeamScenario, updateTeamScenario } from '@/services/team-scenario-service';
 import type { SessionContext } from '@/types/session';
 
 const FOREIGN_TEAM_ID = 'ffffffff-ffff-4fff-8fff-fffffffffff1';
+const FOREIGN_ORGANIZATION_ID = 'ffffffff-ffff-4fff-8fff-fffffffffff9';
 
 function makeSession(overrides: Partial<SessionContext>): SessionContext {
   return {
@@ -98,5 +100,27 @@ describe('team-scenario-service write scoping', () => {
       baseInput(MOCK_IDS.teams.product),
     );
     expect(scenario.teamId).toBe(MOCK_IDS.teams.product);
+  });
+  it('updates the caller\'s row when another organization shares the identifier', () => {
+    const session = makeSession({});
+    const scenario = createTeamScenario(session, baseInput(MOCK_IDS.teams.platform));
+
+    // Same identifier, different organization, listed first so an
+    // organization-blind lookup would take it.
+    const store = getMockStore();
+    const foreign = { ...scenario, organizationId: FOREIGN_ORGANIZATION_ID, title: 'foreign' };
+    store.teamScenarios.unshift(foreign);
+
+    const updated = updateTeamScenario(session, scenario.id, { title: 'renamed' });
+
+    expect(updated?.organizationId).toBe(MOCK_IDS.organization);
+    expect(foreign.title).toBe('foreign');
+    expect(
+      store.teamScenarios.find(
+        (s) => s.id === scenario.id && s.organizationId === MOCK_IDS.organization,
+      )?.title,
+    ).toBe('renamed');
+
+    store.teamScenarios.splice(store.teamScenarios.indexOf(foreign), 1);
   });
 });

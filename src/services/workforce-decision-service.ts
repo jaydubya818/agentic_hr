@@ -186,7 +186,14 @@ export function updateWorkforceDecision(
   assertDecisionWriteScope(session, input);
 
   const store = getMockStore();
-  const index = store.workforceDecisions.findIndex((d) => d.id === decisionId);
+  // Locate the row by organization as well as id. The read above is already
+  // organization-scoped, but an unqualified `findIndex` would write to
+  // whichever row carries the id first -- so a colliding identifier in
+  // another organization would take the update instead. Every read path in
+  // this service already joins on organization for the same reason.
+  const index = store.workforceDecisions.findIndex(
+    (d) => d.id === decisionId && d.organizationId === session.organizationId,
+  );
   if (index < 0) return null;
 
   const updated: WorkforceDecision = {

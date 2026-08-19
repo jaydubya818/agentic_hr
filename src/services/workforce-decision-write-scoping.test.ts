@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 import { MOCK_IDS } from '@/lib/mock/ids';
+import { getMockStore } from '@/services/data-provider/mock-provider';
 import {
   createWorkforceDecision,
   updateWorkforceDecision,
@@ -8,6 +9,7 @@ import {
 import type { SessionContext } from '@/types/session';
 
 const FOREIGN_ID = 'ffffffff-ffff-4fff-8fff-fffffffffff2';
+const FOREIGN_ORGANIZATION_ID = 'ffffffff-ffff-4fff-8fff-fffffffffff9';
 
 function makeSession(overrides: Partial<SessionContext>): SessionContext {
   return {
@@ -74,5 +76,30 @@ describe('workforce-decision-service write scoping', () => {
     );
     expect(decision.teamId).toBe(MOCK_IDS.teams.product);
     expect(decision.ownerEmployeeId).toBe(MOCK_IDS.employees.morgan);
+  });
+  it('updates the caller\'s row when another organization shares the identifier', () => {
+    const session = makeSession({});
+    const decision = createWorkforceDecision(
+      session,
+      baseInput({ teamId: MOCK_IDS.teams.platform }),
+    );
+
+    // Same identifier, different organization, listed first so an
+    // organization-blind lookup would take it.
+    const store = getMockStore();
+    const foreign = { ...decision, organizationId: FOREIGN_ORGANIZATION_ID, title: 'foreign' };
+    store.workforceDecisions.unshift(foreign);
+
+    const updated = updateWorkforceDecision(session, decision.id, { title: 'renamed' });
+
+    expect(updated?.organizationId).toBe(MOCK_IDS.organization);
+    expect(foreign.title).toBe('foreign');
+    expect(
+      store.workforceDecisions.find(
+        (d) => d.id === decision.id && d.organizationId === MOCK_IDS.organization,
+      )?.title,
+    ).toBe('renamed');
+
+    store.workforceDecisions.splice(store.workforceDecisions.indexOf(foreign), 1);
   });
 });

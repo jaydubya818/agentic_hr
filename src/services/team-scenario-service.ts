@@ -145,7 +145,13 @@ export function updateTeamScenario(
   }
 
   const store = getMockStore();
-  const index = store.teamScenarios.findIndex((s) => s.id === scenarioId);
+  // Locate the row by organization as well as id, matching every read path in
+  // this service: an unqualified `findIndex` would apply the update to
+  // whichever row carries the id first, which need not be the one the
+  // organization-scoped read above authorized.
+  const index = store.teamScenarios.findIndex(
+    (s) => s.id === scenarioId && s.organizationId === session.organizationId,
+  );
   if (index < 0) return null;
 
   const updated: TeamScenario = {
