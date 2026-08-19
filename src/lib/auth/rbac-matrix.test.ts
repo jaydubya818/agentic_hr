@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest';
 import type { z } from 'zod';
 import { userRoleSchema } from '@/schemas/enums';
 import {
+  canInvokeAgents,
   canManageUserRoles,
   canReadAuditLogs,
   canReadIndividualEmployeeData,
@@ -31,6 +32,7 @@ describe('RBAC role matrix (PILOT_PERSISTENCE_RELEASE)', () => {
     expect(canReadTeamScopedEmployeeData(roles)).toBe(false);
     expect(canReadIndividualEmployeeData(roles)).toBe(false);
     expect(canManageUserRoles(roles)).toBe(false);
+    expect(canInvokeAgents(roles)).toBe(true);
   });
 
   it('manager: team-scoped reads, no audit or org-wide workforce', () => {
@@ -40,6 +42,7 @@ describe('RBAC role matrix (PILOT_PERSISTENCE_RELEASE)', () => {
     expect(canReadAuditLogs(roles)).toBe(false);
     expect(canReadOrganizationWorkforceData(roles)).toBe(false);
     expect(canManageUserRoles(roles)).toBe(false);
+    expect(canInvokeAgents(roles)).toBe(true);
   });
 
   it('hr_admin: org workforce + audit, no org_admin role management', () => {
@@ -50,6 +53,7 @@ describe('RBAC role matrix (PILOT_PERSISTENCE_RELEASE)', () => {
     expect(canReadIndividualEmployeeData(roles)).toBe(true);
     expect(canManageUserRoles(roles)).toBe(false);
     expect(canWriteOrganizationWorkforceData(roles)).toBe(true);
+    expect(canInvokeAgents(roles)).toBe(true);
   });
 
   it('org_admin: audit + workforce + role management', () => {
@@ -60,6 +64,7 @@ describe('RBAC role matrix (PILOT_PERSISTENCE_RELEASE)', () => {
     expect(canReadIndividualEmployeeData(roles)).toBe(true);
     expect(canManageUserRoles(roles)).toBe(true);
     expect(canWriteOrganizationWorkforceData(roles)).toBe(true);
+    expect(canInvokeAgents(roles)).toBe(true);
   });
 
   it('executive_readonly: aggregate workforce read-only, no audit or PII management', () => {
@@ -72,5 +77,10 @@ describe('RBAC role matrix (PILOT_PERSISTENCE_RELEASE)', () => {
     // employee's record is a 403, even though the aggregate read is allowed.
     expect(canReadIndividualEmployeeData(roles)).toBe(false);
     expect(canWriteOrganizationWorkforceData(roles)).toBe(false);
+    // BACKEND_STRUCTURE 6.1 leaves the invoke_agents cell empty for this role.
+    expect(canInvokeAgents(roles)).toBe(false);
+    // Roles are additive: pairing the executive view with a role that does
+    // hold the grant keeps it.
+    expect(canInvokeAgents([...roles, 'employee'])).toBe(true);
   });
 });
