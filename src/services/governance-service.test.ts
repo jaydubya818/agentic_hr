@@ -1,7 +1,12 @@
 import { describe, expect, it, beforeEach } from 'vitest';
 import { clearAuditLogs } from './audit-service';
 import { invokeAgentWithRawOutput } from './agent-service';
-import { validateAgentOutput } from './governance-service';
+import {
+  HUMAN_IN_THE_LOOP_MESSAGE,
+  validateAgentOutput,
+  withHumanReviewNotice,
+} from './governance-service';
+import { MAX_AGENT_RESPONSE_LENGTH } from '@/lib/ai/schemas/agent-response';
 import type { SessionContext } from '@/types/session';
 
 const TEST_SESSION: SessionContext = {
@@ -11,6 +16,20 @@ const TEST_SESSION: SessionContext = {
   roles: ['employee'],
   activeRole: 'employee',
 };
+
+describe('withHumanReviewNotice', () => {
+  it('appends the reminder to a short reply', () => {
+    const result = withHumanReviewNotice('Focus on system design depth.');
+    expect(result).toBe(`Focus on system design depth.\n\n${HUMAN_IN_THE_LOOP_MESSAGE}`);
+  });
+
+  it('keeps a maximum-length reply within the cap the invoke route enforces', () => {
+    const atCap = 'a'.repeat(MAX_AGENT_RESPONSE_LENGTH);
+    const result = withHumanReviewNotice(atCap);
+    expect(result.length).toBeLessThanOrEqual(MAX_AGENT_RESPONSE_LENGTH);
+    expect(result.endsWith(HUMAN_IN_THE_LOOP_MESSAGE)).toBe(true);
+  });
+});
 
 describe('governance-service', () => {
   beforeEach(() => {

@@ -3,6 +3,7 @@ import {
   GOVERNANCE_BLOCK_MESSAGE,
   type ProhibitedPattern,
 } from '@/lib/governance/prohibited-patterns';
+import { MAX_AGENT_RESPONSE_LENGTH } from '@/lib/ai/schemas/agent-response';
 import type { CreateRecommendationInput } from '@/types/agent';
 import type { GovernanceStatus } from '@/types/agent';
 
@@ -20,6 +21,24 @@ export const LOW_CONFIDENCE_THRESHOLD = 0.5;
 
 export const HUMAN_IN_THE_LOOP_MESSAGE =
   'This suggestion has lower confidence or may need review. Discuss with your manager or HR before taking action.';
+
+/**
+ * Append the human-in-the-loop reminder to a flagged reply without pushing it
+ * past `MAX_AGENT_RESPONSE_LENGTH`.
+ *
+ * The invoke route validates every `conversationHistory` entry against the
+ * same 4000-character cap the response schema enforces. A flagged reply at
+ * the cap plus this reminder came to 4112 characters, so the panel echoed
+ * back a message the API then rejected -- and because the oversized entry
+ * stays in the transcript, every later turn failed the same way and the
+ * conversation could not be recovered without a reload.
+ */
+export function withHumanReviewNotice(responseText: string): string {
+  const suffix = `\n\n${HUMAN_IN_THE_LOOP_MESSAGE}`;
+  const room = MAX_AGENT_RESPONSE_LENGTH - suffix.length;
+  const body = responseText.length > room ? responseText.slice(0, room).trimEnd() : responseText;
+  return `${body}${suffix}`;
+}
 
 export interface GovernanceValidationInput {
   responseText: string;

@@ -14,7 +14,7 @@ import type {
 import { generateLiveAgentResponse } from '@/lib/ai/agent-llm';
 import { getLlmMode } from '@/lib/ai';
 import { isLiveAgentEnabled } from '@/lib/ai/config';
-import { HUMAN_IN_THE_LOOP_MESSAGE } from './governance-service';
+import { withHumanReviewNotice } from './governance-service';
 import {
   logAgentInvocation,
   logAgentResponse,
@@ -540,7 +540,7 @@ export async function invokeAgent(agentId: AgentId, params: AgentInvokeParams): 
   }
 
   if (governance.flagged && governance.humanReviewRequired) {
-    responseText = `${responseText}\n\n${HUMAN_IN_THE_LOOP_MESSAGE}`;
+    responseText = withHumanReviewNotice(responseText);
   }
 
   const recommendations = createAgentRecommendations({
