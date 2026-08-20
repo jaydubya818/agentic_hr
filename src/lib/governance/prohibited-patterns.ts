@@ -36,10 +36,14 @@ export const PROHIBITED_PATTERNS: ProhibitedPattern[] = [
     //
     // "exit" and "separation" are context-guarded rather than matched bare --
     // this product discusses engineering skills, where "exit criteria" and
-    // "separation of concerns" are ordinary vocabulary.
+    // "separation of concerns" are ordinary vocabulary. "transition" and
+    // "renew" are guarded the same way: transitioning into a new role and
+    // renewing a certification are exactly what this product is for, so only
+    // transitioning a named person *out of the company* and declining to
+    // renew a *contract* are treated as exits.
     id: 'termination_euphemism',
     pattern:
-      /\bpart(ing|ed|s)?\s+ways\b|\boff-?board(ing|ed|s)?\b|\b(involuntary|voluntary)\s+separation\b|\bseparation\s+(agreement|package|date|process)\b|\bexit\s+(interview|package)\b|\bmanaged\s+exit\b|\bexit(ing)?\s+(him|her|them|someone|(this|that|the)\s+(person|employee|individual|report|hire))\b/i,
+      /\bpart(ing|ed|s)?\s+ways\b|\boff-?board(ing|ed|s)?\b|\b(involuntary|voluntary|mutual|negotiated)\s+separation\b|\bseparation\s+(agreement|package|date|process)\b|\bexit\s+(interview|package)\b|\bmanaged\s+exit\b|\bexit(ing)?\s+(him|her|them|someone|(this|that|the)\s+(person|employee|individual|report|hire))\b|\bcounsell?(ed|ing)?\s+out\b|\btransition(ed|ing)?\s+(him|her|them|someone|(this|that|the)\s+(person|employee|individual|report|hire))\s+out\b|\btransition(ed|ing)?\s+out\s+of\s+the\s+(company|organi[sz]ation|business)\b|\bnon-?renewal\s+of\s+(his|her|their|the)?\s*(contract|agreement|employment)\b|\b(do|does|did|will|would)\s+not\s+renew\s+(his|her|their|the)?\s*(contract|agreement)\b|\bnot\s+renewing\s+(his|her|their|the)?\s*(contract|agreement)\b/i,
     category: 'termination',
   },
   {

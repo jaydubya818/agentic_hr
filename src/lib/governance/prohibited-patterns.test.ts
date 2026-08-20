@@ -47,6 +47,32 @@ describe('prohibited-patterns inflections', () => {
     expect(matchedIds('Schedule her exit interview.')).toContain('termination_euphemism');
   });
 
+  it('blocks the softest exit euphemisms', () => {
+    expect(matchedIds('This report should be counselled out of the organization.')).toContain(
+      'termination_euphemism',
+    );
+    expect(matchedIds('We should transition her out of the company.')).toContain(
+      'termination_euphemism',
+    );
+    expect(matchedIds('Plan to transition this employee out.')).toContain(
+      'termination_euphemism',
+    );
+    expect(matchedIds('Offer a mutual separation.')).toContain('termination_euphemism');
+    expect(matchedIds('Recommend non-renewal of his contract.')).toContain(
+      'termination_euphemism',
+    );
+    expect(matchedIds('We will not renew her contract.')).toContain('termination_euphemism');
+  });
+
+  it('does not read career transitions or renewals as exits', () => {
+    // Moving into a new role and renewing a certification are the product.
+    expect(matchedIds('Transition into a platform engineering role next year.')).toHaveLength(0);
+    expect(matchedIds('Renew your cloud certification before it lapses.')).toHaveLength(0);
+    expect(matchedIds('Transition out of the legacy codebase onto the new service.')).toHaveLength(
+      0,
+    );
+  });
+
   it('does not read engineering vocabulary as a termination euphemism', () => {
     expect(matchedIds('Practise separation of concerns in your service design.')).toHaveLength(0);
     expect(matchedIds('Define exit criteria for the migration project.')).toHaveLength(0);
