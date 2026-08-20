@@ -48,7 +48,7 @@ export async function POST(request: Request) {
     const body = createActionPlanRequestSchema.parse(await request.json());
     const { actions, ...planInput } = body;
 
-    const validation = validateActionPlan(actions);
+    const validation = validateActionPlan(actions, planInput);
     if (!validation.valid) {
       logAuditEvent({
         session,

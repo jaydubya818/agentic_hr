@@ -127,6 +127,40 @@ describe('action-plan-governance', () => {
     expect(filterDisallowedActions([action])).toHaveLength(0);
   });
 
+  it('scans the plan title and summary, not only the actions', () => {
+    // The plan's own free text is stored, rendered in the action-plan panel
+    // and echoed into the action_plan.created audit entry exactly like an
+    // action's, but only the actions were ever scanned.
+    const cleanAction = {
+      actionType: 'skill_development' as const,
+      title: 'Deepen system design skills',
+      description: null,
+      explanation: 'Career path analysis shows system design as the primary gap.',
+    };
+
+    expect(validateActionPlan([cleanAction]).valid).toBe(true);
+
+    const blockedTitle = validateActionPlan([cleanAction], {
+      title: 'Termination plan for Alex',
+      summary: null,
+    });
+    expect(blockedTitle.valid).toBe(false);
+    expect(blockedTitle.errors.join(' ')).toContain('action plan');
+
+    const blockedSummary = validateActionPlan([cleanAction], {
+      title: 'Q3 plan',
+      summary: 'Prepare a severance package before the review.',
+    });
+    expect(blockedSummary.valid).toBe(false);
+
+    expect(
+      validateActionPlan([cleanAction], {
+        title: 'Growth actions from career path analysis',
+        summary: 'Development-focused actions grounded in confirmed skills.',
+      }).valid,
+    ).toBe(true);
+  });
+
   it('exports allowed and disallowed constants', () => {
     expect(ALLOWED_ACTION_TYPES).toContain('skill_development');
     expect(DISALLOWED_ACTION_TYPES).toContain('termination');

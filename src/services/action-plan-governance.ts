@@ -43,8 +43,13 @@ const PROHIBITED_ACTION_PATTERNS: RegExp[] = [
   /\blow performers?\b/i,
 ];
 
-function containsProhibitedTerm(action: ActionInput): boolean {
-  const combined = `${action.title} ${action.description ?? ''} ${action.explanation ?? ''}`;
+/** Plan-level free text, which is stored and rendered exactly like an action's. */
+export interface ActionPlanTextInput {
+  title?: string | null;
+  summary?: string | null;
+}
+
+function containsProhibitedText(combined: string): boolean {
   // Also run the shared governance list. This module carried its own copy of
   // the prohibited vocabulary, and the copy had drifted: "let her go",
   // "dismissal", "severance", "downsizing", "put her on a PIP", "managed out",
@@ -57,6 +62,12 @@ function containsProhibitedTerm(action: ActionInput): boolean {
   );
 }
 
+function containsProhibitedTerm(action: ActionInput): boolean {
+  return containsProhibitedText(
+    `${action.title} ${action.description ?? ''} ${action.explanation ?? ''}`,
+  );
+}
+
 function isDisallowedActionType(value: string): boolean {
   return (DISALLOWED_ACTION_TYPES as readonly string[]).includes(value);
 }
@@ -65,13 +76,24 @@ function isAllowedActionType(value: string): value is ProposedActionType {
   return (ALLOWED_ACTION_TYPES as readonly string[]).includes(value);
 }
 
-export function validateActionPlan(actions: ActionInput[]): ActionPlanValidationResult {
+export function validateActionPlan(
+  actions: ActionInput[],
+  plan?: ActionPlanTextInput,
+): ActionPlanValidationResult {
   const errors: string[] = [];
   const warnings: string[] = [];
   const blockedActionTypes: string[] = [];
 
   if (actions.length === 0) {
     warnings.push('Action plan contains no proposed actions.');
+  }
+
+  // The plan's own title and summary are stored, rendered in the action-plan
+  // panel and echoed into the action_plan.created audit entry exactly like an
+  // action's text, but only the actions were ever scanned. A plan titled
+  // "Termination plan for Alex" with innocuous actions passed as `passed`.
+  if (plan && containsProhibitedText(`${plan.title ?? ''} ${plan.summary ?? ''}`)) {
+    errors.push(`Prohibited language detected in action plan: ${plan.title ?? '(untitled)'}`);
   }
 
   for (const action of actions) {

@@ -94,7 +94,7 @@ export function createActionPlanFromInput(
 ): AgentActionPlanDetail {
   assertActionPlanWriteScope(session, input, proposedActions);
 
-  const validation = validateActionPlan(proposedActions);
+  const validation = validateActionPlan(proposedActions, input);
   if (!validation.valid) {
     throw new Error(validation.errors.join('; '));
   }
