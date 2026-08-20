@@ -70,8 +70,15 @@ export const PROHIBITED_PATTERNS: ProhibitedPattern[] = [
     category: 'compensation',
   },
   {
+    // Every label here was matched in the singular only, so the plural -- how
+    // a team-level answer actually phrases it ("your low performers are Alex
+    // and Jordan") -- walked straight through. The superlative was missing
+    // too: EVALS_AND_GOVERNANCE 8 lists "Lowest performer" under the
+    // supermanager agent's "must not use", and \blow performer\b cannot
+    // match "lowest performer".
     id: 'punitive_labels',
-    pattern: /\b(low performer|not promotable|low potential|underperformer|dead weight|weakest link)\b/i,
+    pattern:
+      /\b(low(est)?\s+performers?|poor\s+performers?|bottom\s+performers?|not\s+promotable|low\s+potential|under-?performers?|dead\s+weight|weakest\s+(link|performer|member|employee|contributor)s?)\b/i,
     category: 'punitive_label',
   },
   {

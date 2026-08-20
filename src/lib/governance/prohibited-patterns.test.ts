@@ -117,6 +117,23 @@ describe('prohibited-patterns inflections', () => {
     expect(matchedIds('Identify a successor before the reorg.')).toContain('succession');
   });
 
+  it('blocks punitive labels in the plural and the superlative', () => {
+    // Only the singular was matched, so the phrasing a team-level answer
+    // actually uses walked through, and the "Lowest performer" spelled out in
+    // EVALS_AND_GOVERNANCE 8 was never covered at all.
+    expect(matchedIds('Your low performers are Alex and Jordan.')).toContain('punitive_labels');
+    expect(matchedIds('She is the lowest performer on the team.')).toContain('punitive_labels');
+    expect(matchedIds('These two are underperformers.')).toContain('punitive_labels');
+    expect(matchedIds('He is a poor performer this quarter.')).toContain('punitive_labels');
+    expect(matchedIds('Cut the weakest links from the project.')).toContain('punitive_labels');
+    expect(matchedIds('Focus on the bottom performers.')).toContain('punitive_labels');
+  });
+
+  it('does not read ordinary performance vocabulary as a punitive label', () => {
+    expect(matchedIds('Low latency is a system design goal.')).toHaveLength(0);
+    expect(matchedIds('Application performance tuning is a strong skill here.')).toHaveLength(0);
+  });
+
   it('still allows development-framed text', () => {
     expect(matchedIds('Focus on a growth path to promotion-ready skills.')).toHaveLength(0);
     expect(matchedIds('Strengthen system design through mentoring.')).toHaveLength(0);
