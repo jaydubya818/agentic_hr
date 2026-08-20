@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 
 import { mockHrisAdapter } from '@/integrations/mock-hris-adapter';
 import { syncHrisReadFabric } from '@/integrations/sync-hris-read';
@@ -18,6 +18,26 @@ describe('HRIS read fabric (Phase 16)', () => {
     const sf = await successFactorsReadAdapter.fetchEmployees('other-org');
     expect(wd.length).toBeGreaterThan(0);
     expect(sf.length).toBe(0);
+  });
+
+  it('merges vendor payloads on externalId instead of concatenating them', async () => {
+    // Both adapters are stubs over the same mock source, so concatenating
+    // returned every record twice. externalId is the identity of a record:
+    // the same id from two vendors is one person, not two.
+    vi.stubEnv('USE_HRIS_READ', 'true');
+    try {
+      const result = await syncHrisReadFabric(ORG);
+      expect(result.skipped).toBe(false);
+      expect(result.employees.length).toBeGreaterThan(0);
+      expect(new Set(result.employees.map((e) => e.externalId)).size).toBe(
+        result.employees.length,
+      );
+      expect(new Set(result.jobProfiles.map((p) => p.externalId)).size).toBe(
+        result.jobProfiles.length,
+      );
+    } finally {
+      vi.unstubAllEnvs();
+    }
   });
 
   it('sync skips when USE_HRIS_READ is not true', async () => {

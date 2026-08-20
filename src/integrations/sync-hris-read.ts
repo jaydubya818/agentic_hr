@@ -11,6 +11,24 @@ export interface HrisSyncResult {
 }
 
 /**
+ * Merge vendor payloads on the identity key, first vendor wins.
+ *
+ * `externalId` is the identity of a record, so the same id arriving from two
+ * vendors is one person, not two. Concatenating the arrays produced a payload
+ * that double-counted every overlapping record -- which is every record while
+ * both adapters are stubs delegating to the same mock source.
+ */
+function mergeByExternalId<T extends { externalId: string }>(...batches: T[][]): T[] {
+  const byId = new Map<string, T>();
+  for (const batch of batches) {
+    for (const record of batch) {
+      if (!byId.has(record.externalId)) byId.set(record.externalId, record);
+    }
+  }
+  return [...byId.values()];
+}
+
+/**
  * Manual-trigger HRIS read sync stub. When USE_HRIS_READ=false, returns empty payload.
  */
 export async function syncHrisReadFabric(organizationId: string): Promise<HrisSyncResult> {
@@ -27,8 +45,8 @@ export async function syncHrisReadFabric(organizationId: string): Promise<HrisSy
 
   return {
     vendor: 'workday+successfactors',
-    employees: [...workdayEmployees, ...sfEmployees],
-    jobProfiles: [...workdayProfiles, ...sfProfiles],
+    employees: mergeByExternalId(workdayEmployees, sfEmployees),
+    jobProfiles: mergeByExternalId(workdayProfiles, sfProfiles),
     skipped: false,
   };
 }
