@@ -66,6 +66,26 @@ describe('grounding summary treats stored records as data', () => {
     }
   });
 
+  it('caps a single oversized record so it cannot dominate the prompt', () => {
+    const profile = getMockStore().employeeProfiles.find((p) => p.employeeId === employeeId);
+    const original = profile!.careerSummary;
+    // Nothing bounds careerSummary on the way in, and the grounding block is
+    // re-sent on every turn, so an unbounded field is re-billed every turn.
+    profile!.careerSummary = 'padding '.repeat(5000);
+
+    try {
+      const grounding = buildGroundingSummary('employee-growth', employeeId);
+      const summaryLine = grounding.split('\n').find((line) => line.startsWith('Career summary: '));
+
+      expect(summaryLine!.length).toBeLessThan(700);
+      expect(summaryLine).toContain('(truncated)');
+      // The other grounding lines survive the cut.
+      expect(grounding).toContain('Confirmed skills: ');
+    } finally {
+      profile!.careerSummary = original;
+    }
+  });
+
   it('falls back to the placeholder when a record only holds whitespace', () => {
     const profile = getMockStore().employeeProfiles.find((p) => p.employeeId === employeeId);
     const original = profile!.careerSummary;

@@ -22,6 +22,19 @@ export interface LiveAgentRequest {
 const GROUNDING_FENCE = '<<<GROWTHOS_RECORD_DATA>>>';
 
 /**
+ * Per-field cap on the grounding block.
+ *
+ * Grounding is assembled from records the product itself does not bound --
+ * `careerSummary` is free text, and the skill lists grow with the catalogue --
+ * and every one of them is re-sent on every turn of a conversation. One
+ * oversized record could therefore crowd the real instructions out of the
+ * context window and multiply the token cost of the whole thread. This is the
+ * same bound the invoke route puts on `message` and `conversationHistory`,
+ * applied to the side of the prompt the user does not type.
+ */
+const MAX_GROUNDING_FIELD_LENGTH = 600;
+
+/**
  * Render a stored field as inert data.
  *
  * Grounding is assembled from records employees and managers can write --
@@ -38,7 +51,11 @@ const GROUNDING_FENCE = '<<<GROWTHOS_RECORD_DATA>>>';
 function asData(value: string | null | undefined, fallback: string): string {
   if (!value) return fallback;
   const flattened = value.replace(/[\r\n]+/g, ' ').split(GROUNDING_FENCE).join('').trim();
-  return flattened || fallback;
+  if (!flattened) return fallback;
+  if (flattened.length <= MAX_GROUNDING_FIELD_LENGTH) return flattened;
+  // Mark the cut so the model reads a truncated list as truncated rather than
+  // as the complete record.
+  return `${flattened.slice(0, MAX_GROUNDING_FIELD_LENGTH).trimEnd()}… (truncated)`;
 }
 
 export function buildGroundingSummary(agentId: AgentId, employeeId: string, managerEmployeeId?: string): string {
