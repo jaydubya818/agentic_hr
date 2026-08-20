@@ -52,6 +52,21 @@ export const PROHIBITED_PATTERNS: ProhibitedPattern[] = [
       /\b(layoffs?|lay(s|ing)? off|laid off|rif|reduction in force|downsiz(e|ed|es|ing)|severance|(headcount|workforce|staff)\s+reduction|reduc(e|ing)\s+(headcount|the\s+workforce))\b/i,
     category: 'layoff',
   },
+  {
+    // A collective reduction is announced with the vocabulary HR and legal
+    // actually use, and none of it contains the word "layoff": UK/EU
+    // consultations say "redundancy", cost actions say "furlough" or "garden
+    // leave", and a reorg deck says "role elimination". All of them passed a
+    // filter whose stated bias is safety over recall.
+    //
+    // "redundancy" is context-guarded rather than matched bare: this product
+    // discusses engineering skills, where building redundancy into a system
+    // is ordinary vocabulary.
+    id: 'layoff_euphemism',
+    pattern:
+      /\bfurlough(s|ed|ing)?\b|\bgarden(ing)?\s+leave\b|\bmade\s+redundant\b|\bat\s+risk\s+of\s+redundancy\b|\bredundanc(y|ies)\s+(process|consultation|pool|list|package|programme|program|selection|notice)\b|\bredundant\s+(role|position|job|headcount)s?\b|\b(role|position|job|headcount)s?\s+elimination\b|\beliminat(e|ed|es|ing|ion\s+of)\s+(this|that|the|his|her|their|a)?\s*(role|position|job|headcount)s?\b|\b(role|position|job|headcount)s?\s+((is|are|was|were|will)\s+)?(being\s+|be\s+)?eliminated\b/i,
+    category: 'layoff',
+  },
   { id: 'demotion', pattern: /\b(demot(e|ed|ion)|downgrade role|reduce level)\b/i, category: 'demotion' },
   {
     id: 'promotion_decision',

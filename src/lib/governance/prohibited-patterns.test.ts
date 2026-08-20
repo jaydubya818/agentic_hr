@@ -67,6 +67,32 @@ describe('prohibited-patterns inflections', () => {
     expect(matchedIds('We are reducing headcount in support.')).toContain('layoff');
   });
 
+  it('blocks the collective-reduction euphemisms that never say "layoff"', () => {
+    expect(matchedIds('Two engineers were made redundant.')).toContain('layoff_euphemism');
+    expect(matchedIds('Open a redundancy consultation with the team.')).toContain(
+      'layoff_euphemism',
+    );
+    expect(matchedIds('Put the team on furlough for the quarter.')).toContain('layoff_euphemism');
+    expect(matchedIds('Place him on garden leave until the notice period ends.')).toContain(
+      'layoff_euphemism',
+    );
+    expect(matchedIds('The reorg calls for role elimination in support.')).toContain(
+      'layoff_euphemism',
+    );
+    expect(matchedIds('We should eliminate this position next quarter.')).toContain(
+      'layoff_euphemism',
+    );
+    expect(matchedIds('Her position is being eliminated.')).toContain('layoff_euphemism');
+  });
+
+  it('does not read engineering redundancy as a workforce reduction', () => {
+    // The product discusses system design, where redundancy is a property of
+    // an architecture rather than an employment action.
+    expect(matchedIds('Build redundancy into the ingestion pipeline.')).toHaveLength(0);
+    expect(matchedIds('Redundancy and failover are core system design skills.')).toHaveLength(0);
+    expect(matchedIds('Eliminate duplicate work from the sprint.')).toHaveLength(0);
+  });
+
   it('blocks formal performance management', () => {
     expect(matchedIds('Put her on a performance improvement plan.')).toContain(
       'performance_management',
