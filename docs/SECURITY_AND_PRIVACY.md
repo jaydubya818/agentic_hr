@@ -608,6 +608,47 @@ line, so the CVE-2025-55182 / CVE-2025-66478 RSC deserialization fix and the
 2026 advisory batch are both present (16.7). The 16.x line has since reached
 16.3.1; the migration remains the open item.
 
+### 14.8 Known-vulnerability audit (2026-08-20)
+
+`npm audit` reports **4** findings, all moderate — unchanged from 14.7.
+
+- **esbuild / drizzle-kit — still open, still dev-only.** All four findings are
+  the same advisory (GHSA-67mh-4wv8-2f99) reaching the tree through
+  `drizzle-kit` → `@esbuild-kit/esm-loader` → `@esbuild-kit/core-utils` →
+  `esbuild` 0.18.20. `drizzle-kit` 0.31.10 is still the current release and
+  still depends on the archived `@esbuild-kit/*` packages. The 14.5 and 14.7
+  reasoning holds: the advisory needs the esbuild **dev server**, which the
+  loader never starts. Not overridden.
+- **No new advisories.** `npm audit fix --force` still offers only
+  `next@16.3.1` and a `drizzle-kit` downgrade to 0.18.1, both breaking.
+
+**Supply-chain re-check (Shai-Hulud / ChainDrop).** `keyv` 4.5.4,
+`flat-cache` 4.0.1 and `file-entry-cache` 8.0.0 — all below the compromised
+versions. No `cacheable`, `cacheable-request`, `@cacheable/*`, `cache-manager`
+or `got` chain resolves anywhere in the lockfile. `ignore-scripts=true` (14.2)
+remains in `.npmrc`.
+
+**Next.js version.** Still 15.5.23, which npm still publishes as the
+`backport` dist-tag for the 15 line — i.e. the newest 15.5.x, so no 15-line
+patch is being missed. `latest` is 16.3.1; the 16.x migration remains the open
+item (16.7).
+
+### 14.9 Next.js July 2026 advisory triad — applicability review (2026-08-20)
+
+The July 2026 Next.js security release patched three issues. Each was checked
+against this codebase; **none is reachable here**, and each conclusion rests on
+a property of the app that a future change could remove — so re-check these
+when touching `next.config.ts` or introducing Server Actions.
+
+| Advisory pattern | Precondition | Status here |
+| --- | --- | --- |
+| App Router + Turbopack middleware/proxy auth bypass | `config.i18n.locales` declared with a single entry | **Not applicable.** `next.config.ts` declares no `i18n` block at all, and no `i18n` key appears anywhere in the repo. The route guard in `src/middleware.ts` is therefore not reachable through a locale-prefixed path |
+| Server Actions CPU-exhaustion DoS | At least one Server Action (`'use server'`) | **Not applicable.** The repo contains no `'use server'` directive. Every mutation goes through a route handler under `src/app/api/`, each of which authenticates, validates with Zod, and (for agent invocation) rate-limits |
+| `rewrites()` / `redirects()` SSRF and open redirect | A destination hostname built from request-controlled input | **Not applicable.** `next.config.ts` declares neither `rewrites()` nor `redirects()`. Every redirect in the app is built by cloning `request.nextUrl` and setting `pathname`, so the origin is never attacker-supplied; the one request-controlled destination, the login `next` parameter, is already allowlisted (14) |
+
+**Re-check trigger:** adding `i18n`, `rewrites`, `redirects`, or the first
+Server Action to this project reopens the corresponding row.
+
 ---
 
 ## 15. Privacy Risks
