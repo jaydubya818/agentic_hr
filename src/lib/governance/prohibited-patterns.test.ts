@@ -213,6 +213,39 @@ describe('prohibited-patterns inflections', () => {
     expect(matchedIds('Open opportunities are ranked by skill overlap.')).toHaveLength(0);
   });
 
+  it('blocks reasoning tied to a protected characteristic', () => {
+    // EVALS_AND_GOVERNANCE 10.1 lists "Discriminatory" as an absolute
+    // prohibition; it was the one row of that table with no pattern at all.
+    expect(matchedIds('Because she is pregnant, delay the stretch assignment.')).toContain(
+      'protected_characteristic',
+    );
+    expect(matchedIds('Given his age, he may not adapt to new tooling.')).toContain(
+      'protected_characteristic',
+    );
+    expect(matchedIds('Do not offer the rotation because of her disability.')).toContain(
+      'protected_characteristic',
+    );
+    expect(matchedIds('He is too old for the graduate programme.')).toContain(
+      'protected_characteristic',
+    );
+    expect(matchedIds('She is nearing retirement, so skip the investment.')).toContain(
+      'protected_characteristic',
+    );
+    expect(matchedIds('Her visa status makes this a poor investment.')).toContain(
+      'protected_characteristic',
+    );
+  });
+
+  it('does not read ordinary vocabulary as a protected characteristic', () => {
+    // The bare nouns are everyday words in this product.
+    expect(matchedIds('Fix the race condition in the scheduler.')).toHaveLength(0);
+    expect(matchedIds('The age of the skills data is 90 days.')).toHaveLength(0);
+    expect(matchedIds('Average tenure and age distribution are aggregate metrics.')).toHaveLength(
+      0,
+    );
+    expect(matchedIds('Discuss parental leave policy with HR.')).toHaveLength(0);
+  });
+
   it('still allows development-framed text', () => {
     expect(matchedIds('Focus on a growth path to promotion-ready skills.')).toHaveLength(0);
     expect(matchedIds('Strengthen system design through mentoring.')).toHaveLength(0);

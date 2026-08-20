@@ -118,6 +118,24 @@ export const PROHIBITED_PATTERNS: ProhibitedPattern[] = [
     category: 'ranking',
   },
   {
+    // EVALS_AND_GOVERNANCE 10.1 lists "Discriminatory -- any adverse action
+    // based on protected characteristics" as an absolute prohibition, and
+    // nothing implemented it: every other row of that table had a pattern and
+    // this one had none, so "given his age, he may not adapt to new tooling"
+    // and "because she is pregnant, delay the stretch assignment" passed.
+    //
+    // The characteristic has to be attached to a person for this to fire --
+    // "his religion", "because of her disability", "since he is on paternity
+    // leave" -- because the bare nouns are ordinary vocabulary here: "race
+    // condition" is a concurrency bug and "the age of the skills data" is a
+    // data-readiness metric. The one accepted over-block is the idiom "their
+    // race to ship", which safety over recall makes an acceptable trade.
+    id: 'protected_characteristic',
+    pattern:
+      /\b(because|due|owing)\s+(of|to)\s+(his|her|their)\s+(pregnan(cy|t)|maternity|paternity|disabilit(y|ies)|religion|religious\s+beliefs?|race|ethnicity|national\s+origin|citizenship|immigration\s+status|visa\s+status|marital\s+status|veteran\s+status|gender\s+identity|sexual\s+orientation|medical\s+condition|age)\b|\b(given|considering|based\s+on)\s+(his|her|their)\s+(pregnan(cy|t)|maternity|paternity|disabilit(y|ies)|religion|religious\s+beliefs?|race|ethnicity|national\s+origin|citizenship|immigration\s+status|visa\s+status|marital\s+status|veteran\s+status|gender\s+identity|sexual\s+orientation|medical\s+condition|age)\b|\b(his|her|their)\s+(pregnan(cy|t)|disabilit(y|ies)|religion|race|ethnicity|gender\s+identity|sexual\s+orientation|national\s+origin|immigration\s+status|visa\s+status|marital\s+status|veteran\s+status|medical\s+condition)\b|\b(because|since|given\s+that|now\s+that)\s+(he|she|they)\s+(is|are|was|were)\s+(pregnant|disabled|on\s+(maternity|paternity|parental)\s+leave|a\s+veteran)\b|\btoo\s+(old|young)\s+(for|to)\b|\b(nearing|close\s+to|approaching)\s+retirement\b|\bretirement\s+age\b/i,
+    category: 'discriminatory',
+  },
+  {
     id: 'hiring_decision',
     pattern: /\b(you are hired|do not hire|reject this candidate|hire this candidate)\b/i,
     category: 'hiring',
