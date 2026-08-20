@@ -101,6 +101,23 @@ export const PROHIBITED_PATTERNS: ProhibitedPattern[] = [
     category: 'punitive_label',
   },
   {
+    // Ranking people against each other is an explicit prohibition --
+    // EVALS_AND_GOVERNANCE 8 lists "Rank employees" under the supermanager
+    // agent's "must not", PRD 13.2 repeats it -- and nothing implemented it.
+    // Only the label "weakest link" was ever caught, so "stack rank your
+    // direct reports", "rank the team from strongest to weakest", "nine-box"
+    // and "bottom 10% of the team" all passed.
+    //
+    // The verb is guarded by its object so the product's own vocabulary
+    // survives: skill gaps are "ranked by severity", career paths are "ranked
+    // against your active goal", and the talent-density copy says it is "not
+    // a performance ranking". None of those name a person or a team.
+    id: 'employee_ranking',
+    pattern:
+      /\bstack[-\s]?rank(ing|ed|s)?\b|\bforced\s+(rank(ing|ed|s)?|distribution)\b|\brank(s|ed|ing)?\s+(the\s+|your\s+|my\s+|his\s+|her\s+|their\s+)?(teams?|employees?|staff|people|(direct\s+)?reports?|engineers?|team\s+members?)\b|\brank(s|ed|ing)?\s+(them|him|her|everyone)\b|\bnine[-\s]?box\b|\b9[-\s]?box\b|\b(top|bottom)\s+\d{1,3}\s*(%|percent)\s+of\s+(the\s+)?(teams?|employees?|performers?|staff|reports?|org|organi[sz]ation)\b|\b(strongest|best)\s+to\s+(weakest|worst)\b|\b(weakest|worst)\s+to\s+(strongest|best)\b/i,
+    category: 'ranking',
+  },
+  {
     id: 'hiring_decision',
     pattern: /\b(you are hired|do not hire|reject this candidate|hire this candidate)\b/i,
     category: 'hiring',

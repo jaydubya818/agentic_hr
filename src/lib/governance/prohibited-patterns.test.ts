@@ -186,6 +186,33 @@ describe('prohibited-patterns inflections', () => {
     expect(matchedIds('Application performance tuning is a strong skill here.')).toHaveLength(0);
   });
 
+  it('blocks ranking employees against each other', () => {
+    // EVALS_AND_GOVERNANCE 8 and PRD 13.2 both prohibit ranking employees;
+    // only the "weakest link" label was ever implemented.
+    expect(matchedIds('Stack rank your direct reports before the review.')).toContain(
+      'employee_ranking',
+    );
+    expect(matchedIds('Rank the team from strongest to weakest.')).toContain('employee_ranking');
+    expect(matchedIds('Plot each engineer on a nine-box grid.')).toContain('employee_ranking');
+    expect(matchedIds('She is in the bottom 10% of the team.')).toContain('employee_ranking');
+    expect(matchedIds('Use a forced distribution across the group.')).toContain(
+      'employee_ranking',
+    );
+    expect(matchedIds('Rank them for the calibration meeting.')).toContain('employee_ranking');
+  });
+
+  it('does not block ranking things that are not people', () => {
+    // The product's own copy uses all of these.
+    expect(matchedIds('Skill gaps are ranked by severity against your target role.')).toHaveLength(
+      0,
+    );
+    expect(matchedIds('Paths are ranked against your active goal.')).toHaveLength(0);
+    expect(
+      matchedIds('Talent density is a simplified indicator, not a performance ranking.'),
+    ).toHaveLength(0);
+    expect(matchedIds('Open opportunities are ranked by skill overlap.')).toHaveLength(0);
+  });
+
   it('still allows development-framed text', () => {
     expect(matchedIds('Focus on a growth path to promotion-ready skills.')).toHaveLength(0);
     expect(matchedIds('Strengthen system design through mentoring.')).toHaveLength(0);
