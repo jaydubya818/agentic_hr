@@ -9,17 +9,20 @@ read this file first to avoid re-proposing work that is already tracked here.
 - [ ] 2026-08-21 — Replace regex-only governance filtering with a normalize-then-match pipeline — the filter is bypassed by Unicode tricks that no additional keyword pattern can catch; see "Design note" below.
 - [ ] 2026-08-21 — ESLint 9 → 10 is blocked by `eslint-config-next@15.5.23` — the 9.x line is EOL (2026-08-06) but the upgrade is coupled to the Next 16 migration; see "Design note" below.
 - [ ] 2026-08-21 — Raise the `engines.node` floor off Node 20 — Node 20 reached EOL on 2026-04-30, so `engines.node: ">=20"` and `@types/node@20.19.42` both advertise support for an unsupported runtime.
-- [ ] 2026-08-21 — Decide whether `executive_readonly` may read an individual workforce decision — `GET /api/decisions/[id]` admits the role via `canReadOrganizationWorkforceData`, but BACKEND_STRUCTURE 6.1 grants that role `view_org_data: aggregate` only, and the detail payload names individual participants.
+- [ ] 2026-08-21 — Decide whether `executive_readonly` may read the workforce decision **list** — the single-record leak is closed (see Closed), but `filterDecisionsForSession` still returns every decision in the organization to the role. Each row carries `ownerEmployeeId`, so "aggregate" is doing some work in `BACKEND_STRUCTURE` 6.1 that the list endpoint does not honour. Narrowing it changes what the executive dashboard can render, so it is a product question, not a patch.
 
 ## Closed
 
-_(nothing yet — this file was created on 2026-08-21)_
+- [x] 2026-08-21 — `executive_readonly` could read an individual workforce decision — closed by `54de61d`. `GET /api/decisions/[id]` now gates on `canReadIndividualEmployeeData`, so the role gets the 403 that `SECURITY_AND_PRIVACY` 6.2 Example 6 requires. Scoped deliberately to the single-record read; the list question is still open above.
 
 ## Checked, not applicable
 
 - 2026-08-21 — Next.js May and July 2026 security releases — the 15.x fixed versions are 15.5.18 and 15.5.21; this repo pins **15.5.23**, which is ahead of both. Per-advisory reachability is already recorded in `SECURITY_AND_PRIVACY.md` §14.9, and the version reasoning in §14.8. Do not re-check unless the pin moves backwards.
 - 2026-08-21 — Committed secrets — no Supabase `service_role` key, JWT, or Postgres connection string is committed. `.env*` is gitignored (`!.env.example`), and `.env.example` ships empty values only. The two `postgres://` strings in the tree are `drizzle.config.ts`'s localhost default and a test fixture.
 - 2026-08-21 — Real PII in seed data — `drizzle/seed/seed-mock-data.ts` and `data/mock/` use synthetic personas at the fictional `techforward.io` domain (Alex Chen, Jordan Lee, Morgan Kim, Riley Nguyen, Sam Patel, `engineer1..7`). No SSNs, phone numbers, or real addresses.
+- 2026-08-21 — Agent-harness control-plane invariants 1–3 ("deterministic code owns the graph", "agents are bounded nodes", "typed envelopes are the only cross-phase channel") — **the premise does not hold here.** This is a product with an agent feature, not an agent harness: there is no multi-phase graph for code to own. `invokeAgent` is a single call with no phase sequencing, no retry policy, and no inter-agent handoff, so there is no sequencing for an agent to usurp. Invariant 3 was applied in the small where a boundary does exist (`bff9848` carries the scanned text in the governance result rather than letting the audit stage re-derive it). Do not re-open unless the product grows real multi-step agent orchestration.
+- 2026-08-21 — Agent-harness invariant 4, "code-checked gates replace self-certification", as applied to `src/evals` — **already satisfied; no change needed.** All three eval files (`agent-eval`, `workforce-intelligence-eval`, `enablement-qa-eval`) assert with `expect` against fixtures and pure functions (`findProhibitedMatches`, `validateAgentOutput`, `validateActionPlan`, `filterDisallowedActions`). Nothing anywhere in the suite reads a model's claim of success, a self-reported score, or an LLM-as-judge verdict. The evals are deterministic and offline. Invariant 4 *did* find a real gap outside the eval directory, in RBAC — see Closed.
+- 2026-08-21 — "Gains live in tools, middleware and memory, not the system prompt" — **already the architecture.** The prohibited-content control is deterministic code (`findProhibitedMatches` over `PROHIBITED_PATTERNS`) that runs on the model's output and cannot be talked out of blocking; the prompt layer only *also* asks for good behaviour. That is the structural-over-prose ordering the article argues for. The one caveat is that evals EV-03/EV-04 assert on prompt *wording* (`toMatch(/confidence/i)`), which is the weak prose layer — but they are cheap regression guards on a real requirement, not a substitute for the code gate, so rewriting them would be churn. Do not re-check.
 
 ---
 
@@ -88,6 +91,19 @@ bump, the block decision belongs with a classifier over the model's own
 output, with the regex list demoted to a fast pre-filter. That is a product
 decision about latency and cost, which is why this is a backlog item and not a
 patch.
+
+### What the second 2026-08-21 run did instead
+
+Commit `bff9848` did not touch what the filter blocks. It made the filter's
+decisions *attributable*: `agent.invocation` now records
+`scannedContentPreview`, a digest of the exact string the patterns ran
+against, alongside the verdict. Before that, a bypassed input and a clean one
+both logged `matchedPatterns: []` and were byte-identical in the audit trail,
+so none of the seven bypasses above would leave any trace to count. They are
+now at least distinguishable after the fact, which is what makes it possible
+to measure how often this happens before deciding how aggressive the
+canonicalization needs to be. When the pipeline below lands, that same field
+should carry the canonical form.
 
 **Why this was not fixed in the 2026-08-21 run:** the change alters what the
 filter blocks for every input, so it is a behavioral change to a safety
