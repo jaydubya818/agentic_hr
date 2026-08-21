@@ -48,6 +48,25 @@ export function logAuditEvent(params: {
   return entry;
 }
 
+/**
+ * `scannedContent` is the text the governance filter actually matched against,
+ * which is the agent's own output -- not `message`, which is the employee's
+ * prompt. Recording only the verdict left the trail unable to answer the two
+ * questions an auditor asks of it:
+ *
+ * - On a block, *what* was blocked. The blocked path returns before
+ *   `logAgentResponse`, so without this the offending output was never written
+ *   down anywhere and a block could not be reviewed as a true or false
+ *   positive.
+ * - On a pass, what the filter saw. A clean output and an output that slipped
+ *   a known term past the patterns by encoding both logged
+ *   `matchedPatterns: []` and were byte-identical in the trail.
+ *
+ * Both values go through `agentContentForAudit`, so this stays inside the
+ * SECURITY_AND_PRIVACY 8.2 rule -- readable preview outside production, stable
+ * `sha256:` digest inside it. The digest is the point: it makes repeated
+ * blocked outputs correlatable without exposing the text.
+ */
 export function logAgentInvocation(params: {
   session: SessionContext;
   agentId: AgentId;
@@ -55,6 +74,7 @@ export function logAgentInvocation(params: {
   governanceStatus: string;
   blocked: boolean;
   matchedPatterns?: string[];
+  scannedContent?: string;
 }): AuditLogEntry {
   return logAuditEvent({
     session: params.session,
@@ -65,6 +85,7 @@ export function logAgentInvocation(params: {
       messagePreview: agentContentForAudit(params.message),
       governanceStatus: params.governanceStatus,
       matchedPatterns: params.matchedPatterns ?? [],
+      scannedContentPreview: agentContentForAudit(params.scannedContent),
     },
   });
 }
