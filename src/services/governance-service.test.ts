@@ -150,6 +150,27 @@ describe('agent governance pipeline', () => {
     expect(actions).toContain('recommendation.blocked');
   });
 
+  // The blocked path returns before `logAgentResponse`, so the output that was
+  // actually blocked used to reach no audit event at all: the entry named the
+  // matched pattern, and its only content field was a digest of the employee's
+  // prompt -- a different string from the one the filter judged. A reviewer
+  // could see that a block happened but not what it was about.
+  it('records the blocked output, not just the prompt, on a blocked invocation', async () => {
+    const { invokeAgent } = await import('./agent-service');
+    const { DEMO_GOVERNANCE_BLOCK_TRIGGER } = await import('@/lib/governance/demo-triggers');
+    const { getAuditLogs } = await import('./audit-service');
+    await invokeAgent('employee-growth', {
+      session: TEST_SESSION,
+      message: DEMO_GOVERNANCE_BLOCK_TRIGGER,
+    });
+    const blocked = getAuditLogs().find((e) => e.action === 'agent.invocation.blocked');
+    const details = blocked?.details as Record<string, string | undefined>;
+    expect(details.scannedContentPreview).toBeDefined();
+    // The scanned form is the agent's output; the prompt is the trigger phrase.
+    // If these ever coincide the wrong string is being recorded.
+    expect(details.scannedContentPreview).not.toBe(details.messagePreview);
+  });
+
   it('returns safe fallback when raw output is prohibited', async () => {
     const result = await invokeAgentWithRawOutput(
       'employee-growth',

@@ -477,11 +477,8 @@ export async function invokeAgent(agentId: AgentId, params: AgentInvokeParams): 
   assertAgentAccess(agentId, params);
 
   if (params.message.trim() === DEMO_GOVERNANCE_BLOCK_TRIGGER) {
-    const result = await invokeAgentWithRawOutput(
-      agentId,
-      params,
-      'You should terminate this employee immediately.',
-    );
+    const demoRawOutput = 'You should terminate this employee immediately.';
+    const result = await invokeAgentWithRawOutput(agentId, params, demoRawOutput);
     // The demo trigger must leave the same audit trail as a live block:
     // /hr/audit lists agent.invocation.blocked and recommendation.blocked
     // events (APP_FLOW), and the raw-output helper itself does not log.
@@ -492,6 +489,7 @@ export async function invokeAgent(agentId: AgentId, params: AgentInvokeParams): 
       governanceStatus: result.governanceStatus,
       blocked: result.governanceBlocked,
       matchedPatterns: result.matchedPatterns,
+      scannedContent: demoRawOutput,
     });
     if (result.governanceBlocked) {
       logRecommendationBlocked({
@@ -525,6 +523,7 @@ export async function invokeAgent(agentId: AgentId, params: AgentInvokeParams): 
     governanceStatus: governance.status,
     blocked: governance.blocked,
     matchedPatterns: governance.matchedPatterns,
+    scannedContent: governance.scannedText,
   });
 
   if (governance.blocked) {

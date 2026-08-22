@@ -55,6 +55,24 @@ export interface GovernanceValidationResult {
   safeResponse?: string;
   humanReviewRequired: boolean;
   warnings: string[];
+  /**
+   * The exact string the patterns were matched against.
+   *
+   * The audit trail has to say what a governance verdict was *about*, not just
+   * what the verdict was. Callers must not re-derive this by re-running
+   * `collectTextToScan`: the scanned form is an output of this stage, and
+   * re-deriving it downstream lets the recorded text drift away from the text
+   * that was actually judged.
+   *
+   * This is raw agent text. Redaction is the audit layer's job --
+   * `agentContentForAudit` decides preview-vs-hash per
+   * `SECURITY_AND_PRIVACY.md` 8.2 -- so never persist this value directly.
+   *
+   * When the normalize-then-match pipeline in `docs/NIGHTLY-BACKLOG.md` lands,
+   * this carries the canonical form, which is what makes a normalization
+   * bypass visible in the audit trail rather than silent.
+   */
+  scannedText: string;
 }
 
 function collectTextToScan(input: GovernanceValidationInput): string {
@@ -90,6 +108,7 @@ export function validateAgentOutput(input: GovernanceValidationInput): Governanc
       safeResponse: GOVERNANCE_BLOCK_MESSAGE,
       humanReviewRequired: false,
       warnings,
+      scannedText: text,
     };
   }
 
@@ -104,6 +123,7 @@ export function validateAgentOutput(input: GovernanceValidationInput): Governanc
       matchedPatterns: [],
       humanReviewRequired: true,
       warnings,
+      scannedText: text,
     };
   }
 
@@ -115,6 +135,7 @@ export function validateAgentOutput(input: GovernanceValidationInput): Governanc
     matchedPatterns: [],
     humanReviewRequired: false,
     warnings,
+    scannedText: text,
   };
 }
 

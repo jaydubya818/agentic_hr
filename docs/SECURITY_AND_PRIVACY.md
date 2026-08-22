@@ -278,6 +278,15 @@ value becomes a stable `sha256:<hex>` digest instead. `AUDIT_LOG_AGENT_CONTENT`
 (`true`/`false`) overrides the default in either direction — set it to `true`
 only for a demo environment seeded with fictional employees.
 
+`agent.invocation` carries two such fields, and they are different strings:
+`messagePreview` is the employee's prompt, while `scannedContentPreview` is the
+text the governance filter matched against — the agent's own output. Both are
+reduced by the same helper. The second exists so a governance verdict is
+attributable to the text it was made about: the blocked path returns before
+`agent.response` is written, so without it a block recorded which pattern
+fired but nothing about what fired it, and a passed output that evaded the
+patterns was indistinguishable from one with nothing to find.
+
 This matters because agent chat is the employee's own words (career doubts,
 manager friction, mobility interest) and every `hr_admin` can read and
 CSV-export the whole audit trail.

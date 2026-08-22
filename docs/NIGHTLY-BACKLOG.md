@@ -15,8 +15,8 @@ read this file first to avoid re-proposing work that is already tracked here.
 
 ## Closed
 
-- [x] 2026-08-22 — Raise the `engines.node` floor off Node 20 — done in `chore(engines): raise the Node floor off end-of-life Node 20`, **on the unmerged branch `nightly/2026-08-22-improvements`**. Floor is now `>=22.12.0` (Node 22 Maintenance LTS) with `@types/node@22.20.1`. Verified at V3; the `@types/node` major bump produced no new type errors.
-- [x] 2026-08-21 — Decide whether `executive_readonly` may read an individual workforce decision — resolved as "no" on branch `nightly/2026-08-21-improvements` (`fix(rbac): deny executive_readonly an individual workforce decision`). The same rule was applied to the team context graph on 2026-08-22; see below. **Both fixes are still unmerged on their nightly branches.**
+- [x] 2026-08-22 — Raise the `engines.node` floor off Node 20 — done in `chore(engines): raise the Node floor off end-of-life Node 20`, **merged to `main` on 2026-08-22**. Floor is now `>=22.12.0` (Node 22 Maintenance LTS) with `@types/node@22.20.1`. Verified at V3; the `@types/node` major bump produced no new type errors.
+- [x] 2026-08-21 — Decide whether `executive_readonly` may read an individual workforce decision — resolved as "no" on branch `nightly/2026-08-21-improvements` (`fix(rbac): deny executive_readonly an individual workforce decision`). The same rule was applied to the team context graph on 2026-08-22; see below. **Both fixes are now merged to `main` (2026-08-22 backlog drain); the nightly branches have been deleted.**
 
 ## Checked, not applicable
 
