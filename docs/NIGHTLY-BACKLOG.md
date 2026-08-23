@@ -11,10 +11,13 @@ read this file first to avoid re-proposing work that is already tracked here.
 - [ ] 2026-08-22 — Ground the app shell's displayed identity in the real session — in live mode `getMockSession()` returns the hard-coded demo persona to every signed-in user; see "Design note" below.
 - [ ] 2026-08-22 — Next.js pre-announced a security release for **2026-08-26** (15.5.24 / 16.3.3, one CRITICAL). Not published as of this run, so it could not be applied. The next run after 2026-08-26 should bump `next` off 15.5.23 and re-check.
 - [ ] 2026-08-22 — Decide whether the org-wide _list_ endpoints should narrow for `executive_readonly` — `GET /api/decisions` and `GET /api/agent-actions` return `ownerEmployeeId` / `targetEmployeeId`, which are employee UUIDs rather than names. Unlike the detail reads already fixed, these are the role's documented aggregate surface, so narrowing them is a product call, not a bug.
-- [ ] 2026-08-22 — `getBusinessPriorityContext`, `findPeopleForBusinessPriority`, `findSkillsAtRiskForTeam` and `explainRelationship` take no `organizationId` and apply no tenant filter, unlike their `getEmployeeContextGraph` / `getTeamContextGraph` siblings. Currently reachable only from tests, so this is a latent trap for the first route that calls them, not a live leak.
+- [ ] 2026-08-22 — `getBusinessPriorityContext`, `findPeopleForBusinessPriority`, `findSkillsAtRiskForTeam` and `explainRelationship` take no `organizationId` and apply no tenant filter, unlike their `getEmployeeContextGraph` / `getTeamContextGraph` siblings. Currently reachable only from tests, so this is a latent trap for the first route that calls them, not a live leak. **(2026-08-23: add `getActionPlan(planId)` in `src/services/agent-action-service.ts` to this list. It is the same shape — every sibling in that file (`listActionPlansForSession`, `listActionPlansForOrganization`, `updateProposedActionStatus`, `applyActionToGrowthPlan`) takes or derives an organization and filters on it; `getActionPlan` takes only a plan id and returns the plan row from any organization. Its child-action join _is_ scoped, and `agent-action-scoping.test.ts` pins that, which is what makes the unscoped parent row easy to miss. Also reachable only from tests today.)**
+- [ ] 2026-08-23 — Postgres row-level security is not on the application's data path at all. Every read and write goes through Drizzle over `DATABASE_URL`, while the RLS policies are keyed on `auth.uid()`; see "Design note" below. Tenant isolation is therefore entirely application-level, and the docs currently describe RLS as a live control.
+- [ ] 2026-08-23 — Page and layout route guards cannot be tested in this harness. `tsconfig.json` sets `jsx: "preserve"` and `vitest.config.ts` collects only `src/**/*.test.ts` with `environment: 'node'` and no React plugin, so importing any `.tsx` fails with `Failed to parse source for import analysis`. That is why `(app)/hr/layout.tsx` and `(app)/manager/layout.tsx` — two server-side role gates — have no tests. The 2026-08-23 `/hr/audit` gate worked around it by containing no JSX, which does not generalize. Fixing it properly means adding `@vitejs/plugin-react` (or setting `esbuild.jsx: 'automatic'`) and widening `include` to `*.test.tsx`, which is a test-infrastructure change worth doing deliberately rather than as a side effect.
 
 ## Closed
 
+- [x] 2026-08-23 — `/hr/audit` had no route guard of its own — fixed on branch `nightly/2026-08-23-improvements` by `fix(rbac): gate the HR audit page on the audit-read permission`, which adds `(app)/hr/audit/layout.tsx` gating on `canReadAuditLogs` instead of inheriting the HR subtree's `canReadOrganizationWorkforceData`. `executive_readonly` could previously open the page (the API still answered 403, so no data leaked) and see only a failed fetch. Five tests in `layout.test.ts` pin it; the `executive_readonly` case goes red if the predicate is swapped back.
 - [x] 2026-08-22 — Raise the `engines.node` floor off Node 20 — done in `chore(engines): raise the Node floor off end-of-life Node 20`, **merged to `main` on 2026-08-22**. Floor is now `>=22.12.0` (Node 22 Maintenance LTS) with `@types/node@22.20.1`. Verified at V3; the `@types/node` major bump produced no new type errors.
 - [x] 2026-08-21 — Decide whether `executive_readonly` may read an individual workforce decision — resolved as "no" on branch `nightly/2026-08-21-improvements` (`fix(rbac): deny executive_readonly an individual workforce decision`). The same rule was applied to the team context graph on 2026-08-22; see below. **Both fixes are now merged to `main` (2026-08-22 backlog drain); the nightly branches have been deleted.**
 
@@ -28,7 +31,12 @@ read this file first to avoid re-proposing work that is already tracked here.
 - 2026-08-22 — `npm audit`: 4 moderate, all one chain — `esbuild <=0.24.2` (GHSA-67mh-4wv8-2f99) via `@esbuild-kit/*` under `drizzle-kit@0.31.10`. `drizzle-kit` is a devDependency and the advisory is a dev-server-only SSRF, so it is not reachable from the built app. The only offered remedy is `drizzle-kit@0.18.1`, a major downgrade of the migration tool. Not worth it; revisit when drizzle-kit drops `@esbuild-kit`.
 - 2026-08-22 — `eslint 9.39.4`, `react 19.1.0`, `drizzle-orm 0.45.2`, `@supabase/supabase-js 2.112.3`, `zod 4.3.6`, `typescript 5.9.3` — no advisories against these exact pins.
 - 2026-08-22 — `/api/team-scenarios/[id]` was checked against the same individual-PII rule applied to the decision and team-context detail reads, and is **correctly** left on `canReadOrganizationWorkforceData`. `TeamScenarioDetail` carries only `teamId`, `roleId` and `skillId`; it names no employee, so it is a genuine aggregate.
-- 2026-08-22 — `/manager` and `/hr` page subtrees both already carry server-side `getSessionContext()` role gates in `layout.tsx`, so the unsigned active-role cookie read by `middleware.ts` is defence-in-depth only, as its comments claim. Verified, no gap.
+- 2026-08-22 — `/manager` and `/hr` page subtrees both already carry server-side `getSessionContext()` role gates in `layout.tsx`, so the unsigned active-role cookie read by `middleware.ts` is defence-in-depth only, as its comments claim. Verified, no gap. **(2026-08-23: still true for the subtree gates. The gap found this run was one level down — `/hr/audit` needed a _narrower_ gate than the subtree's, not a missing one. Fixed; see Closed.)**
+- 2026-08-23 — Hardcoded Claude model IDs. `claude-opus-4-1-20250805` was retired from the Claude API on 2026-08-05, so a hardcoded reference would be broken today. There is none: `grep -rn "claude-\(opus\|sonnet\|haiku\)"` over the tree returns nothing. The only model string in the repo is `'mock-llm'` in `src/lib/ai/providers/mock-llm.ts`; the live provider is OpenAI and reads `OPENAI_MODEL` from the environment (`.env.example` defaults it to `gpt-4o-mini`). Nothing to pin or bump.
+- 2026-08-23 — Committed secrets, third independent pass. `git ls-files | xargs grep -EI` for JWT (`eyJ…`), `sk-ant-…`, `sbp_…`, `AKIA…`, `ghp_…` and credentialed `postgres://` returns only the two known localhost test fixtures (`src/lib/auth/acting-ids.test.ts:32`, `src/services/data-provider/provider-fallback.test.ts:29`, both `postgres://user:pass@localhost:5432/growthos`). `.env.example` still ships empty values for all six secrets.
+- 2026-08-23 — Real PII, third independent pass, scanned separately from secrets. Across `src/`, `data/` and `drizzle/` there are 17 distinct email addresses on exactly two fictional domains (`techforward.io`, `example.com`, plus one `a@b.com` placeholder). No SSN-shaped value (`\d{3}-\d{2}-\d{4}`) anywhere in the tree. The `salary` / `compensation` tokens that match a naive grep are all in prose — docs, prompt text, and the governance prohibited-pattern list that exists to _block_ those topics — not in any fixture field.
+- 2026-08-23 — `npm audit` unchanged from 2026-08-22: the same 4 moderate findings, all `esbuild <=0.24.2` via `@esbuild-kit/*` under the `drizzle-kit` devDependency. Reasoning above still holds.
+- 2026-08-23 — `npm outdated` triage against the exact-pin policy. `next`/`eslint-config-next` 16.3.2 and `eslint` 10.9.0 are the tracked Next 16 migration, not nightly work. `typescript` 7.0.2 and `@types/node` 26 are majors. `react`/`react-dom` 19.2.8, `zod` 4.4.3, `@supabase/ssr` 0.12.4, `@base-ui/react` 1.7.0, `shadcn` 4.19.0 and `lucide-react` 1.33.0 are all clean minors with no advisory against the pinned version, so bumping them buys nothing this run and would churn the lockfile ahead of the 2026-08-26 `next` bump that has to touch it anyway. Deferred to that run deliberately.
 
 ---
 
@@ -61,6 +69,108 @@ disk:
 
 Full V3 verification costs well under two minutes. There is no reason for a
 nightly run to skip it.
+
+Re-measured 2026-08-23 on the same machine, with `npm_config_cache=/tmp/npmcache`
+and `NODE_ENV` unset: `npm ci` 5s, `npm run typecheck` clean, `npm run lint`
+clean, `npm test` 386 tests / 62 files in 2.4s, `npm run build` 12.7s. The
+table above still holds; only the test count has moved.
+
+---
+
+## Design note — RLS is not on the data path (2026-08-23)
+
+Every RLS policy in `drizzle/migrations/0001_rls_rbac.sql` and
+`0003_workforce_intelligence_rls.sql` is real, well-written, and currently
+enforcing nothing, because no application query ever reaches Postgres over a
+connection where those policies apply.
+
+### The evidence, in four steps
+
+1. **The policies key on `auth.uid()`.** `0001_rls_rbac.sql` defines
+   `current_app_user_id()`, `current_user_organization_id()`,
+   `current_user_employee_id()` and `current_user_has_role()` as
+   `SECURITY DEFINER` functions that all resolve `auth.uid()`, and every policy
+   is written in terms of them. `auth.uid()` reads the `request.jwt.claims`
+   GUC, which only Supabase's PostgREST/`supabase-js` path sets.
+
+2. **`supabase-js` is never used for data.** `grep -rn "supabase.from("` over
+   `src/` returns nothing. `createSupabaseServerClient()` has exactly three
+   callers — `api/auth/login`, `api/auth/logout` and
+   `lib/auth/session-context.ts` — and all three use it only for
+   `auth.signInWithPassword`, `auth.signOut` and `auth.getUser`.
+
+3. **All data goes through Drizzle over `DATABASE_URL`.** `src/lib/db/index.ts`
+   is `postgres(url, { max: 1 })` wrapped in `drizzle()`. That is a plain
+   Postgres connection: no JWT, `auth.uid()` is `NULL`, and the connecting role
+   for a Supabase `DATABASE_URL` is the table owner, which policies do not
+   constrain in the first place.
+
+4. **The store is loaded whole, for every tenant at once.**
+   `loadSupabaseStore()` issues 32 unfiltered `db.select().from(table)` calls
+   and caches the result in a module-level singleton (`store-runtime.ts`). One
+   process therefore holds every organization's employees, skills, decisions,
+   scenarios and action plans in memory simultaneously.
+
+### What that means
+
+Tenant isolation in this product is **entirely** the application-level
+`organizationId === session.organizationId` comparisons in `src/services/*`.
+There is no database backstop. Those comparisons are, as far as this run could
+tell, correct and well tested — `workforce-decision-scoping`,
+`team-scenario-read-scoping`, `agent-action-scoping`, `inferred-skill-scoping`
+and `agent-access-scoping` all specifically pin cross-organization cases. The
+problem is not that a check is missing today; it is that a single missed
+comparison in one future service function is a cross-tenant data leak with
+nothing underneath it to catch the mistake. The two already-tracked unscoped
+helpers (`getBusinessPriorityContext` and friends, `getActionPlan`) are exactly
+that shape, which is why they are worth more than their current
+reachable-only-from-tests status suggests.
+
+### The documentation is what makes this dangerous
+
+`SECURITY_AND_PRIVACY.md` currently presents RLS as a live control:
+
+- §Overview — "Defense in depth | Middleware + service layer + RLS (Phase 8)"
+- Risk register — "IDOR on employee endpoints … Session scope checks; RLS"
+- Risk register — "Cross-org data leak … organization_id on all queries; RLS"
+
+Two of the three named mitigations for the highest-impact risk in an HR
+product are not in effect. `src/lib/db/rls-migration.test.ts` and
+`workforce-intelligence-rls-migration.test.ts` reinforce the belief by
+asserting the policy SQL exists — which it does; it is simply never consulted.
+
+### Proposed shape
+
+There are two honest options and they are very different in cost.
+
+1. **Make RLS real.** Connect Drizzle as a non-owner role and open every
+   request in a transaction that sets the JWT claims
+   (`SET LOCAL request.jwt.claims = …`) from the verified Supabase session, so
+   `auth.uid()` resolves. This is the option that actually delivers the
+   defence-in-depth the docs claim, and it is incompatible with the current
+   load-everything-once store: the cache would have to become per-request or
+   go away.
+
+2. **Drop the claim and invest in the application layer.** Keep Drizzle as an
+   owner connection, rewrite the three documentation lines above to say that
+   tenant isolation is enforced in the service layer, and add a lint rule or a
+   structural test asserting that every exported service function that reads
+   `getMockStore()` takes an organization and filters on it. Cheaper, honest,
+   and it makes the real invariant checkable.
+
+Either way the documentation must stop describing RLS as an active control
+while it is not one. Doing that correction alone, without a decision on 1 or 2,
+would remove the false assurance but leave the gap — which is why this is one
+backlog item and not a doc-only patch.
+
+### Why this was not fixed in the 2026-08-23 run
+
+Both options are architectural. Option 1 changes the database connection
+model, the request lifecycle and the caching strategy at once. Option 2 is a
+product/security decision about what guarantee GrowthOS is willing to make to
+a pilot customer, which is not a nightly maintenance call. Nothing here is
+reproducible as a failing test without a live Postgres, so this is recorded as
+a finding with its evidence rather than patched.
 
 ---
 
