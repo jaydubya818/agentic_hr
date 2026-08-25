@@ -9,6 +9,7 @@ import {
   getEmployeeContextGraph,
   getTeamContextGraph,
 } from '@/services/context-graph-service';
+import { getMockStore } from '@/services/data-provider/mock-provider';
 
 const FOREIGN_ORGANIZATION = '99999999-9999-4999-8999-999999999999';
 
@@ -110,5 +111,37 @@ describe('context-graph-service', () => {
     const edgeId = getEmployeeContextGraph(MOCK_IDS.employees.alex)!.edges[0]!.id;
     expect(explainRelationship(edgeId, MOCK_IDS.organization)).not.toBeNull();
     expect(explainRelationship(edgeId, FOREIGN_ORGANIZATION)).toBeNull();
+  });
+
+  it("excludes another organization's edge recorded against the same entity id", () => {
+    const store = getMockStore();
+    const timestamp = new Date().toISOString();
+    const foreignEdge = {
+      id: 'dddddddd-dddd-4ddd-8ddd-ddddddddddd9',
+      organizationId: FOREIGN_ORGANIZATION,
+      sourceEntityType: 'employee' as const,
+      sourceEntityId: MOCK_IDS.employees.alex,
+      targetEntityType: 'skill' as const,
+      targetEntityId: 'cccccccc-cccc-4ccc-8ccc-ccccccccccc9',
+      relationshipType: 'at_risk_for' as const,
+      strength: null,
+      label: null,
+      explanation: 'foreign-organization narrative',
+      metadata: {},
+      createdAt: timestamp,
+      updatedAt: timestamp,
+    };
+    store.workforceContextEdges.push(foreignEdge);
+    try {
+      const graph = getEmployeeContextGraph(MOCK_IDS.employees.alex, MOCK_IDS.organization);
+      expect(graph).not.toBeNull();
+      expect(graph!.edges.some((e) => e.id === foreignEdge.id)).toBe(false);
+      expect(graph!.nodes.some((n) => n.entityId === foreignEdge.targetEntityId)).toBe(false);
+    } finally {
+      store.workforceContextEdges.splice(
+        store.workforceContextEdges.findIndex((e) => e.id === foreignEdge.id),
+        1,
+      );
+    }
   });
 });

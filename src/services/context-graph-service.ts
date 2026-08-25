@@ -114,12 +114,20 @@ function buildGraphFromEdges(
   };
 }
 
-function edgesForEntity(entityType: ContextEntityType, entityId: string): WorkforceContextEdge[] {
+function edgesForEntity(
+  entityType: ContextEntityType,
+  entityId: string,
+  organizationId?: string,
+): WorkforceContextEdge[] {
   const store = getMockStore();
   return store.workforceContextEdges.filter(
     (edge) =>
-      (edge.sourceEntityType === entityType && edge.sourceEntityId === entityId) ||
-      (edge.targetEntityType === entityType && edge.targetEntityId === entityId),
+      // Join on organization as well as entity id (matching the plan-detail
+      // scoping in agent-action-service) so another organization's edge
+      // recorded against the same identifier can never enter a scoped graph.
+      (organizationId === undefined || edge.organizationId === organizationId) &&
+      ((edge.sourceEntityType === entityType && edge.sourceEntityId === entityId) ||
+        (edge.targetEntityType === entityType && edge.targetEntityId === entityId)),
   );
 }
 
@@ -133,7 +141,7 @@ export function getEmployeeContextGraph(
   // Do not reveal cross-organization employees; treat them as not found.
   if (organizationId !== undefined && employee.organizationId !== organizationId) return null;
 
-  const edges = edgesForEntity('employee', employeeId);
+  const edges = edgesForEntity('employee', employeeId, organizationId);
   return buildGraphFromEdges('employee', employeeId, edges, store);
 }
 
@@ -144,7 +152,7 @@ export function getTeamContextGraph(teamId: string, organizationId?: string): Co
   // Do not reveal cross-organization teams; treat them as not found.
   if (organizationId !== undefined && team.organizationId !== organizationId) return null;
 
-  const edges = edgesForEntity('team', teamId);
+  const edges = edgesForEntity('team', teamId, organizationId);
   return buildGraphFromEdges('team', teamId, edges, store);
 }
 
@@ -158,7 +166,7 @@ export function getBusinessPriorityContext(
   // Do not reveal cross-organization priorities; treat them as not found.
   if (organizationId !== undefined && priority.organizationId !== organizationId) return null;
 
-  const edges = edgesForEntity('business_priority', priorityId);
+  const edges = edgesForEntity('business_priority', priorityId, organizationId);
   return buildGraphFromEdges('business_priority', priorityId, edges, store);
 }
 
@@ -186,6 +194,7 @@ export function findPeopleForBusinessPriority(
 
   for (const edge of store.workforceContextEdges) {
     if (
+      (organizationId === undefined || edge.organizationId === organizationId) &&
       edge.targetEntityType === 'business_priority' &&
       edge.targetEntityId === priorityId &&
       edge.sourceEntityType === 'employee'
@@ -222,6 +231,7 @@ export function findSkillsAtRiskForTeam(
   return store.workforceContextEdges
     .filter(
       (edge) =>
+        (organizationId === undefined || edge.organizationId === organizationId) &&
         edge.sourceEntityType === 'team' &&
         edge.sourceEntityId === teamId &&
         edge.targetEntityType === 'skill' &&
