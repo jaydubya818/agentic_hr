@@ -46,6 +46,17 @@ describe('agent-action-service organization scoping', () => {
     }
   });
 
+  it('returns the plan when the requested organization owns it', () => {
+    const detail = getActionPlan(MOCK_IDS.actionPlans.employeeGrowth, ORG_ID);
+    expect(detail).not.toBeNull();
+    expect(detail!.organizationId).toBe(ORG_ID);
+  });
+
+  it('conceals a plan from another organization', () => {
+    const detail = getActionPlan(MOCK_IDS.actionPlans.employeeGrowth, OTHER_ORG_ID);
+    expect(detail).toBeNull();
+  });
+
   it('does not update actions belonging to another organization', () => {
     const action = getMockStore().agentProposedActions[0]!;
     const before = action.status;
