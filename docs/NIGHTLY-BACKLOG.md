@@ -11,12 +11,16 @@ read this file first to avoid re-proposing work that is already tracked here.
 - [ ] 2026-08-22 — Ground the app shell's displayed identity in the real session — in live mode `getMockSession()` returns the hard-coded demo persona to every signed-in user; see "Design note" below.
 - [ ] 2026-08-22 — Next.js pre-announced a security release for **2026-08-26** (15.5.24 / 16.3.3, one CRITICAL). Not published as of this run, so it could not be applied. The next run after 2026-08-26 should bump `next` off 15.5.23 and re-check.
 - [ ] 2026-08-22 — Decide whether the org-wide _list_ endpoints should narrow for `executive_readonly` — `GET /api/decisions` and `GET /api/agent-actions` return `ownerEmployeeId` / `targetEmployeeId`, which are employee UUIDs rather than names. Unlike the detail reads already fixed, these are the role's documented aggregate surface, so narrowing them is a product call, not a bug.
-- [ ] 2026-08-22 — `getBusinessPriorityContext`, `findPeopleForBusinessPriority`, `findSkillsAtRiskForTeam` and `explainRelationship` take no `organizationId` and apply no tenant filter, unlike their `getEmployeeContextGraph` / `getTeamContextGraph` siblings. Currently reachable only from tests, so this is a latent trap for the first route that calls them, not a live leak. **(2026-08-23: add `getActionPlan(planId)` in `src/services/agent-action-service.ts` to this list. It is the same shape — every sibling in that file (`listActionPlansForSession`, `listActionPlansForOrganization`, `updateProposedActionStatus`, `applyActionToGrowthPlan`) takes or derives an organization and filters on it; `getActionPlan` takes only a plan id and returns the plan row from any organization. Its child-action join _is_ scoped, and `agent-action-scoping.test.ts` pins that, which is what makes the unscoped parent row easy to miss. Also reachable only from tests today.)**
 - [ ] 2026-08-24 — The demo manager persona manages no team, so every manager-scoped _detail_ page is a 404 in mock mode. `getMockSession()` returns `DEFAULT_SESSION` (Alex Chen, employee `…331`) whatever userId the session cookie carries, and no row in `data/mock/teams.json` names `…331` as `managerEmployeeId` — Platform Engineering is managed by `…332`, Product Engineering by `…334`. `filterScenariosForSession` and its decision-side equivalent therefore return an empty set for the demo manager, so `/manager/decisions/[id]` and `/manager/team-scenarios/[id]` cannot render a record for any id (confirmed against `next dev`: both 404 under the `manager` role cookie, both 200 under `hr`). The scoping code is correct; the demo _data_ does not exercise it. Fixing it is a fixture decision — either make `…331` a manager of a team, or point the demo manager session at `…334` — and it overlaps the `getMockSession()` item above, so it should be settled alongside it rather than separately.
 - [ ] 2026-08-24 — This repository has no CI. There is no `.github/` directory at all, so nothing runs `typecheck`, `lint`, `test` or `build` on push or pull request; every guarantee in this file rests on a nightly run happening to look. A ready-to-apply workflow was generated and verified with `git apply --check` on 2026-08-24 but could not be pushed: the nightly token is a fine-grained PAT without the `workflow` scope, so any push touching `.github/workflows/` is rejected by GitHub. Someone with workflow permission needs to land it. The patch adds a single `verify` job on Node 22.12.0 running `npm ci --include=dev` (the `--include=dev` is load-bearing; see the environment note below) then typecheck, lint, test and build with `USE_MOCK_DATA=true`.
 - [ ] 2026-08-23 — Postgres row-level security is not on the application's data path at all. Every read and write goes through Drizzle over `DATABASE_URL`, while the RLS policies are keyed on `auth.uid()`; see "Design note" below. Tenant isolation is therefore entirely application-level, and the docs currently describe RLS as a live control.
+- [ ] 2026-08-25 — Two nightly branches are unmerged and nothing on `main` carries their fixes: `nightly/2026-08-23-improvements` (the `/hr/audit` route guard, one commit, listed as Closed below but **not on `main`**) and `nightly/2026-08-25-improvements` (three tenant-scoping fixes). Both are verified at V3. Nightly runs do not merge to `main` on their own; someone has to drain them, and the `/hr/audit` guard has now been sitting unmerged for two days.
+- [ ] 2026-08-25 — `npm run format:check` fails on **138 files** on a pristine `main` — the repository is broadly out of sync with its own Prettier config. This is not a nightly-run fix: `prettier --write .` would rewrite most of the tree and drown every subsequent review diff in formatting churn. It wants one deliberate reformat commit landed on its own, ideally together with the CI workflow above so it stays true. Until then, runs that touch a file must avoid running Prettier across it, because doing so silently mixes unrelated reformatting into a behaviour change (this run hit that twice and reverted it both times).
 
 ## Closed
+
+- [x] 2026-08-22 → 2026-08-25 — The unscoped context-graph and action-plan reads — fixed on branch `nightly/2026-08-25-improvements` by three commits. `getBusinessPriorityContext`, `findPeopleForBusinessPriority`, `findSkillsAtRiskForTeam`, `explainRelationship` and `getActionPlan` now all take an optional `organizationId` and conceal cross-organization rows, matching the `getEmployeeContextGraph` / `getTeamContextGraph` convention. Probed before the fix: `getBusinessPriorityContext(foreign) => GRAPH RETURNED`, `findSkillsAtRiskForTeam(foreign) => length 1`, `explainRelationship(foreign) => EXPLANATION RETURNED`; all three return empty afterwards. Six new tests, all red against the pre-fix source. The parameter is optional, so the existing (test-only) call sites are unchanged. **Every exported read in both files now accepts and honours an organization**, which is what makes this a closed class rather than another instance.
+- [x] 2026-08-25 → 2026-08-25 — A third, deeper instance found and fixed in the same run: `edgesForEntity` in `context-graph-service.ts` matched only on entity type and id, so a graph scoped to one organization still collected edges belonging to **any** organization that referenced the same identifier — carrying that edge's `label` and `explanation` free text and adding its target as a graph node. The center-row check added in `fix(security): scope context-graph reads to the caller's organization` guards who the graph is _about_, not what it _contains_. `agent-action-service.ts` already defends the identical shape one service over (`agent-action-scoping.test.ts` pins that a foreign action row recorded against the same plan id never reaches a plan detail); the graph reader had no equivalent join. Reproduced by pushing a foreign-organization edge whose `sourceEntityId` is the demo employee's id: `foreign edge visible in scoped graph => true` before, `false` after. Fixed by `fix(context-graph): join graph edges on organization, not just entity id`.
 
 - [x] 2026-08-23 → 2026-08-24 — Page and layout route guards could not be tested in this harness — fixed on `main` by `test(rbac): make .tsx route gates testable and pin the two subtree gates`. `vitest.config.ts` now collects `src/**/*.test.{ts,tsx}` and overrides the JSX transform for Vitest only via Vite 8's `oxc.jsx` (`{ runtime: 'automatic' }`). The `esbuild.jsx` / `esbuild.tsconfigRaw` route suggested in the original note does **not** work here: Vitest 4.1.11 bundles Vite 8.2.1, which transforms with Oxc rather than esbuild, so the `esbuild` key is ignored and the JSX still reaches import analysis. No React plugin and no new dependency were needed — the tests call the async server components directly and assert on the redirect. `(app)/hr/layout.tsx` and `(app)/manager/layout.tsx` now have nine cases between them; swapping the manager gate to the HR predicate turns two of them red. `tsconfig.json` was left alone, so `next build` and `tsc --noEmit` are unaffected.
 - [x] 2026-08-24 → 2026-08-24 — `npm run smoke` exited 1 on a pristine checkout — fixed on `main` by `test(smoke): stop the smoke script failing on its own fixtures`. Three routes failed for reasons in the script: `/hr/work-design/[id]` was passed a _team scenario_ id (`aaaa…aaa1`) although the page reads `getRoleEvolutionScenario`, whose only fixture is `bbbb…bbb1`; and the two manager detail routes were asserted as successes when their 404 is correct team scoping (see the new Open item above). Route entries may now be `[path, expectedStatus]`, so the denials are asserted rather than deleted. The script now exits 0 against `next dev`.
@@ -27,6 +31,11 @@ read this file first to avoid re-proposing work that is already tracked here.
 
 ## Checked, not applicable
 
+- 2026-08-25 — **Next.js July 2026 security release (9 CVEs, 4 high / 5 medium)** — fixed in 16.2.11 and **15.5.21**. This repo pins **15.5.23**, which is ahead of the 15.5 fix, so every one of the nine is already patched. This keeps being re-surfaced by generic advisory feeds; it has now been checked four separate nights and the answer has not changed. Do not re-check unless the `next` pin moves *backwards*.
+- 2026-08-25 — **Node 20 EOL (2026-04-30)** — not applicable. `engines.node` is `>=22.12.0` and has been since 2026-08-22. Verified again on **Node v24.18.1**: `npm ci --include=dev` 9.4s, typecheck clean, lint clean, 395 tests, `next build --turbopack` exit 0.
+- 2026-08-25 — **esbuild GHSA-67mh-4wv8-2f99 reachability, settled with the dependency path written down so it stops being re-investigated.** `npm ls esbuild` at the top level returns `(empty)`: esbuild is not a direct dependency and not a dependency of anything the built app imports. The only copy in the tree is `node_modules/@esbuild-kit/core-utils/node_modules/esbuild@0.18.20`, pinned by `@esbuild-kit/core-utils@3.3.2`'s `"esbuild": "~0.18.20"`, reached as `drizzle-kit` → `@esbuild-kit/esm-loader` → `@esbuild-kit/core-utils`. `drizzle-kit` is a **devDependency** used for `db:generate` / `db:migrate`, and `@esbuild-kit/*` uses esbuild as a **transform/loader API**, never `esbuild.serve()` — the advisory is specifically about the `Access-Control-Allow-Origin: *` header on esbuild's *development server*, which nothing here starts. Not reachable, in dev or in production. The only remedy npm offers is `drizzle-kit@0.18.1`, a major downgrade of the migration tool, and overriding esbuild across 0.18 → 0.25 would very likely break `@esbuild-kit`'s API expectations. **Deliberately not overridden.** Revisit only when `drizzle-kit` drops `@esbuild-kit` (upstream has deprecated it in favour of `tsx`).
+- 2026-08-25 — Committed secrets, fifth independent pass, run before any other work. `git ls-files -z | xargs -0 grep -InE` over the whole tree for `sk-ant-…`, `sk-…`, `ghp_…`, `github_pat_…`, `AKIA…`, `xox[baprs]-…`, `sbp_…` (Supabase personal token), `service_role`, `eyJ…` JWTs, `-----BEGIN … PRIVATE KEY` and credentialed `postgres://user:pass@host`. **Zero real hits.** The three `service_role` matches are this file's own prose (twice) and the SQL policy *name* `recommendations_insert_service_roles` in `drizzle/migrations/0001_rls_rbac.sql:825` — a policy identifier, not a key. `.gitignore` still has `.env*` with `!.env.example`, and `.env.example` ships empty values. No Supabase `service_role` key is committed anywhere.
+- 2026-08-25 — Real PII, fifth independent pass, scanned separately from secrets. Every email address across `data/`, `drizzle/` and `src/` is one of **17 distinct synthetic addresses** on `techforward.io` (Alex Chen, Jordan Lee, Morgan Kim, Riley Nguyen, Sam Patel, `engineer1..7`) or `example.com` placeholders (`a@b.com`, `user@example.com`, `User@Example.com`, `a@`/`b@example.com`). No SSN-shaped value (`\b\d{3}-\d{2}-\d{4}\b`) anywhere in the tree. A JSON-key search of `data/` and `drizzle/` for `ssn`, `socialSecurity`, `nationalId`, `dateOfBirth`, `dob`, `salary`, `compensation`, `payRate`, `bankAccount`, `homeAddress`, `phone`, `phoneNumber` returns **nothing** — no fixture carries any of those fields. Unchanged from the four prior passes.
 - 2026-08-24 — `next@15.5.23` is still the newest release on the 15.5 line. `npm view next dist-tags` gives `backport: 15.5.23` and `npm view next versions` ends at 15.5.23, so the pre-announced 2026-08-26 security release (15.5.24 / 16.3.3, one CRITICAL) was **not yet published** as of this run and could not be applied. It remains an Open item, not a closed one.
 - 2026-08-24 — ESLint 10 re-confirmed blocked, with the exact ranges: `npm view eslint-config-next@15.5.23 peerDependencies` returns `{ eslint: '^7.23.0 || ^8.0.0 || ^9.0.0' }`, which excludes 10.x. `eslint@latest` is 10.9.1 and `eslint-config-next@latest` (16.3.2) peers `eslint: '>=9.0.0'`, so the upgrade stays coupled to the Next 16 migration exactly as the design note says. `eslint` still publishes a `maintenance` tag at 9.39.5; the repo's 9.39.4 is one patch behind it.
 - 2026-08-24 — Node 20 EOL is not applicable: `engines.node` is `>=22.12.0`. Verified further that the repo is clean on **Node v24.18.1** — `npm ci --include=dev` in 9s, typecheck clean, lint clean, 395 tests, `next build --turbopack` succeeds. Nothing in the toolchain objects to Node 24.
@@ -50,6 +59,39 @@ read this file first to avoid re-proposing work that is already tracked here.
 - 2026-08-23 — Real PII, third independent pass, scanned separately from secrets. Across `src/`, `data/` and `drizzle/` there are 17 distinct email addresses on exactly two fictional domains (`techforward.io`, `example.com`, plus one `a@b.com` placeholder). No SSN-shaped value (`\d{3}-\d{2}-\d{4}`) anywhere in the tree. The `salary` / `compensation` tokens that match a naive grep are all in prose — docs, prompt text, and the governance prohibited-pattern list that exists to _block_ those topics — not in any fixture field.
 - 2026-08-23 — `npm audit` unchanged from 2026-08-22: the same 4 moderate findings, all `esbuild <=0.24.2` via `@esbuild-kit/*` under the `drizzle-kit` devDependency. Reasoning above still holds.
 - 2026-08-23 — `npm outdated` triage against the exact-pin policy. `next`/`eslint-config-next` 16.3.2 and `eslint` 10.9.0 are the tracked Next 16 migration, not nightly work. `typescript` 7.0.2 and `@types/node` 26 are majors. `react`/`react-dom` 19.2.8, `zod` 4.4.3, `@supabase/ssr` 0.12.4, `@base-ui/react` 1.7.0, `shadcn` 4.19.0 and `lucide-react` 1.33.0 are all clean minors with no advisory against the pinned version, so bumping them buys nothing this run and would churn the lockfile ahead of the 2026-08-26 `next` bump that has to touch it anyway. Deferred to that run deliberately.
+
+---
+
+## Backlog health check (2026-08-25)
+
+This file is long, so it is worth stating plainly what the length is made of.
+Of 384 lines, roughly 240 are **design notes** — recorded reasoning about why
+four specific things were *not* fixed, each with a reproduction. Only about
+ten lines are the Open list itself. Length here is documentation of judgement,
+not accumulated debt, and it is doing its job: this run re-proposed nothing
+that was already tracked, and skipped three false leads (the July Next.js
+CVEs, Node 20 EOL, the esbuild advisory) in minutes because the answers were
+already written down.
+
+The real problem is different and worth naming. **Every long-lived Open item
+is blocked on a decision only a human can make**, and none of those decisions
+has been made in five nights:
+
+| Item                                | Open since | Blocked on                         |
+| ----------------------------------- | ---------- | ---------------------------------- |
+| Governance normalize-then-match     | 08-21      | Product: false-positive tolerance  |
+| ESLint 10                           | 08-21      | Upstream: Next 16 migration        |
+| Live-mode session identity          | 08-22      | Product: what to show, and a schema change |
+| `executive_readonly` list endpoints | 08-22      | Product: is a UUID list aggregate? |
+| Demo manager fixture                | 08-24      | Product: which persona is the demo manager |
+| No CI                               | 08-24      | Access: a token with `workflow` scope |
+| RLS not on the data path            | 08-23      | Architecture: option 1 vs option 2 |
+
+Nightly runs cannot clear any row in that table. What they *can* do is what
+this run did — find and close concrete, reproducible defects — and that supply
+is finite. If the Open list is still this shape in another week, the useful
+response is a decision session on the four product rows, not more nightly
+scanning.
 
 ---
 
@@ -87,6 +129,13 @@ Re-measured 2026-08-23 on the same machine, with `npm_config_cache=/tmp/npmcache
 and `NODE_ENV` unset: `npm ci` 5s, `npm run typecheck` clean, `npm run lint`
 clean, `npm test` 386 tests / 62 files in 2.4s, `npm run build` 12.7s. The
 table above still holds; only the test count has moved.
+
+Re-measured 2026-08-25 on Node v24.18.1, `npm_config_cache=/tmp/npmcache`,
+`NODE_ENV` unset: `npm ci --include=dev` 9.4s, typecheck clean, lint clean,
+`npm test` **395 tests / 64 files** in 1.4s, `npm run build` exit 0 in 9.5s.
+Full V3 in well under a minute. The one thing to be careful of is
+`npm run format:check`, which is red on 138 files at baseline and is **not**
+part of V0–V3 — see the Open item about it.
 
 ---
 
@@ -138,6 +187,20 @@ nothing underneath it to catch the mistake. The two already-tracked unscoped
 helpers (`getBusinessPriorityContext` and friends, `getActionPlan`) are exactly
 that shape, which is why they are worth more than their current
 reachable-only-from-tests status suggests.
+
+**(2026-08-25: those helpers are now fixed — see Closed — but the argument got
+_stronger_, not weaker. Fixing them surfaced a third instance nobody had
+tracked: `edgesForEntity`, a private helper, joined graph edges on entity id
+alone, so a graph scoped to one organization still pulled in another
+organization's edges and their free-text explanations. That one was invisible
+to every audit so far precisely because it is not an exported function with a
+missing parameter — it is a missing organization term inside a join. The
+org-scoping class in `src/services/` has now taken eight fixes across the
+repo's history (`abfd9ad`, `4088e0d`, `d164101`, `c7701a8`, `53c9f7e`, plus
+this run's three). That is the floor this note predicted. Option 2's
+structural invariant test would have caught the five exported ones; only
+option 1, or a join-level convention enforced somewhere, catches the sixth
+shape. Whoever takes this decision should weigh that.)**
 
 ### The documentation is what makes this dangerous
 
