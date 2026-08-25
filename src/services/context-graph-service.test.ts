@@ -10,6 +10,8 @@ import {
   getTeamContextGraph,
 } from '@/services/context-graph-service';
 
+const FOREIGN_ORGANIZATION = '99999999-9999-4999-8999-999999999999';
+
 describe('context-graph-service', () => {
   it('builds employee context graph for Alex Chen', () => {
     const graph = getEmployeeContextGraph(MOCK_IDS.employees.alex);
@@ -67,5 +69,46 @@ describe('context-graph-service', () => {
     const graph = getBusinessPriorityContext(MOCK_IDS.businessPriorities.productQuality);
     expect(graph).not.toBeNull();
     expect(graph!.center.entityType).toBe('business_priority');
+  });
+
+  it('scopes business priority context graphs to the requested organization', () => {
+    const sameOrg = getBusinessPriorityContext(
+      MOCK_IDS.businessPriorities.productQuality,
+      MOCK_IDS.organization,
+    );
+    expect(sameOrg).not.toBeNull();
+    const crossOrg = getBusinessPriorityContext(
+      MOCK_IDS.businessPriorities.productQuality,
+      FOREIGN_ORGANIZATION,
+    );
+    expect(crossOrg).toBeNull();
+  });
+
+  it('scopes the people search for a business priority to the requested organization', () => {
+    const sameOrg = findPeopleForBusinessPriority(
+      MOCK_IDS.businessPriorities.productQuality,
+      MOCK_IDS.organization,
+    );
+    expect(sameOrg).toEqual(
+      findPeopleForBusinessPriority(MOCK_IDS.businessPriorities.productQuality),
+    );
+    const crossOrg = findPeopleForBusinessPriority(
+      MOCK_IDS.businessPriorities.productQuality,
+      FOREIGN_ORGANIZATION,
+    );
+    expect(crossOrg).toEqual([]);
+  });
+
+  it('scopes the at-risk skill search for a team to the requested organization', () => {
+    const sameOrg = findSkillsAtRiskForTeam(MOCK_IDS.teams.product, MOCK_IDS.organization);
+    expect(sameOrg.length).toBeGreaterThan(0);
+    const crossOrg = findSkillsAtRiskForTeam(MOCK_IDS.teams.product, FOREIGN_ORGANIZATION);
+    expect(crossOrg).toEqual([]);
+  });
+
+  it('scopes relationship explanations to the requested organization', () => {
+    const edgeId = getEmployeeContextGraph(MOCK_IDS.employees.alex)!.edges[0]!.id;
+    expect(explainRelationship(edgeId, MOCK_IDS.organization)).not.toBeNull();
+    expect(explainRelationship(edgeId, FOREIGN_ORGANIZATION)).toBeNull();
   });
 });
