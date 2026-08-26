@@ -9,15 +9,17 @@ read this file first to avoid re-proposing work that is already tracked here.
 - [ ] 2026-08-21 — Replace regex-only governance filtering with a normalize-then-match pipeline — the filter is bypassed by Unicode tricks that no additional keyword pattern can catch; see "Design note" below. **(2026-08-22: still open. This run deliberately did not touch `prohibited-patterns.ts` and added no pattern #6 — the design note's argument stands and the next same-class regex is the wrong move. Anyone picking this up should implement the normalize-then-match pipeline, not another keyword.)**
 - [ ] 2026-08-21 — ESLint 9 → 10 is blocked by `eslint-config-next@15.5.23` — the 9.x line is EOL (2026-08-06) but the upgrade is coupled to the Next 16 migration; see "Design note" below.
 - [ ] 2026-08-22 — Ground the app shell's displayed identity in the real session — in live mode `getMockSession()` returns the hard-coded demo persona to every signed-in user; see "Design note" below.
-- [ ] 2026-08-22 — Next.js pre-announced a security release for **2026-08-26** (15.5.24 / 16.3.3, one CRITICAL). Not published as of this run, so it could not be applied. The next run after 2026-08-26 should bump `next` off 15.5.23 and re-check.
+- [ ] 2026-08-26 — The `executive_readonly` aggregate-only rule is enforced route by route, and has now been got wrong on four routes. `/api/organizational-learning` is the fourth; see "Design note" below. **Do not fix it by narrowing that one route.** A fifth ad-hoc gate is evidence the per-route approach has a floor, not an invitation to add one.
 - [ ] 2026-08-22 — Decide whether the org-wide _list_ endpoints should narrow for `executive_readonly` — `GET /api/decisions` and `GET /api/agent-actions` return `ownerEmployeeId` / `targetEmployeeId`, which are employee UUIDs rather than names. Unlike the detail reads already fixed, these are the role's documented aggregate surface, so narrowing them is a product call, not a bug.
 - [ ] 2026-08-24 — The demo manager persona manages no team, so every manager-scoped _detail_ page is a 404 in mock mode. `getMockSession()` returns `DEFAULT_SESSION` (Alex Chen, employee `…331`) whatever userId the session cookie carries, and no row in `data/mock/teams.json` names `…331` as `managerEmployeeId` — Platform Engineering is managed by `…332`, Product Engineering by `…334`. `filterScenariosForSession` and its decision-side equivalent therefore return an empty set for the demo manager, so `/manager/decisions/[id]` and `/manager/team-scenarios/[id]` cannot render a record for any id (confirmed against `next dev`: both 404 under the `manager` role cookie, both 200 under `hr`). The scoping code is correct; the demo _data_ does not exercise it. Fixing it is a fixture decision — either make `…331` a manager of a team, or point the demo manager session at `…334` — and it overlaps the `getMockSession()` item above, so it should be settled alongside it rather than separately.
 - [ ] 2026-08-24 — This repository has no CI. There is no `.github/` directory at all, so nothing runs `typecheck`, `lint`, `test` or `build` on push or pull request; every guarantee in this file rests on a nightly run happening to look. A ready-to-apply workflow was generated and verified with `git apply --check` on 2026-08-24 but could not be pushed: the nightly token is a fine-grained PAT without the `workflow` scope, so any push touching `.github/workflows/` is rejected by GitHub. Someone with workflow permission needs to land it. The patch adds a single `verify` job on Node 22.12.0 running `npm ci --include=dev` (the `--include=dev` is load-bearing; see the environment note below) then typecheck, lint, test and build with `USE_MOCK_DATA=true`.
 - [ ] 2026-08-23 — Postgres row-level security is not on the application's data path at all. Every read and write goes through Drizzle over `DATABASE_URL`, while the RLS policies are keyed on `auth.uid()`; see "Design note" below. Tenant isolation is therefore entirely application-level, and the docs currently describe RLS as a live control.
-- [ ] 2026-08-25 — Two nightly branches are unmerged and nothing on `main` carries their fixes: `nightly/2026-08-23-improvements` (the `/hr/audit` route guard, one commit, listed as Closed below but **not on `main`**) and `nightly/2026-08-25-improvements` (three tenant-scoping fixes). Both are verified at V3. Nightly runs do not merge to `main` on their own; someone has to drain them, and the `/hr/audit` guard has now been sitting unmerged for two days.
 - [ ] 2026-08-25 — `npm run format:check` fails on **138 files** on a pristine `main` — the repository is broadly out of sync with its own Prettier config. This is not a nightly-run fix: `prettier --write .` would rewrite most of the tree and drown every subsequent review diff in formatting churn. It wants one deliberate reformat commit landed on its own, ideally together with the CI workflow above so it stays true. Until then, runs that touch a file must avoid running Prettier across it, because doing so silently mixes unrelated reformatting into a behaviour change (this run hit that twice and reverted it both times).
 
 ## Closed
+
+- [x] 2026-08-22 → 2026-08-26 — Apply the pre-announced Next.js security release. It published on **2026-08-25** (15.5.24 on the maintenance line, 16.3.3 on Active LTS) with two criticals. Done on branch `nightly/2026-08-26-improvements` by `chore(deps): bump next to 15.5.24 for the August 2026 security release`; `eslint-config-next` moved with it to keep the pair in lockstep. Confirmed before acting that `npm view next dist-tags` gives `backport: 15.5.24` / `latest: 16.3.3` and that the lockfile pinned 15.5.23. Verified at V3 on the bumped tree: typecheck clean, lint clean, 407 tests / 65 files, `next build --turbopack` exit 0. Exposure to both criticals is recorded under "Checked, not applicable" rather than here, because the answer to both was "not exposed" and that reasoning is what a future run needs.
+- [x] 2026-08-25 → 2026-08-26 — Both unmerged nightly branches have been drained into `main` and deleted. `git ls-remote --heads origin` now returns `refs/heads/main` only, and the content is verifiably on `main`, not just the merge messages: `git show origin/main:src/app/(app)/hr/audit/layout.tsx` returns the `canReadAuditLogs` guard, and `origin/main:src/services/context-graph-service.ts` carries the `organizationId` parameter and the edge-level organization join. The two merge commits are `3cc390d` (2026-08-23 RBAC guard) and `7274b47` (2026-08-25 org-scoping fixes). The drain lag this item complained about was real but is now cleared.
 
 - [x] 2026-08-22 → 2026-08-25 — The unscoped context-graph and action-plan reads — fixed on branch `nightly/2026-08-25-improvements` by three commits. `getBusinessPriorityContext`, `findPeopleForBusinessPriority`, `findSkillsAtRiskForTeam`, `explainRelationship` and `getActionPlan` now all take an optional `organizationId` and conceal cross-organization rows, matching the `getEmployeeContextGraph` / `getTeamContextGraph` convention. Probed before the fix: `getBusinessPriorityContext(foreign) => GRAPH RETURNED`, `findSkillsAtRiskForTeam(foreign) => length 1`, `explainRelationship(foreign) => EXPLANATION RETURNED`; all three return empty afterwards. Six new tests, all red against the pre-fix source. The parameter is optional, so the existing (test-only) call sites are unchanged. **Every exported read in both files now accepts and honours an organization**, which is what makes this a closed class rather than another instance.
 - [x] 2026-08-25 → 2026-08-25 — A third, deeper instance found and fixed in the same run: `edgesForEntity` in `context-graph-service.ts` matched only on entity type and id, so a graph scoped to one organization still collected edges belonging to **any** organization that referenced the same identifier — carrying that edge's `label` and `explanation` free text and adding its target as a graph node. The center-row check added in `fix(security): scope context-graph reads to the caller's organization` guards who the graph is _about_, not what it _contains_. `agent-action-service.ts` already defends the identical shape one service over (`agent-action-scoping.test.ts` pins that a foreign action row recorded against the same plan id never reaches a plan detail); the graph reader had no equivalent join. Reproduced by pushing a foreign-organization edge whose `sourceEntityId` is the demo employee's id: `foreign edge visible in scoped graph => true` before, `false` after. Fixed by `fix(context-graph): join graph edges on organization, not just entity id`.
@@ -30,6 +32,14 @@ read this file first to avoid re-proposing work that is already tracked here.
 - [x] 2026-08-21 — Decide whether `executive_readonly` may read an individual workforce decision — resolved as "no" on branch `nightly/2026-08-21-improvements` (`fix(rbac): deny executive_readonly an individual workforce decision`). The same rule was applied to the team context graph on 2026-08-22; see below. **Both fixes are now merged to `main` (2026-08-22 backlog drain); the nightly branches have been deleted.**
 
 ## Checked, not applicable
+
+- 2026-08-26 — **August 2026 Next.js critical #1, the AVIF image-optimization RCE** (flaw in `libheif`, reached through `sharp`; unauthenticated RCE when Next optimizes an attacker-controlled AVIF). The vulnerable code is genuinely in the tree — `npm ls sharp` returns `next@15.5.23 -> sharp@0.35.3 overridden`, held there by the `overrides` block in `package.json` — but **nothing attacker-controlled can reach the optimizer**, for four independent reasons: (1) `next.config.ts` declares no `images` key at all, so `images.remotePatterns` and `images.domains` are both empty and `/_next/image` rejects every absolute URL; (2) `images.formats` is likewise unset, so AVIF is not even an output format; (3) `next/image` is imported **nowhere** in `src/` — the single `_next/image` occurrence is the exclusion in the `middleware.ts` matcher — so no page renders an optimized image; (4) the app has no ingestion path for an image at all: `grep -rniE "formData|multipart|upload|writeFile|\.avif|blob"` over `src/` returns one unrelated test string, and `public/` holds five SVGs. **Vulnerable version, no exposure.** Bumped to 15.5.24 anyway so that adding an `images` config later cannot silently convert this into a live exposure. Re-check this only if `next.config.ts` gains `images.remotePatterns`, `images.domains`, or a user-upload route.
+- 2026-08-26 — **August 2026 Next.js critical #2, the Windows-filesystem RCE.** Advisories describe it as affecting apps that use **both** Pages Router and App Router without Cache Components, on Windows. It does not apply here, and the reason is stronger than the operating-system carve-out usually quoted: there is **no Pages Router in this repository at all** — neither `pages/` nor `src/pages/` exists, every route lives under `src/app/`. So the precondition fails on any OS, not just on the Linux/macOS deployment target. No `cacheComponents` / `dynamicIO` flag is set either, but that is moot given the missing precondition.
+- 2026-08-26 — **CVE-2026-45109, the May 2026 fix that was incomplete specifically under Turbopack.** Worth restating because this repo does build with `--turbopack` (`next build --turbopack`), so Turbopack-conditional patches are a live concern here in general. Not applicable to this pin: the complete fix shipped in 16.2.5 / **15.5.16**, and the repo was already on 15.5.23 before this run and is on 15.5.24 after. Kept on record so a future run recognises the Turbopack-conditional shape quickly rather than re-deriving it.
+- 2026-08-26 — Committed secrets, sixth independent pass, run before any other work. `git ls-files -z | xargs -0 grep -InE` across the whole tree for `sk-ant-…`, `sk-…`, `ghp_…`, `github_pat_…`, `AKIA…`, `xox[baprs]-…`, `sbp_…`, `eyJ….eyJ` JWTs, `-----BEGIN … PRIVATE KEY` and credentialed `postgres://user:pass@host`. **Zero real hits**, unchanged from the five prior passes: the only matches are this file's own prose and the two known localhost test fixtures (`src/lib/auth/acting-ids.test.ts:32`, `src/services/data-provider/provider-fallback.test.ts:29`). Every `SUPABASE_SERVICE_ROLE_KEY` occurrence is a documentation table row or the empty `.env.example` placeholder — no value is attached to any of them, and the one `service_role` hit in SQL is still the policy *name* `recommendations_insert_service_roles`. The anon key is likewise only ever an empty `.env.example` placeholder, and would be public by design in any case. `.gitignore` still carries `.env*` with `!.env.example`.
+- 2026-08-26 — Real PII, sixth independent pass, scanned separately from secrets. Every email address in the tree resolves to **21 distinct synthetic addresses** across three fictional domains — `techforward.io` (Alex Chen, Jordan Lee, Morgan Kim, Riley Nguyen, Sam Patel, `engineer1..7`), `techforward.com` (`alex@`, `jordan@`, `sam@`, `exec@`, which appear only in documentation examples) and `example.com` placeholders (`a@b.com`, `user@example.com`, `User@Example.com`, `a@`/`b@example.com`). No SSN-shaped value (`\b\d{3}-\d{2}-\d{4}\b`) anywhere. A JSON-key search of `data/`, `drizzle/` **and `src/evals/`** for `ssn`, `socialSecurity`, `nationalId`, `dateOfBirth`, `dob`, `salary`, `compensation`, `payRate`, `bankAccount`, `homeAddress`, `phone`, `phoneNumber` returns nothing. `src/evals/fixtures/` holds three files — `career-path-good.json` and two `prohibited-*.txt` governance probes — and none carries a real person's data.
+- 2026-08-26 — `npm audit` unchanged for the fifth consecutive run **after** the `next` bump: 4 moderate, all `esbuild <=0.24.2` (GHSA-67mh-4wv8-2f99) via `@esbuild-kit/*` under the `drizzle-kit` devDependency. The settled reasoning above still holds; the 15.5.24 bump did not move it in either direction.
+- 2026-08-26 — Division-by-zero sweep across the analytics helpers, prompted by the number of unguarded-looking `/ x.length` expressions in `mock-provider.ts`. **All fifteen are already guarded** — either by an early `if (x.length === 0) return 0`, a `total > 0 ? … : 0` ternary, or a `Math.max(1, …)` denominator. `computePlanAdoptionPct`, `computeManagerEnablementScore`, `computeConfirmedInferredRatio`, `getWorkforceReadinessReport`, `getTeamSkillsMatrix` and `getManagerDashboard` were each read line by line. No `NaN` can reach a response. Recorded so the next run does not re-open this on the strength of a grep.
 
 - 2026-08-25 — **Next.js July 2026 security release (9 CVEs, 4 high / 5 medium)** — fixed in 16.2.11 and **15.5.21**. This repo pins **15.5.23**, which is ahead of the 15.5 fix, so every one of the nine is already patched. This keeps being re-surfaced by generic advisory feeds; it has now been checked four separate nights and the answer has not changed. Do not re-check unless the `next` pin moves *backwards*.
 - 2026-08-25 — **Node 20 EOL (2026-04-30)** — not applicable. `engines.node` is `>=22.12.0` and has been since 2026-08-22. Verified again on **Node v24.18.1**: `npm ci --include=dev` 9.4s, typecheck clean, lint clean, 395 tests, `next build --turbopack` exit 0.
@@ -83,6 +93,7 @@ has been made in five nights:
 | ESLint 10                           | 08-21      | Upstream: Next 16 migration        |
 | Live-mode session identity          | 08-22      | Product: what to show, and a schema change |
 | `executive_readonly` list endpoints | 08-22      | Product: is a UUID list aggregate? |
+| `executive_readonly` per-route floor | 08-26     | Product: same call as the row above, then encode it once |
 | Demo manager fixture                | 08-24      | Product: which persona is the demo manager |
 | No CI                               | 08-24      | Access: a token with `workflow` scope |
 | RLS not on the data path            | 08-23      | Architecture: option 1 vs option 2 |
@@ -136,6 +147,129 @@ Re-measured 2026-08-25 on Node v24.18.1, `npm_config_cache=/tmp/npmcache`,
 Full V3 in well under a minute. The one thing to be careful of is
 `npm run format:check`, which is red on 138 files at baseline and is **not**
 part of V0–V3 — see the Open item about it.
+
+Re-measured 2026-08-26 on **Node v22.14.0 / npm 10.9.2**, `TMPDIR=/tmp`,
+`npm_config_cache=/tmp/npmcache`: `npm ci --include=dev` 7.1s, typecheck clean,
+lint clean, `npm test` **407 tests / 65 files** in 1.3s, `npm run build` exit 0.
+
+**The `NODE_ENV=production` trap above caught this run on its first command**,
+and the note is what made it a thirty-second detour instead of a wrong
+conclusion. The shell this run started in had `NODE_ENV=production` exported
+by the environment, not by the repo, and the very first `npm ci` produced the
+exact three symptoms the note predicts — `TS2307: Cannot find module 'vitest'`
+from typecheck, `Cannot find package '@eslint/eslintrc'` from lint, and
+`sh: vitest: command not found` from test. Re-running with `NODE_ENV` unset
+turned all three green with no repo change. **If you see those three symptoms
+together, check `echo $NODE_ENV` before believing anything else.** This note
+has now paid for itself twice; leave it in place.
+
+---
+
+## Design note — the `executive_readonly` rule is enforced per route, and that has a floor (2026-08-26)
+
+The product rule is written down in three places and is not ambiguous.
+BACKEND_STRUCTURE 6.1 grants `executive_readonly` `view_org_data: aggregate`;
+SECURITY_AND_PRIVACY 6.1 gives it "aggregated dashboards only; no individual
+PII"; 6.2 Example 6 requires a 403 when an executive asks for one employee's
+record. `rbac.ts` even encodes it once, cleanly, as
+`canReadIndividualEmployeeData`.
+
+The rule is nonetheless **applied by hand, one route at a time**, and has now
+been got wrong four times:
+
+| # | Surface | Fixed by | Date |
+| - | ------- | -------- | ---- |
+| 1 | `GET /api/decisions/[id]` | `fix(rbac): deny executive_readonly an individual workforce decision` | 08-21 |
+| 2 | `GET /api/context/team/[id]` | `fix(rbac): deny executive_readonly the team context graph` | 08-22 |
+| 3 | `/hr/audit` page | `fix(rbac): gate the HR audit page on the audit-read permission` | 08-23 |
+| 4 | `GET /api/organizational-learning` | **not fixed — see below** | 08-26 |
+
+Plus one route pair still open as a product question (`GET /api/decisions`,
+`GET /api/agent-actions`). That is five of roughly eighteen API routes where
+the gate was, or may be, wrong for this one role.
+
+### Reproduction of instance #4
+
+`/api/organizational-learning` gates on `canReadOrganizationWorkforceData`,
+which admits `executive_readonly`. Its `learningSignals` array is built by
+`getLearningSignalsForAgent`, which loops every workforce decision in the
+organization and, for any decision with a `partially_achieved` actual outcome,
+emits a signal that interpolates the decision straight into the payload:
+
+```ts
+id: `signal-outcome-${decision.id}`,
+title: `Partial outcomes on: ${decision.title}`,
+```
+
+Probed against the shipped fixtures with an `executive_readonly` role set:
+
+```
+GET /api/decisions/[id] allowed for executive_readonly: false
+GET /api/organizational-learning allowed for executive_readonly: true
+  - {"id":"signal-outcome-99999999-9999-4999-8999-999999999991",
+     "title":"Partial outcomes on: Reskill QA automation toward AI-assisted quality"}
+```
+
+So the role is 403'd on the decision and then handed that same decision's
+**UUID** and **free-text title** through a neighbouring endpoint. The endpoint
+is named and documented as organizational *learning* — aggregate insight — but
+its payload is not aggregate: it is per-decision, and `title` is operator-typed
+free text with no constraint keeping an employee's name out of it.
+
+**Severity, stated honestly.** With the shipped fixtures this leaks nothing
+personal: all four decision titles are role- and team-level
+("Reskill QA automation toward AI-assisted quality"). The `insight` string is a
+fixed template from `summarizeOutcomeStatus`, not free text. So this is a
+latent defect in the payload's *shape*, not an active PII leak today — which is
+precisely why four rounds of route auditing walked past it.
+
+### Why the fifth ad-hoc gate is the wrong move
+
+Narrowing this one route takes about three lines and would be the fourth
+same-class fix. It would also not change the thing that produced all four: the
+rule lives in prose and is re-applied, from memory, by whoever writes the next
+route. There are ~18 API routes and ~14 page/layout gates today; every new one
+is a fresh chance to pick `canReadOrganizationWorkforceData` because it reads
+like "org-wide data, and this is an org-wide endpoint". Instances #1 and #4 are
+the *same mistake with the same helper*, five days apart.
+
+A keyword-list-style rebuttal applies here too: the audit that finds instance
+#5 is the same audit that missed #4, run again.
+
+### Proposed shape
+
+Make the rule checkable in one place instead of eighteen. Roughly in
+increasing cost:
+
+1. **A route-manifest test.** One table mapping every route path to its
+   required predicate, and a test that imports each route module and asserts
+   the gate it actually calls matches the table. The table becomes the single
+   written form of BACKEND_STRUCTURE 6.1, and adding a route without adding a
+   row fails the suite. Catches all four instances above.
+2. **A payload invariant.** Assert structurally that no response reachable by
+   an `executive_readonly` session contains an individual-level identifier —
+   `employeeId`, `ownerEmployeeId`, `targetEmployeeId`, `participants`, or a
+   record UUID from an individual-scoped table. This catches instance #4, which
+   a manifest alone would only catch if someone correctly classified the route
+   when writing its row.
+3. **Types.** Give aggregate readers a distinct return type (`Aggregate<T>`)
+   that structurally cannot carry an individual identifier, so the compiler
+   rejects the mistake rather than a test catching it. Highest cost, highest
+   assurance, and a wide refactor of `src/services/`.
+
+Option 1 is a nightly-sized change and would have caught every instance found
+so far. Option 2 is the one that catches the shape found this run. They
+compose, and doing 1 then 2 is a reasonable order.
+
+### Why this was not fixed in the 2026-08-26 run
+
+Two reasons. The narrow fix is the anti-pattern this note exists to stop. And
+the non-narrow fix needs a product decision that overlaps the already-open
+question about the list endpoints: whether "aggregate" means *no individual
+identifiers in the payload* or *no individual PII in the payload*. Those give
+different answers for `signal-outcome-<uuid>` — the first forbids it, the
+second permits it — and that call is not a maintenance one. Settle it once,
+then encode it once, via option 1 or 2.
 
 ---
 
