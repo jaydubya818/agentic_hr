@@ -179,10 +179,17 @@ export function listActionPlansForSession(session: SessionContext): AgentActionP
   );
 }
 
-export function getActionPlan(planId: string): AgentActionPlanDetail | null {
+export function getActionPlan(
+  planId: string,
+  organizationId?: string,
+): AgentActionPlanDetail | null {
   const store = getMockStore();
   const plan = store.agentActionPlans.find((p) => p.id === planId);
   if (!plan) return null;
+  // Do not reveal cross-organization plans; treat them as not found. The
+  // child-action join below was already organization-scoped, which is what
+  // made the unscoped parent row easy to miss.
+  if (organizationId !== undefined && plan.organizationId !== organizationId) return null;
 
   return {
     ...plan,
