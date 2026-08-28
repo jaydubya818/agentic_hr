@@ -18,6 +18,10 @@ read this file first to avoid re-proposing work that is already tracked here.
 
 ## Closed
 
+- [x] 2026-08-28 — **Seven catalogue reads collected every tenant's rows, because their predicate was a *status* rather than an *id*.** Fixed on branch `nightly/2026-08-28-improvements` by `fix(multitenancy): bound the role, opportunity and learning catalogs by organization`. The store holds all tenants at once (`loadSupabaseStore()` issues one unfiltered `select` per table into a module-level singleton — see the RLS design note), so `data.roles.filter(r => r.isActive)`, `opportunities.filter(o => o.status === 'open')`, `opportunities.filter(o => o.department === 'Engineering')` and a `learningResources` skill-id set membership all cross the tenant boundary. The affected reads were `getCareerPaths` (candidate roles, `suggestedLearning`, `suggestedOpportunities`), `buildStretchOpportunitiesForEmployee`, `getManagerDashboard`'s `stretchOpportunities`, and `agent-service`'s `buildInternalMobilityRecommendations` / `buildDynamicLearningRecommendations`. Every *neighbouring* read in `mock-provider.ts` (lines 398, 637, 823) already carried the organization term; these did not. Reproduced by unshifting one foreign-organization role, opportunity and learning resource onto the store — a legitimate ordering, since the loader has no `ORDER BY` and each read ends in a `.slice(0, n)`: `getCareerPaths` returned `["FOREIGN Chief Restructuring Officer", …]`, `suggestedOpportunities` and `getManagerDashboard` both returned the foreign opening, and `invokeAgent('internal-mobility')` returned it as a recommendation — which `createAgentRecommendations` then **persists as a row against the caller's own employee record**. All empty of foreign rows after the fix. The organization is taken from data already in hand at each site (the employee row `getCareerPaths` fetches, the manager row `getManagerDashboard` fetches, the session on the agent path), so no exported signature changed. Six tests in `career-path-org-scoping.test.ts`; five are red against the pre-fix source.
+
+- [x] 2026-08-28 — **`getSkills()` with no argument silently resolves to the first tenant in the store.** Fixed on the same branch by `fix(multitenancy): name the organization on the three skill-catalogue reads`. The fallback is `getOrganization()`, which is `organizations[0]`; in single-tenant mock mode that is always the demo organization, so it is invisible, but against the Supabase-backed store it is whichever tenant the unordered `select` returned first. Three call sites relied on it — `getTeamSkillsMatrix` and the two employee pages that build a `skillById` map. Reproduced by unshifting one foreign organization onto `store.organizations`: `getSkills()` then returns **0** rows for the demo caller and `/manager/team-skills` renders every direct report's skill as `"Unknown skill"` (five of five). This one is a correctness defect rather than a leak — the map is keyed by skill id, so a foreign catalogue produces blanks, not another tenant's data — but it is the same missing-organization-term class. Each site now passes the organization it already holds; the optional parameter and its fallback are kept (other callers pass it explicitly) with a docstring naming the trap. Two tests; the matrix case is red against the pre-fix source.
+
 - [x] 2026-08-26 → 2026-08-27 — **The 2026-08-26 `next` 15.5.24 security bump was never drained; `main` was still shipping 15.5.23.** The branch `nightly/2026-08-26-improvements` carried exactly one commit (`07e62ee`) and was left unmerged, so the August 2026 maintenance release existed only on a branch. Landed on `main` as `merge(nightly): land the 2026-08-26 next 15.5.24 security bump` and the branch deleted. Re-verified independently on the merge result before pushing, not trusting the prior run's numbers: `npm ci --include=dev` 7.9s, `tsc --noEmit` clean, `eslint` clean, **407 tests / 65 files**, `next build --turbopack` exit 0 in 10.5s, and `npm ls next sharp` confirming `next@15.5.24 -> sharp@0.35.3`. The identical suite was run on pristine `main` first (`15.5.23`, 407 tests, build exit 0) so the two are comparable: the bump changes nothing observable. **This is the second time a nightly branch has been left stranded** (the 2026-08-25 entry below records the first). The lesson is not "remember to merge" — it is that a run which pushes a branch has no way to land it, so the *next* run must check `git ls-remote --heads origin 'nightly/*'` before doing anything else and drain what it finds. That check is now the first step in the workflow.
 
 - [x] 2026-08-22 → 2026-08-26 — Apply the pre-announced Next.js security release. It published on **2026-08-25** (15.5.24 on the maintenance line, 16.3.3 on Active LTS) with two criticals. Done on branch `nightly/2026-08-26-improvements` by `chore(deps): bump next to 15.5.24 for the August 2026 security release`; `eslint-config-next` moved with it to keep the pair in lockstep. Confirmed before acting that `npm view next dist-tags` gives `backport: 15.5.24` / `latest: 16.3.3` and that the lockfile pinned 15.5.23. Verified at V3 on the bumped tree: typecheck clean, lint clean, 407 tests / 65 files, `next build --turbopack` exit 0. Exposure to both criticals is recorded under "Checked, not applicable" rather than here, because the answer to both was "not exposed" and that reasoning is what a future run needs.
@@ -34,6 +38,14 @@ read this file first to avoid re-proposing work that is already tracked here.
 - [x] 2026-08-21 — Decide whether `executive_readonly` may read an individual workforce decision — resolved as "no" on branch `nightly/2026-08-21-improvements` (`fix(rbac): deny executive_readonly an individual workforce decision`). The same rule was applied to the team context graph on 2026-08-22; see below. **Both fixes are now merged to `main` (2026-08-22 backlog drain); the nightly branches have been deleted.**
 
 ## Checked, not applicable
+
+- 2026-08-28 — **The August 2026 Next.js security release does not apply to this repository, and the lock version is written down here so no further run re-derives it.** Vercel disclosed two criticals on 2026-08-25 — **GHSA-2xp9-vwfh-vxw4**, the libheif/AVIF heap overflow reached through `sharp` (unauthenticated RCE, CVSS v4 9.5), and **CVE-2026-75604 / GHSA-p293-qw3h-jr36**, the Windows-only path traversal — patched in **15.5.24** and **16.3.3**. `package.json` declares `next 15.5.24` and `package-lock.json` **resolves `next` to 15.5.24**, i.e. the patched Maintenance-LTS release; `npm ls next sharp` returns `next@15.5.24 └── sharp@0.35.3`. **Nothing to do.** The reachability analyses for both advisories are recorded in the 2026-08-26 and 2026-08-27 entries below and are unchanged. This entry exists because a version match alone keeps getting re-checked by generic advisory feeds: the answer is "already on the patched release", and it does not change unless the `next` pin moves *backwards*.
+- 2026-08-28 — **ESLint 9 EOL** — confirmed unchanged and deliberately not re-proposed. The 9.x line went end of life on **2026-08-06**; the repo pins `eslint@9.39.4`; the upgrade to 10.x is blocked by `eslint-config-next`'s `^9` peer range and is a sub-task of the Next 16 migration. That is already the Open item and its design note; this run added nothing to it beyond re-confirming the EOL date is recorded.
+- 2026-08-28 — **Dependency sweep** — no action. `react 19.1.0`, `zod 4.3.6`, `drizzle-orm 0.45.2`, `@supabase/supabase-js 2.112.3`, `vitest 4.1.11`, `typescript 5.9.3`, `tailwindcss 4.3.3` are all exact pins with no advisory against them, and the lockfile resolves `esbuild 0.25.12`. Dependency work was not where this night's value was; see the run note.
+- 2026-08-28 — Committed secrets, **eighth** pass. `git ls-files -z | xargs -0 grep -InE` for a *valued* `SUPABASE_SERVICE_ROLE_KEY`, `eyJ….eyJ` JWTs, credentialed `postgres://user:pass@host`, `sk-…`, `ghp_…`, `github_pat_…`, `AKIA…`, `xox[baprs]-…`, `sbp_…` and `-----BEGIN … PRIVATE KEY`, excluding this file. **Three hits, all known and all non-secrets**: `docs/TECH_STACK.md:385` (`SUPABASE_SERVICE_ROLE_KEY=...`, a literal ellipsis in a documentation table) and the two localhost fixtures at `src/lib/auth/acting-ids.test.ts:32` and `src/services/data-provider/provider-fallback.test.ts:29`. Unchanged from seven prior passes.
+- 2026-08-28 — Real PII, **eighth** pass, run in the narrowed form the 2026-08-27 entry proposed. `git log --since=2026-08-26 -- data/ drizzle/seed/` returns **nothing**, so no fixture has changed since the last full pass. The full scan was run anyway and agrees: every email address in the tree resolves to `techforward.io` (31), `example.com`/`Example.com` (19), `techforward.com` (8, documentation examples) and `b.com` (7, the `a@b.com` placeholder) — no other domain appears, and all are synthetic. No SSN-shaped value (`\b\d{3}-\d{2}-\d{4}\b`) anywhere. **A future run should keep the narrowed form: check whether `data/` or `drizzle/seed/` has changed, and only do the full scan if it has.**
+- 2026-08-28 — **The `executive_readonly` per-route floor was not touched, and no fifth ad-hoc gate was added.** This run found no new leaking route; the four instances and the open product question stand exactly as the design note records them. Recorded so the absence is legible rather than looking like an oversight.
+- 2026-08-28 — **`prohibited-patterns.ts` was not touched, and no pattern #6 was added.** No new bypass was probed for and none is claimed. The normalize-then-match proposal is still the only correct move on that file.
 
 - 2026-08-27 — **`npm audit` now reports `found 0 vulnerabilities`** — the four moderate `esbuild` findings that were reported unchanged on five consecutive runs are gone. This is *not* the result of anything this run did: the lockfile change that landed was the `next` bump alone, and `esbuild@0.18.20` is still physically present at `node_modules/@esbuild-kit/core-utils/node_modules/esbuild`. `npm ls esbuild --all` returns `(empty)`, so npm no longer resolves it as part of the logical dependency tree, and the audit came back clean twice, the second time with an explicit `--registry=https://registry.npmjs.org/` to rule out a stale local cache. The most likely explanation is an upstream revision or withdrawal of GHSA-67mh-4wv8-2f99's affected range. **Recorded as observed, not as fixed** — nothing was overridden or downgraded, and the settled "deliberately not overridden" reasoning below stands unchanged in case the advisory returns. A future run seeing 4 moderates again should not treat it as a regression.
 - 2026-08-27 — **AVIF image-optimization RCE (GHSA-2xp9-vwfh-vxw4 / libheif GHSA-g89c-p67h-r497), re-derived independently rather than inherited from the 2026-08-26 entry.** Confirmed each precondition afresh against the merged tree: `next.config.ts` contains `outputFileTracingRoot`, `poweredByHeader`, `turbopack` and a `headers()` block and **no `images` key at all**, so neither `images.formats` nor `images.remotePatterns`/`domains` exists and `/_next/image` accepts no absolute URL and never emits AVIF; `git grep "next/image"` over `src/` returns exactly one line, the `_next/image` exclusion in the `middleware.ts` matcher, so nothing renders an optimized image; `git grep -rniE "formData|multipart|\.avif|createReadStream"` over `src/` returns **nothing**, so there is no image ingestion path; `public/` holds five SVGs. `sharp@0.35.3` is still resolved under `next@15.5.24`. **Vulnerable dependency present, zero reachable exposure** — the bump is defence in depth against someone later adding an `images` config. Re-check only if `next.config.ts` gains an `images` key or a route starts accepting uploads.
@@ -82,6 +94,53 @@ read this file first to avoid re-proposing work that is already tracked here.
 - 2026-08-23 — Real PII, third independent pass, scanned separately from secrets. Across `src/`, `data/` and `drizzle/` there are 17 distinct email addresses on exactly two fictional domains (`techforward.io`, `example.com`, plus one `a@b.com` placeholder). No SSN-shaped value (`\d{3}-\d{2}-\d{4}`) anywhere in the tree. The `salary` / `compensation` tokens that match a naive grep are all in prose — docs, prompt text, and the governance prohibited-pattern list that exists to _block_ those topics — not in any fixture field.
 - 2026-08-23 — `npm audit` unchanged from 2026-08-22: the same 4 moderate findings, all `esbuild <=0.24.2` via `@esbuild-kit/*` under the `drizzle-kit` devDependency. Reasoning above still holds.
 - 2026-08-23 — `npm outdated` triage against the exact-pin policy. `next`/`eslint-config-next` 16.3.2 and `eslint` 10.9.0 are the tracked Next 16 migration, not nightly work. `typescript` 7.0.2 and `@types/node` 26 are majors. `react`/`react-dom` 19.2.8, `zod` 4.4.3, `@supabase/ssr` 0.12.4, `@base-ui/react` 1.7.0, `shadcn` 4.19.0 and `lucide-react` 1.33.0 are all clean minors with no advisory against the pinned version, so bumping them buys nothing this run and would churn the lockfile ahead of the 2026-08-26 `next` bump that has to touch it anyway. Deferred to that run deliberately.
+
+---
+
+## Run note (2026-08-28) — the defect supply was not exhausted; the search was looking at the wrong axis
+
+The 2026-08-27 note concluded that "the supply of concrete nightly-sized
+defects in this repository is close to exhausted". That was a reasonable read
+of seven nights of evidence and it was wrong. This run found **ten** reachable
+cross-tenant reads in two files both of which every previous run had already
+opened, and fixed them in two commits on
+`nightly/2026-08-28-improvements`.
+
+What made them invisible for seven nights is worth recording, because it is a
+lesson about the *search*, not about the code. Every prior org-scoping sweep
+asked a signature question — "does this exported function accept an
+organization?" — and `getCareerPaths(employeeId)` answers that question
+acceptably: it fetches the employee row, and the employee row carries an
+organization. The defect was one level down, in what it did with it: three of
+its four reads filtered on `isActive` / `status === 'open'` / a skill-id set
+membership and never mentioned the organization the function already had.
+The sharper rule now lives in the RLS design note: **a predicate that is not an
+id is not a tenant bound.** Searching on that axis instead of on signatures
+turned up ten instances in one file-reading pass.
+
+The severity is not uniform and the entries say so. The internal-mobility
+recommendation is the sharp end — `createAgentRecommendations` *persists*
+another organization's opening as a row against the caller's own employee
+record — while `getSkills()`'s first-tenant default only produces blanks. Both
+are worth fixing; only one is a leak.
+
+Two standing rules held. `prohibited-patterns.ts` was not touched and no
+pattern #6 was added. No fifth ad-hoc `executive_readonly` route gate was
+added — no new leaking route was found, and the four known instances stand as
+the design note records them.
+
+Baseline before any change: 407 tests / 65 files, typecheck clean, lint clean.
+After: **415 tests / 67 files**, typecheck clean, lint clean,
+`next build --turbopack` exit 0 in 12.9s. Both new test files were confirmed
+red against the pre-fix source before being kept (5 of 6, and 1 of 2 —
+the passing cases are the ones the fixture happens not to exercise, and the
+entries say which).
+
+**The useful correction to the 2026-08-27 note is this: "no new defects found"
+should be read as "this search strategy has stopped yielding", not as "the
+code is clean". Changing the axis of the search was worth more this night than
+another pass along the old one.** The decision table below is still unmoved,
+and still needs a human.
 
 ---
 
@@ -376,6 +435,38 @@ this run's three). That is the floor this note predicted. Option 2's
 structural invariant test would have caught the five exported ones; only
 option 1, or a join-level convention enforced somewhere, catches the sixth
 shape. Whoever takes this decision should weigh that.)**
+
+**(2026-08-28: ten more, and a fourth shape that neither option would have
+caught.** The 2026-08-25 note above says the class had taken eight fixes and
+that the sixth shape — a missing organization term *inside* a join — needed
+something stronger than a per-function parameter audit. This run found ten
+further instances, and they are a different shape again: **the predicate was
+never an id at all.** `data.roles.filter(r => r.isActive)`,
+`opportunities.filter(o => o.status === 'open')`,
+`opportunities.filter(o => o.department === 'Engineering')`, a
+`learningResources` skill-id set membership, and `getSkills()`'s
+`organizations[0]` default are all filters on *status*, and status is not
+tenant-bounded. An audit that asks "does this exported function take an
+organization?" returns *yes* for `getCareerPaths(employeeId)` — the employee
+row carries one — and still misses it, because the function had the
+organization in hand and simply did not use it in three of its four reads.
+
+The distinguishing rule is short enough to be checkable, and worth writing
+down because it is the fourth time this class has been re-derived from
+scratch: **in this codebase, a read of a tenant-scoped table is safe only if
+every predicate is an id that is itself already tenant-bounded. The moment a
+predicate is a status, a flag, a department name or a set membership, the read
+needs an explicit `organizationId` term.** By that rule the four shapes seen so
+far — missing parameter, missing join term, status-only predicate, and a
+first-row default — are one rule violated four ways rather than four separate
+discoveries, and the rule is mechanically checkable in a way "does it take an
+organization?" is not.
+
+That does not change the recommendation. It sharpens it: option 2's structural
+invariant should be stated over *predicates*, not over signatures. Ten
+instances found in one night, in a file every prior run had already read, is
+the strongest evidence yet that the application layer is carrying tenant
+isolation alone and that spotting these by eye does not converge.)**
 
 ### The documentation is what makes this dangerous
 
