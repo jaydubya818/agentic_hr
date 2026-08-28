@@ -156,6 +156,13 @@ export function getTeamMembers(managerEmployeeId: string): Employee[] {
   return employees.filter((e) => e.managerId === managerEmployeeId && e.isActive);
 }
 
+/**
+ * Pass the caller's organization. The no-argument form falls back to
+ * `getOrganization()`, which is `organizations[0]` — the first row the store
+ * happens to hold. That is unambiguous only in single-tenant mock mode; with a
+ * Supabase-backed store it resolves to whichever tenant the unordered
+ * `select` returned first, and every other tenant gets an empty catalogue.
+ */
 export function getSkills(organizationId?: string): Skill[] {
   const orgId = organizationId ?? getOrganization()?.id;
   return getMockStore().skills.filter((s) => s.organizationId === orgId && s.isActive);
@@ -1332,7 +1339,7 @@ export function getTeamSkillsMatrix(
 
   const team = getTeamByManager(managerEmployeeId);
   const members = getTeamMembers(managerEmployeeId);
-  const skillById = new Map(getSkills().map((s) => [s.id, s]));
+  const skillById = new Map(getSkills(manager.organizationId).map((s) => [s.id, s]));
   const memberIds = members.map((m) => m.id);
   const primaryRoleId = members[0]?.currentRoleId;
 

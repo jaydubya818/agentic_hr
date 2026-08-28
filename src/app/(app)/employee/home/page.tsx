@@ -54,7 +54,9 @@ export default async function EmployeeHomePage() {
   const employee = dataProvider.getEmployee(employeeId);
   const profile = dataProvider.getEmployeeProfile(employeeId);
   const employeeSkills = dataProvider.getEmployeeSkills(employeeId);
-  const skills = dataProvider.getSkills();
+  // Name the organization: the no-argument form resolves to the first row in
+  // the store, which is the wrong catalogue for every tenant but one.
+  const skills = dataProvider.getSkills(employee?.organizationId);
   const skillById = new Map(skills.map((s) => [s.id, s]));
   const careerGoals = dataProvider.getCareerGoals(employeeId);
   const activeGoal = careerGoals.find((g) => g.status === 'active');
