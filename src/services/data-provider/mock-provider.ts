@@ -177,8 +177,15 @@ export function getCareerPaths(employeeId: string): CareerPathMatch[] {
   const employeeSkillRows = data.employeeSkills.filter((es) => es.employeeId === employeeId);
   const skillById = new Map(data.skills.map((s) => [s.id, s]));
 
+  // The store holds every tenant's rows at once (`loadSupabaseStore` selects
+  // each table unfiltered), so a read whose predicate is a *status* rather
+  // than an *id* — `isActive`, `status === 'open'`, a skill-id set membership
+  // — collects other organizations' rows unless it also names an
+  // organization. Ground all three reads below on the employee's own.
+  const organizationId = employee.organizationId;
+
   const candidateRoles = data.roles.filter(
-    (r) => r.isActive && r.id !== employee.currentRoleId,
+    (r) => r.organizationId === organizationId && r.isActive && r.id !== employee.currentRoleId,
   );
 
   return candidateRoles.slice(0, 3).map((role, index) => {
@@ -205,10 +212,19 @@ export function getCareerPaths(employeeId: string): CareerPathMatch[] {
       explanation: `Based on your confirmed and inferred skills, ${role.title} is a ${index === 0 ? 'strong' : 'viable'} growth direction. Gaps are development opportunities, not performance labels.`,
       skillGaps,
       suggestedLearning: data.learningResources
-        .filter((lr) => lr.skillIds.some((sid) => skillGaps.some((g) => g.skill.id === sid)))
+        .filter(
+          (lr) =>
+            lr.organizationId === organizationId &&
+            lr.skillIds.some((sid) => skillGaps.some((g) => g.skill.id === sid)),
+        )
         .slice(0, 2),
       suggestedOpportunities: data.opportunities
-        .filter((o) => o.status === 'open' && (o.roleId === role.id || o.roleId === null))
+        .filter(
+          (o) =>
+            o.organizationId === organizationId &&
+            o.status === 'open' &&
+            (o.roleId === role.id || o.roleId === null),
+        )
         .slice(0, 1),
     };
   });
@@ -1157,9 +1173,17 @@ function buildStretchOpportunitiesForEmployee(employeeId: string): Array<
   const data = getMockStore();
   const employeeSkills = getEmployeeSkills(employeeId);
   const skillIds = new Set(employeeSkills.map((es) => es.skillId));
+  // `status`/`department` are not tenant-bounded predicates; without the
+  // organization term this collects other organizations' open roles.
+  const organizationId = getEmployee(employeeId)?.organizationId;
 
   return data.opportunities
-    .filter((o) => o.status === 'open' && o.department === 'Engineering')
+    .filter(
+      (o) =>
+        o.organizationId === organizationId &&
+        o.status === 'open' &&
+        o.department === 'Engineering',
+    )
     .slice(0, 2)
     .map((opp, index) => {
       const overlap = opp.requiredSkillIds.filter((sid) => skillIds.has(sid)).length;
@@ -1274,8 +1298,16 @@ export function getManagerDashboard(
         : []),
     ];
 
-  const stretchOpportunities = getMockStore().opportunities
-    .filter((o) => o.status === 'open' && o.department === 'Engineering')
+  // Same tenant-bounding as `buildStretchOpportunitiesForEmployee`: the
+  // manager's own organization, not every organization with an open
+  // Engineering role.
+  const stretchOpportunities = getMockStore()
+    .opportunities.filter(
+      (o) =>
+        o.organizationId === manager.organizationId &&
+        o.status === 'open' &&
+        o.department === 'Engineering',
+    )
     .slice(0, 3);
 
   return {
