@@ -128,14 +128,21 @@ function buildSkillsIntelligenceRecommendations(employeeId: string): CreateRecom
   }));
 }
 
-function buildDynamicLearningRecommendations(employeeId: string): CreateRecommendationInput[] {
+function buildDynamicLearningRecommendations(
+  employeeId: string,
+  organizationId: string,
+): CreateRecommendationInput[] {
   const paths = dataProvider.getCareerPaths(employeeId);
   const gap = paths[0]?.skillGaps[0];
   if (!gap) return [];
 
-  const resources = dataProvider.getMockStore().learningResources.filter((r) =>
-    r.skillIds.includes(gap.skill.id),
-  );
+  // The store carries every tenant's catalog, so a skill-id match alone would
+  // recommend another organization's learning resources by title and provider.
+  const resources = dataProvider
+    .getMockStore()
+    .learningResources.filter(
+      (r) => r.organizationId === organizationId && r.skillIds.includes(gap.skill.id),
+    );
 
   if (resources.length === 0) {
     return [
@@ -178,9 +185,17 @@ function buildDynamicLearningRecommendations(employeeId: string): CreateRecommen
   }));
 }
 
-function buildInternalMobilityRecommendations(employeeId: string): CreateRecommendationInput[] {
+function buildInternalMobilityRecommendations(
+  employeeId: string,
+  organizationId: string,
+): CreateRecommendationInput[] {
   const paths = dataProvider.getCareerPaths(employeeId);
-  const opportunities = dataProvider.getMockStore().opportunities.filter((o) => o.status === 'open');
+  // `status === 'open'` is not a tenant bound. Without the organization term
+  // this proposes -- and persists as a recommendation row -- another
+  // organization's confidential openings by title and department.
+  const opportunities = dataProvider
+    .getMockStore()
+    .opportunities.filter((o) => o.organizationId === organizationId && o.status === 'open');
 
   return opportunities.slice(0, 2).map((opp) => {
     const role = opp.roleId ? dataProvider.getRole(opp.roleId) : null;
@@ -392,6 +407,7 @@ function buildMockActionPlan(
 function buildRecommendationsForAgent(
   agentId: AgentId,
   employeeId: string,
+  organizationId: string,
   managerEmployeeId?: string,
 ): CreateRecommendationInput[] {
   switch (agentId) {
@@ -400,9 +416,9 @@ function buildRecommendationsForAgent(
     case 'skills-intelligence':
       return buildSkillsIntelligenceRecommendations(employeeId);
     case 'dynamic-learning':
-      return buildDynamicLearningRecommendations(employeeId);
+      return buildDynamicLearningRecommendations(employeeId, organizationId);
     case 'internal-mobility':
-      return buildInternalMobilityRecommendations(employeeId);
+      return buildInternalMobilityRecommendations(employeeId, organizationId);
     case 'supermanager':
       return buildSupermanagerRecommendations(managerEmployeeId ?? DEMO_MANAGER_EMPLOYEE_ID);
     case 'governance':
@@ -507,6 +523,7 @@ export async function invokeAgent(agentId: AgentId, params: AgentInvokeParams): 
   const recommendationInputs = buildRecommendationsForAgent(
     agentId,
     employeeId,
+    params.session.organizationId,
     params.session.employeeId,
   );
 
