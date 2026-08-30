@@ -110,7 +110,7 @@ export async function PATCH(request: Request, { params }: RouteParams) {
     // growth-plan item behind it.
     if (!applyActionToGrowthPlan(session.organizationId, id, applyEmployeeId)) {
       return NextResponse.json(
-        { error: 'No active or draft growth plan to apply the action to' },
+        { error: 'No active growth plan to apply the action to' },
         { status: 409 },
       );
     }

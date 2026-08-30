@@ -233,8 +233,15 @@ export function applyActionToGrowthPlan(
   const employee = getEmployee(employeeId);
   if (!employee || employee.organizationId !== organizationId) return false;
 
+  // Only an active plan is a valid target. Every reader of `growthPlans`
+  // selects on `status === 'active'` (the employee growth page, the
+  // plan-coverage rollups), so an item pushed onto a draft plan is invisible
+  // to the employee it was created for -- while the caller still flips the
+  // action to 'applied' below and the PATCH route's already-applied guard then
+  // returns 409 for every retry. Reporting failure here keeps the apply
+  // repeatable once the plan is activated.
   const growthPlan = store.growthPlans.find(
-    (p) => p.employeeId === employeeId && (p.status === 'active' || p.status === 'draft'),
+    (p) => p.employeeId === employeeId && p.status === 'active',
   );
   if (!growthPlan) return false;
 
