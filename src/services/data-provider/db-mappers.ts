@@ -327,10 +327,22 @@ export function mapLearningResource(row: {
   };
 }
 
+/**
+ * `opportunity_status` in Postgres carries a `draft` member that
+ * `opportunitySchema` does not, so it has to collapse onto one of open,
+ * filled or closed.
+ *
+ * It must not collapse onto `open`. Every reader of this field selects on
+ * `status === 'open'` and on nothing else -- `suggestedOpportunities` on the
+ * career-path view, the mobility-insights and talent-density rollups, and the
+ * agent's opportunity grounding -- so mapping a draft row to `open` publishes
+ * an unpublished internal opening to employees. `closed` is the member that
+ * keeps an unpublished row out of every one of those reads.
+ */
 function normalizeOpportunityStatus(
   status: 'open' | 'closed' | 'filled' | 'draft',
 ): Opportunity['status'] {
-  return status === 'draft' ? 'open' : status;
+  return status === 'draft' ? 'closed' : status;
 }
 
 export function mapOpportunity(
