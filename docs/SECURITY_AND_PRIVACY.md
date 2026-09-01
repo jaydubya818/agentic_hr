@@ -18,7 +18,7 @@ GrowthOS handles sensitive employment-related data including skills profiles, ca
 | Principle               | Implementation                                                           |
 | ----------------------- | ------------------------------------------------------------------------ |
 | Least privilege         | Users access minimum data for their role                                 |
-| Defense in depth        | Middleware + service layer + RLS (Phase 8)                               |
+| Defense in depth        | Middleware + service layer. RLS is written but not on the data path (6.3) |
 | Secure by default       | Auth required for all app routes; deny on ambiguity                      |
 | No secrets in client    | API keys server-side only                                                |
 | Audit sensitive actions | All agent and recommendation events logged                               |
@@ -218,7 +218,38 @@ CREATE POLICY manager_read_team ON employees
   );
 ```
 
-_Full RLS policies implemented in Phase 8 migrations._
+**These policies are written, but nothing in the application currently
+consults them. Read this before relying on RLS as a control.**
+
+The policies in `drizzle/migrations/0001_rls_rbac.sql` and
+`0003_workforce_intelligence_rls.sql` are real and are asserted to exist by
+`rls-migration.test.ts` — but a policy only applies to a connection it can be
+evaluated against, and no application query uses one:
+
+1. The policies resolve the caller through `auth.uid()`, which reads the
+   `request.jwt.claims` GUC. Only Supabase's PostgREST / `supabase-js` path
+   sets that GUC.
+2. `supabase-js` is never used for data. `createSupabaseServerClient()` has
+   exactly three callers — `api/auth/login`, `api/auth/logout` and
+   `lib/auth/session-context.ts` — and all three use it only for
+   `signInWithPassword`, `signOut` and `getUser`.
+3. Every read and write goes through Drizzle over `DATABASE_URL`
+   (`src/lib/db/index.ts` is `postgres(url, { max: 1 })`). That connection
+   carries no JWT, so `auth.uid()` is `NULL`, and for a Supabase
+   `DATABASE_URL` the connecting role is the table owner, which policies do
+   not constrain in the first place.
+4. `loadSupabaseStore()` then issues 32 unfiltered `select`s and caches the
+   result process-wide, so one process holds every tenant's rows at once.
+
+So the anon key really is RLS-protected on the PostgREST path (12.1 is
+correct) — that path is just only used for authentication. **Tenant isolation
+for application data is enforced entirely by the `organizationId` comparisons
+in `src/services/`, with no database backstop.** A single missed comparison is
+a cross-tenant leak.
+
+Making RLS an actual control, or dropping the claim and investing in a
+checkable service-layer invariant instead, is tracked in
+`docs/NIGHTLY-BACKLOG.md`.
 
 ---
 
@@ -414,7 +445,7 @@ USE_MOCK_AGENTS=true
 
 | Risk                                                               | Likelihood | Impact   | Mitigation                                                                                                                                                                                                                                                                       |
 | ------------------------------------------------------------------ | ---------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| IDOR on employee endpoints                                         | Medium     | High     | Session scope checks; RLS                                                                                                                                                                                                                                                        |
+| IDOR on employee endpoints                                         | Medium     | High     | Session scope checks in the service layer. RLS does **not** back this up — see 6.3                                                                                                                                                                                                                                                        |
 | LLM prompt injection                                               | Medium     | Medium   | Input sanitization; governance filter                                                                                                                                                                                                                                            |
 | API key exposure                                                   | Low        | Critical | Server-only; env vars; code review                                                                                                                                                                                                                                               |
 | Over-permissive RLS                                                | Medium     | High     | Policy review; integration tests                                                                                                                                                                                                                                                 |
@@ -668,7 +699,7 @@ Server Action to this project reopens the corresponding row.
 | Manager surveillance perception | Medium     | Medium   | Growth-focused UI; no monitoring language    |
 | Biased AI recommendations       | Medium     | High     | Fairness evals; governance                   |
 | Data retention beyond need      | Medium     | Medium   | Retention policy is documented in Section 11 but **not implemented**: no retention job and no erasure endpoint exist, so records persist until an operator deletes them by hand. Treat as an open gap for any pilot handling real employee data |
-| Cross-org data leak             | Low        | Critical | organization_id on all queries; RLS          |
+| Cross-org data leak             | High       | Critical | organization_id on all queries, in the service layer only. RLS does **not** back this up — see 6.3 |
 
 ---
 
