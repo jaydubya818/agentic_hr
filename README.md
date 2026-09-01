@@ -136,6 +136,23 @@ npm run build
 npm run evals
 ```
 
+> **Check `echo $NODE_ENV` first.** With `NODE_ENV=production` exported in your
+> shell, `npm ci` silently skips `devDependencies` — TypeScript, ESLint and
+> Vitest are simply not installed. The failures that follow do not mention the
+> cause: `typecheck` reports `TS2307: Cannot find module 'vitest'` across the
+> test files, `lint` cannot resolve its config, and `test` exits with
+> `sh: vitest: command not found`. It looks like a broken checkout and is not.
+>
+> Install with `NODE_ENV` unset, or force it:
+>
+> ```bash
+> npm ci --include=dev
+> ```
+>
+> This has been mistaken for a red baseline more than once. If several
+> unrelated tools break at the same moment on a clean clone, check the
+> environment before the code.
+
 With the dev server running (`npm run dev` in another terminal):
 
 ```bash
