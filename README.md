@@ -52,7 +52,7 @@ Before contributing or using an AI coding assistant, read:
 
 ### Prerequisites
 
-- Node.js 20+
+- Node.js **22.12+** (`engines.node` is `>=22.12.0`; Node 20 reached end of life on 2026-04-30)
 - npm
 
 ### Setup
