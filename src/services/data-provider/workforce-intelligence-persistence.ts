@@ -5,10 +5,12 @@ import {
   agentActionPlans,
   agentProposedActions,
   decisionOutcomes,
+  growthPlanItems,
   teamScenarios,
   workforceDecisions,
 } from '@/lib/db/schema';
 import type { AgentActionPlanDetail } from '@/services/agent-action-service';
+import type { GrowthPlanItem } from './types';
 import type {
   AgentProposedAction,
   DecisionOutcome,
@@ -240,4 +242,38 @@ export async function updateAgentProposedActionInDb(
   if (result.length === 0) return false;
   clearSupabaseStoreCache();
   return true;
+}
+
+/**
+ * Inserts the growth-plan item an applied agent action produced. The table
+ * has a single polymorphic `reference_id`, so whichever of `skillId` /
+ * `learningResourceId` the item carries is written there; `mapGrowthPlanItem`
+ * routes it back by `itemType` on read. `milestoneDay` has no column and is
+ * not persisted (backlog 2026-08-30).
+ */
+export async function persistGrowthPlanItem(
+  organizationId: string,
+  item: GrowthPlanItem,
+): Promise<void> {
+  if (!shouldPersistWrites()) return;
+
+  const db = getDb();
+  if (!db) return;
+
+  await db.insert(growthPlanItems).values({
+    id: item.id,
+    organizationId,
+    growthPlanId: item.growthPlanId,
+    itemType: item.itemType,
+    title: item.title,
+    description: item.description ?? null,
+    status: item.status,
+    dueDate: item.dueDate ? new Date(item.dueDate) : null,
+    referenceId: item.skillId ?? item.learningResourceId ?? null,
+    sortOrder: item.sortOrder,
+    createdAt: new Date(item.createdAt),
+    updatedAt: new Date(item.updatedAt),
+  });
+
+  clearSupabaseStoreCache();
 }

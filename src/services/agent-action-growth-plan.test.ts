@@ -25,8 +25,9 @@ describe('applyActionToGrowthPlan referenceId routing', () => {
 
     const applied = applyActionToGrowthPlan(ORG_ID, action.id, MOCK_IDS.employees.alex);
 
-    expect(applied).toBe(true);
+    expect(applied).not.toBeNull();
     const item = store.growthPlanItems.at(-1)!;
+    expect(item).toBe(applied);
     expect(item.itemType).toBe('learning');
     expect(item.learningResourceId).toBe(learningResourceId);
     expect(item.skillId).toBeNull();
@@ -44,8 +45,9 @@ describe('applyActionToGrowthPlan referenceId routing', () => {
 
     const applied = applyActionToGrowthPlan(ORG_ID, action.id, MOCK_IDS.employees.alex);
 
-    expect(applied).toBe(true);
+    expect(applied).not.toBeNull();
     const item = store.growthPlanItems.at(-1)!;
+    expect(item).toBe(applied);
     expect(item.itemType).toBe('skill');
     expect(item.skillId).toBe(skillId);
     expect(item.learningResourceId).toBeNull();
@@ -87,7 +89,7 @@ describe('applyActionToGrowthPlan plan selection', () => {
     // into a draft plan produced an item the employee could never see while
     // burning the action's one-shot 'applied' status -- the PATCH route's 409
     // already-applied guard then made the apply unrepeatable.
-    expect(applied).toBe(false);
+    expect(applied).toBeNull();
     expect(store.agentProposedActions.find((a) => a.id === action.id)!.status).toBe('approved');
     expect(store.growthPlanItems.filter((i) => i.growthPlanId === draftPlanId)).toHaveLength(0);
 
