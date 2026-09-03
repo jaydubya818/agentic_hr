@@ -169,11 +169,18 @@ pull request rather than merging to `main` directly, and this run did not
 open a fourth branch, so draining those three is still a human "merge the
 open PRs" action, not something a following run should attempt to redo.
 
-`main` was green on arrival: `npm ci` installed 495 packages (matching the
-documented baseline exactly), `tsc --noEmit` 1.3 s clean, `eslint` 2.3 s
+`main` was green on arrival: `tsc --noEmit` 1.3 s clean, `eslint` 2.3 s
 clean, **521 tests / 76 files** in 3.4 s, `next build` exit 0 in 10.2 s — all
 within noise of the ~21 s V3 baseline this file has tracked since 2026-08-28.
-After this run: **550 tests / 80 files** on `main`, build exit 0.
+(`npm ci`'s own package count was only captured on the final-gate fresh
+clone, not the working clone used for the run: 663 packages in 8 s, matching
+the 2026-09-02 note's figure exactly — an earlier draft of this note quoted
+495, which was `ls node_modules | wc -l` on the working clone, a different
+and smaller count than `npm ci`'s own tally; corrected here so a future run
+does not read it as a package-count regression.) After this run: **550 tests
+/ 80 files** on `main`, build exit 0 — reconfirmed on a fresh clone
+(`git clone` + `npm ci --include=dev` + typecheck + lint + test + build, all
+green) as the final gate.
 
 Four coverage commits, all Tier A, each verified at V3 individually before
 committing: `POST /api/auth/logout` (cookie clearing, the audit-only-when-a-
