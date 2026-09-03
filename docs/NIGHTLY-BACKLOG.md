@@ -160,6 +160,56 @@ read this file first to avoid re-proposing work that is already tracked here.
 
 ---
 
+## Run note (2026-09-03) — four more zero-coverage files, and the app-shell-identity item re-verified rather than re-fixed
+
+`git ls-remote --heads origin 'nightly/*'` first: three branches remain
+stranded (`2026-08-31`, `2026-09-01`, `2026-09-02`), unchanged from the
+2026-09-02 note above. Under the current review policy a nightly run opens a
+pull request rather than merging to `main` directly, and this run did not
+open a fourth branch, so draining those three is still a human "merge the
+open PRs" action, not something a following run should attempt to redo.
+
+`main` was green on arrival: `npm ci` installed 495 packages (matching the
+documented baseline exactly), `tsc --noEmit` 1.3 s clean, `eslint` 2.3 s
+clean, **521 tests / 76 files** in 3.4 s, `next build` exit 0 in 10.2 s — all
+within noise of the ~21 s V3 baseline this file has tracked since 2026-08-28.
+After this run: **550 tests / 80 files** on `main`, build exit 0.
+
+Four coverage commits, all Tier A, each verified at V3 individually before
+committing: `POST /api/auth/logout` (cookie clearing, the audit-only-when-a-
+session-resolves branch, and a thrown Supabase `signOut` being swallowed
+rather than surfacing as a 500); `getMockSession` in `mock-session.ts` (the
+null/invalid/unauthenticated cookie cases, and the demo-persona fallback
+itself — see below); `supabase-writes.ts` (all three direct Postgres writes
+on the growth-profile/growth-plan-item path, including the three-way
+metadata merge); and `preload.ts` (mock-mode no-op, once-only fallback
+warning). All four were genuinely zero-coverage — checked by grep against
+every `*.test.ts` in the tree, not just absence of a same-named file.
+
+No Tier B work landed. `reviewInferredSkill` (the one write-guarding path
+this run read closely for a permission-boundary bug, given the HR/PII
+priority) already checks the row's organization against the session before
+checking self/manager/org-write permission, and returns the same 404 for
+"not found" and "wrong organization" so it does not distinguish the two by
+timing or message — no gap found. The audit-log CSV export
+(`/api/hr/audit-logs/export`) already scopes by organization, gates on
+`canReadAuditLogs`, escapes formula-injection prefixes including the
+leading-whitespace bypass, and self-audits the export — also no gap found.
+
+The `getMockSession` coverage commit above is deliberately a
+characterization, not a fix, of the 2026-08-22 "app shell shows the demo
+persona in live mode" item: that item's own design note already concluded
+the fix is new data plumbing (widening `SessionContext` with a
+`users`/`organizations` join, changing what three pages render, and a
+product decision about empty-identity copy for an unlinked live user), not a
+surgical change, and a fresh read of that note tonight did not change that
+conclusion. `src/app/(app)/layout.tsx` still calls `getMockSession()`
+directly and unconditionally, unlike `session-context.ts`'s two call sites
+which branch on `shouldUseMockData()` first — confirmed again by grep, no
+new instance found. The item is left open rather than re-argued.
+
+---
+
 ## Run note (2026-09-02) — the two routes that mint cookies had no tests, and the apply path lost its own write
 
 `main` was green on arrival: `npm ci` 6.9 s / 663 packages, `tsc --noEmit` 2.6 s
