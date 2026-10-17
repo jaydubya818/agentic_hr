@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 
 import { writeErrorResponse } from '@/lib/api/write-error-response';
+import { agentContentForAudit } from '@/lib/audit/agent-content';
 import { getSessionContext } from '@/lib/auth/session-context';
 import {
   agentProposedActionSchema,
@@ -56,7 +57,17 @@ export async function POST(request: Request) {
         entityType: 'agent_action_plan',
         details: {
           agentId: planInput.agentId,
-          errors: validation.errors,
+          // `validation.errors` interpolate the caller's own plan and action
+          // titles ("Prohibited language detected in action plan: <title>"),
+          // so they are agent free text and fall under SECURITY_AND_PRIVACY
+          // 8.2 like every other text that reaches the trail: readable preview
+          // outside production, `sha256:` digest inside it. Without this the
+          // one string the filter has just judged too sensitive to render was
+          // the one stored in clear, readable and CSV-exportable by every
+          // hr_admin. `agentId` and `blockedActionTypes` stay in clear as the
+          // structured reason, mirroring `matchedPatterns` on the
+          // agent-invocation path.
+          errors: validation.errors.map((error) => agentContentForAudit(error)),
           blockedActionTypes: validation.blockedActionTypes,
         },
       });
