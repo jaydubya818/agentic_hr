@@ -10,7 +10,10 @@ import {
   updateProposedActionStatus,
 } from '@/services/agent-action-service';
 import { getMockStore, isDirectReport } from '@/services/data-provider/mock-provider';
-import { updateAgentProposedActionInDb } from '@/services/data-provider/workforce-intelligence-persistence';
+import {
+  persistGrowthPlanItem,
+  updateAgentProposedActionInDb,
+} from '@/services/data-provider/workforce-intelligence-persistence';
 import type { SessionContext } from '@/types/session';
 import { z } from 'zod';
 
@@ -108,12 +111,19 @@ export async function PATCH(request: Request, { params }: RouteParams) {
     // Applying before the status update keeps the store untouched on failure,
     // so a rejected apply cannot leave an action marked applied with no
     // growth-plan item behind it.
-    if (!applyActionToGrowthPlan(session.organizationId, id, applyEmployeeId)) {
+    const item = applyActionToGrowthPlan(session.organizationId, id, applyEmployeeId);
+    if (!item) {
       return NextResponse.json(
         { error: 'No active growth plan to apply the action to' },
         { status: 409 },
       );
     }
+    // In Supabase mode the store is a cache that `updateAgentProposedActionInDb`
+    // clears below, so an item that lives only in the store is discarded on
+    // the same request that marks the action applied. Write it first: if the
+    // insert fails the action is not flipped in the database either, and the
+    // apply stays repeatable after the next cache reload.
+    await persistGrowthPlanItem(session.organizationId, item);
   }
 
   const action = updateProposedActionStatus(session.organizationId, id, updateInput);

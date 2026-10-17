@@ -85,7 +85,7 @@ describe('agent-action-service organization scoping', () => {
 
     const applied = applyActionToGrowthPlan(OTHER_ORG_ID, action.id, MOCK_IDS.employees.alex);
 
-    expect(applied).toBe(false);
+    expect(applied).toBeNull();
   });
 
   it('refuses to apply an action to an unknown or cross-organization employee', () => {
@@ -93,7 +93,7 @@ describe('agent-action-service organization scoping', () => {
 
     const applied = applyActionToGrowthPlan(ORG_ID, action.id, OTHER_ORG_ID);
 
-    expect(applied).toBe(false);
+    expect(applied).toBeNull();
   });
 
   it('applies an in-organization action to the employee growth plan', () => {
@@ -103,8 +103,9 @@ describe('agent-action-service organization scoping', () => {
 
     const applied = applyActionToGrowthPlan(ORG_ID, action.id, MOCK_IDS.employees.alex);
 
-    expect(applied).toBe(true);
+    expect(applied).not.toBeNull();
     expect(store.growthPlanItems.length).toBe(itemsBefore + 1);
+    expect(store.growthPlanItems.at(-1)).toBe(applied);
     expect(store.agentProposedActions[0]!.status).toBe('applied');
   });
 });

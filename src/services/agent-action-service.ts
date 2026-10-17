@@ -14,6 +14,7 @@ import {
   isManagerRole,
 } from '@/lib/auth/rbac';
 import { getEmployee, getMockStore, isDirectReport } from '@/services/data-provider/mock-provider';
+import type { GrowthPlanItem } from '@/services/data-provider/types';
 import type { SessionContext } from '@/types/session';
 import { validateActionPlan, filterDisallowedActions } from '@/services/action-plan-governance';
 
@@ -219,19 +220,25 @@ export function updateProposedActionStatus(
   return updated;
 }
 
+/**
+ * Pushes a growth-plan item for `actionId` onto the employee's active plan in
+ * the in-memory store and flips the action to 'applied'. Returns the new item
+ * so the caller can persist it -- the store is a cache in Supabase mode and
+ * is discarded on the next write -- or null when nothing was applied.
+ */
 export function applyActionToGrowthPlan(
   organizationId: string,
   actionId: string,
   employeeId: string,
-): boolean {
+): GrowthPlanItem | null {
   const store = getMockStore();
   const action = store.agentProposedActions.find(
     (a) => a.id === actionId && a.organizationId === organizationId,
   );
-  if (!action) return false;
+  if (!action) return null;
 
   const employee = getEmployee(employeeId);
-  if (!employee || employee.organizationId !== organizationId) return false;
+  if (!employee || employee.organizationId !== organizationId) return null;
 
   // Only an active plan is a valid target. Every reader of `growthPlans`
   // selects on `status === 'active'` (the employee growth page, the
@@ -243,13 +250,13 @@ export function applyActionToGrowthPlan(
   const growthPlan = store.growthPlans.find(
     (p) => p.employeeId === employeeId && p.status === 'active',
   );
-  if (!growthPlan) return false;
+  if (!growthPlan) return null;
 
   const timestamp = nowIso();
   // referenceId is polymorphic per actionType: route it to the matching
   // growth-plan FK column so a learning resource id never lands in skill_id.
   const isLearningItem = action.actionType === 'learning_assignment';
-  store.growthPlanItems.push({
+  const item: GrowthPlanItem = {
     id: randomUUID(),
     growthPlanId: growthPlan.id,
     itemType: isLearningItem ? 'learning' : 'skill',
@@ -263,11 +270,12 @@ export function applyActionToGrowthPlan(
     sortOrder: store.growthPlanItems.filter((i) => i.growthPlanId === growthPlan.id).length,
     createdAt: timestamp,
     updatedAt: timestamp,
-  });
+  };
+  store.growthPlanItems.push(item);
 
   action.status = 'applied';
   action.updatedAt = timestamp;
-  return true;
+  return item;
 }
 
 export function listActionPlansForOrganization(organizationId: string): AgentActionPlanDetail[] {
