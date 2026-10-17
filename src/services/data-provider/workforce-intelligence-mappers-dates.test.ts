@@ -16,12 +16,11 @@ import {
  *   toIso(v)         -- `v` as an ISO string, or the Unix epoch when nullish
  *   jsonMetadata(v)  -- `v` when it is a non-array object, otherwise `{}`
  *
- * `toIso` is a second, independent copy of the helper of the same name in
- * `db-mappers.ts`, with the same 1970 sentinel. The duplication matters: the
- * open backlog item about the epoch sentinel was written against
- * `db-mappers.ts` only, so anyone who fixes it there will leave this copy
- * behind and the two read paths will start disagreeing about what an unknown
- * date is.
+ * `toIso` was a second, independent copy of the helper of the same name in
+ * `db-mappers.ts`, with the same 1970 sentinel; since 2026-09-02 this file
+ * imports the one in `db-mappers.ts`, so a fix to the sentinel there now
+ * reaches this read path too. The tests below still exercise it through
+ * these mappers, so they would catch the two paths diverging again.
  *
  * The file also carries two different conventions for a missing date, chosen
  * per column rather than per meaning: a nullable column is guarded

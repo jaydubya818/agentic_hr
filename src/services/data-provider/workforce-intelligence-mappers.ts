@@ -16,10 +16,10 @@ import type {
   WorkforceDecision,
 } from '@/schemas/workforce-intelligence';
 
-function toIso(value: Date | string | null | undefined): string {
-  if (!value) return new Date(0).toISOString();
-  return value instanceof Date ? value.toISOString() : value;
-}
+// Shared with db-mappers.ts so the two Postgres read paths cannot disagree
+// about what an unknown date looks like (backlog 2026-09-01). The epoch
+// sentinel it returns for a nullish value is the open 2026-08-31 item.
+import { toIso } from './db-mappers';
 
 function jsonMetadata(value: unknown): Record<string, unknown> {
   if (value && typeof value === 'object' && !Array.isArray(value)) {

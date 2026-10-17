@@ -19,7 +19,12 @@ import type {
   User,
 } from './types';
 
-function toIso(value: Date | string | null | undefined): string {
+/**
+ * ISO-8601 string for a timestamp column. Nullish values collapse to the Unix
+ * epoch -- a sentinel, not a date; see the open 2026-08-31 backlog item.
+ * Shared with workforce-intelligence-mappers.ts; keep exactly one copy.
+ */
+export function toIso(value: Date | string | null | undefined): string {
   if (!value) return new Date(0).toISOString();
   return value instanceof Date ? value.toISOString() : value;
 }
