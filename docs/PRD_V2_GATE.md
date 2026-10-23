@@ -37,7 +37,7 @@ Document scope for a potential **Agentic HRIS core** (compensation, performance,
 | **Enablement (GrowthOS MVP + H0–H5)** | Growth profiles, skills, learning, mobility insights, governed agents, audit |
 | **HRIS core (H6, gated)** | HR transactions, comp, performance cycles — **not started** |
 
-Enablement agents must remain read-mostly on HRIS data via [`src/integrations/`](../../src/integrations/) adapters. No write-back without a separate security review.
+Enablement agents must remain read-mostly on HRIS data via [`src/integrations/`](../src/integrations/) adapters. No write-back without a separate security review.
 
 ---
 
@@ -48,7 +48,7 @@ Enablement agents must remain read-mostly on HRIS data via [`src/integrations/`]
 | Proceed with PRD v2 drafting | Leadership | 2026-06-08 | **Deferred** — planning doc only |
 | Approve H6 implementation | Leadership | — | **Not approved** |
 
-**Recorded in:** [`progress.txt`](../../progress.txt) Phase 18.
+**Recorded in:** [`progress.txt`](../progress.txt) Phase 18.
 
 ---
 
