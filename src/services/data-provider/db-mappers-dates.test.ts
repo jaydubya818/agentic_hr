@@ -139,11 +139,11 @@ describe('mapGrowthPlan start date fallback chain', () => {
   });
 
   // The literal in the third position is only reachable when `createdAt` is
-  // also nullish, at which point `toIso` would have said 1970 -- so the two
-  // fallbacks in this file disagree about what an unknown date looks like.
-  it('falls back to a hard-coded 2026-01-01 when the creation date is missing too', () => {
+  // also nullish. Fixed 2026-11-17: it now uses the epoch date, matching
+  // `toIso`'s unknown-date sentinel, so the two fallbacks in this file agree.
+  it('falls back to the epoch date (matching toIso) when the creation date is missing too', () => {
     const plan = mapGrowthPlan({ ...planRow, createdAt: null as unknown as Date });
-    expect(plan.startDate).toBe('2026-01-01');
+    expect(plan.startDate).toBe(EPOCH.slice(0, 10));
   });
 
   it('leaves a missing target date as a null end date', () => {

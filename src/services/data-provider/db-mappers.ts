@@ -395,7 +395,9 @@ export function mapGrowthPlan(row: {
     targetRoleId: null,
     title: row.title,
     status: row.status,
-    startDate: toDateOnly(row.startDate) ?? toDateOnly(row.createdAt) ?? '2026-01-01',
+    // Matches `toIso`'s unknown-date sentinel (the Unix epoch) instead of an
+    // unrelated hard-coded date, so the two fallbacks in this file agree.
+    startDate: toDateOnly(row.startDate) ?? toDateOnly(row.createdAt) ?? '1970-01-01',
     endDate: toDateOnly(row.targetDate),
     createdAt: toIso(row.createdAt),
     updatedAt: toIso(row.updatedAt),
